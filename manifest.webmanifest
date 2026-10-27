@@ -1,0 +1,15 @@
+{
+  "name": "StratoshiVibes Bull Run",
+  "short_name": "Bull Run",
+  "description": "Arcade racing on crypto highways. Nine tracks, an endless run and a garage.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "any",
+  "background_color": "#0b0820",
+  "theme_color": "#0b0820",
+  "icons": [
+    {"src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+  ]
+}

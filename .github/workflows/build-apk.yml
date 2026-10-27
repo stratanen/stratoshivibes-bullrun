@@ -1,0 +1,94 @@
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: "Android versionCode (whole number, must increase every release)"
+        required: true
+        default: "1"
+      version_name:
+        description: "Version name shown to players"
+        required: true
+        default: "1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: Use the runner's preinstalled Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          ls "$ANDROID_SDK_ROOT/build-tools" | tail -3
+          yes | "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null || true
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Decrypt release keystore
+        env:
+          PW: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          test -n "$PW" || { echo "Add the KEYSTORE_PASSWORD secret in Settings > Secrets and variables > Actions"; exit 1; }
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in release.keystore.enc \
+            -out "$RUNNER_TEMP/release.keystore" -pass env:PW
+
+      - name: Generate Android project (Solana Mobile web shell)
+        env:
+          SOLANA_MOBILE_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SOLANA_MOBILE_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          PAGES_URL="https://$(tr -d '[:space:]' < CNAME)/"   # custom domain from the CNAME file
+          npx --yes solana-mobile@0.5.0 webshell init android \
+            --url "$PAGES_URL" \
+            --manifest "${PAGES_URL}manifest.webmanifest" \
+            --app-name "StratoshiVibes Bull Run" \
+            --application-id "com.stratoshivibes.bullrun" \
+            --version-code "${{ inputs.version_code }}" \
+            --version-name "${{ inputs.version_name }}" \
+            --keystore-path "$RUNNER_TEMP/release.keystore" \
+            --keystore-alias stratoshivibes \
+            --force < /dev/null
+
+      - name: Build signed release APK
+        env:
+          SOLANA_MOBILE_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          SOLANA_MOBILE_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          npx --yes solana-mobile@0.5.0 webshell build android \
+            --keystore-path "$RUNNER_TEMP/release.keystore" \
+            --keystore-alias stratoshivibes < /dev/null
+          cp android/app/build/outputs/apk/release/app-release.apk \
+             "stratoshivibes-bullrun-${{ inputs.version_name }}.apk"
+
+      - name: Check APK signature
+        run: |
+          APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
+          $APKSIGNER verify --print-certs stratoshivibes-bullrun-*.apk
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: stratoshivibes-bullrun-apk
+          path: stratoshivibes-bullrun-*.apk
+
+      - name: Publish APK as a download on the Releases page
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="v${{ inputs.version_name }}-build${{ inputs.version_code }}"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" stratoshivibes-bullrun-*.apk \
+            --title "StratoshiVibes Bull Run ${{ inputs.version_name }} (build ${{ inputs.version_code }})" \
+            --notes "Signed release APK. On an Android phone, open this page in the browser and tap the .apk file to download and install." \
+            --latest

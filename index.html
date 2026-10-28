@@ -553,7 +553,7 @@ let best = +(store.get('bullrun_best') || 0) || 0;
 let totalTok = +(store.get('bullrun_tokens') || 0) || 0;
 
 /* ================= constants (metres, seconds) ================= */
-const STEP = 2, CHUNK = 250, CP_LEN = 2000, ROAD_HALF = 6.4, CURB = 5.6, LANES = [-3.6, 0, 3.6], LANE_V = [40, 33, 26];
+const STEP = 2, CHUNK = 250, CP_LEN = 2000, ROAD_HALF = 6.4, CURB = 5.6, LANES = [-3.6, 0, 3.6], LANE_V = [32, 32, 32];   // same speed in every lane, so the gaps between cars never close up into a wall
 const MAXV = 72.2, NITRO_V = MAXV * 1.3, PLEN = 4.5, PW = 1.92, RAIL_D = 7.3, X_MAX = RAIL_D - PW / 2 - 0.15;
 const START_TIME = 42, AHEAD = 1100, BEHIND = 40;
 
@@ -1122,10 +1122,9 @@ function reset(seed){
 
 /* traffic */
 function laneBlocked(lane, s, gap){ for (const c of cars) if (c.lane === lane && Math.abs(c.s - s) < gap) return true; return false; }
+let lastFree = -1;
 function addCar(lane, s){
   if (laneBlocked(lane, s, 22)) return false;
-  let free = 0; for (let L = 0; L < 3; L++) if (L !== lane && !laneBlocked(L, s, 16)) free++;
-  if (free === 0) return false;
   const rt = RT(), type = lane === 2 && rt < .3 ? 'van' : rt < .45 ? 'sedan' : rt < .8 ? 'hatch' : lane > 0 ? 'van' : 'sedan';
   const hex = TRAFFIC_COLS[(RT() * TRAFFIC_COLS.length) | 0];
   cars.push({ lane, d: LANES[lane], s, v: LANE_V[lane], type, len: CAR_GEO[type].userData.len, w: CAR_GEO[type].userData.w, mesh: getCarMesh(type, hex) });
@@ -1136,11 +1135,22 @@ function manageTraffic(dt){
   for (let i = cars.length - 1; i >= 0; i--) if (cars[i].s < sP - 30) { cars[i].mesh.visible = false; cars.splice(i, 1); }
   const lvl = mode === 'track' ? 1 : Math.min(8, cps), farS = Math.min(sP + 950, finishS + 150);
   if (spawnS < sP + 260) spawnS = sP + 260;
+  // Traffic comes in rows. A row is one car, sometimes two, never three: there is always a free lane.
+  // Rows are at least 62 m apart, and after a two-car row the next two-car row leaves a free lane next to the last one,
+  // so you never need to cross two lanes in a hurry.
   while (spawnS < farS) {
-    const lanes = [0, 1, 2].sort(() => RT() - .5);
-    addCar(lanes[0], spawnS);
-    if (RT() < .05 + lvl * .03) addCar(lanes[1], spawnS + (RT() - .5) * 6);
-    spawnS += Math.max(42, 75 + RT() * 55 - lvl * 4);
+    // keep the new row clear of rows spawned earlier (they have moved on since, so check where they are now)
+    let near = null; for (const c of cars) if (Math.abs(c.s - spawnS) < 60 && (!near || c.s > near.s)) near = c;
+    if (near) { spawnS = near.s + 62; continue; }
+    const dbl = RT() < .06 + lvl * .025;
+    if (dbl) {
+      let free = (RT() * 3) | 0;
+      if (lastFree >= 0 && Math.abs(free - lastFree) > 1) free = 1;
+      const ls = [0, 1, 2].filter(L => L !== free);
+      addCar(ls[0], spawnS); addCar(ls[1], spawnS + (RT() - .5) * 4);
+      lastFree = free;
+    } else { addCar((RT() * 3) | 0, spawnS); lastFree = -1; }
+    spawnS += Math.max(62, 80 + RT() * 60 - lvl * 3);
   }
 }
 function emit(x, y, vx, vy, life, c, size, type){ if (parts.length > 260) parts.shift(); parts.push({ x, y, vx, vy, life, max: life, col: c, size, type: type || 'dot' }); }
@@ -2100,7 +2110,7 @@ if (WAL.addr && ONLINE) checkHolder(false);
 if (tiltMode) tiltStart(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
 window.__bullrun = { get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
-  get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
+  get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },
   gcam(x){ GCAM = x; }, paint(id){ showPaint(id); }, cam(b, h, la, ly){ CAMP = [b, h, la, ly]; }, camL(b, h, la, ly){ CAMP_L = [b, h, la, ly]; } };

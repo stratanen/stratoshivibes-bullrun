@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="el">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Στατιστικά παιχνιδιών</title>
+<style>
+:root{color-scheme:light;--bg:#f4f4f1;--card:#fcfcfb;--line:#e2e1dc;--grid:#ecebe7;--ink:#0b0b0b;--ink2:#52514e;--muted:#7a7974;--accent:#6250d6;
+ --s1:#2a78d6;--s2:#eb6834;--s3:#1baf7a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;--bg:#111110;--card:#1a1a19;--line:#2e2d2a;--grid:#262523;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8f8e86;--accent:#9085e9;
+ --s1:#3987e5;--s2:#d95926;--s3:#199e70}}
+:root[data-theme="dark"]{color-scheme:dark;--bg:#111110;--card:#1a1a19;--line:#2e2d2a;--grid:#262523;--ink:#f0efec;--ink2:#c3c2b7;--muted:#8f8e86;--accent:#9085e9;--s1:#3987e5;--s2:#d95926;--s3:#199e70}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1040px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+h1{font-size:22px;margin:0}
+h2{font-size:16px;margin:0 0 4px}
+.sub{color:var(--muted);font-size:13px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.games{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px}
+@media (max-width:760px){.games{grid-template-columns:1fr}}
+.game h2{display:flex;align-items:center;gap:8px}
+.sw{width:10px;height:10px;border-radius:3px;flex:none}
+.hero{font-size:34px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:6px}
+.hero small{font-size:13px;font-weight:400;color:var(--ink2);margin-left:6px}
+.kv{display:grid;grid-template-columns:1fr auto;gap:4px 12px;margin-top:12px;font-size:13px;color:var(--ink2)}
+.kv b{color:var(--ink);font-variant-numeric:tabular-nums;font-weight:600;text-align:right}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--ink2);margin:8px 0 4px}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.tip{position:absolute;pointer-events:none;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:0 6px 20px #0003;white-space:nowrap;display:none;z-index:2}
+.tip b{display:block;margin-bottom:4px;font-size:12px}
+.tip div{display:flex;align-items:center;gap:6px;color:var(--ink2)}
+.tip div i{width:8px;height:8px;border-radius:2px}
+.tip div em{font-style:normal;color:var(--ink);font-weight:600;margin-left:auto;padding-left:12px;font-variant-numeric:tabular-nums}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:7px 8px;border-bottom:1px solid var(--grid);text-align:right;font-variant-numeric:tabular-nums}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-weight:600;font-size:12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.tabs button{border:1px solid var(--line);background:transparent;color:var(--ink2);border-radius:99px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+.tabs button[aria-pressed="true"]{background:var(--ink);color:var(--card);border-color:var(--ink)}
+.bar{height:8px;border-radius:4px;background:var(--grid);overflow:hidden;min-width:60px}
+.bar i{display:block;height:100%;border-radius:4px}
+form{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+input{flex:1;min-width:200px;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit}
+button.main{padding:10px 16px;border-radius:10px;border:0;background:var(--accent);color:#fff;font:inherit;font-weight:600;cursor:pointer}
+.err{color:#e34948;font-size:13px;margin-top:8px}
+.note{font-size:12px;color:var(--muted);margin-top:10px}
+@media (max-width:600px){.barc{display:none}}
+details summary{cursor:pointer;color:var(--ink2);font-size:13px}
+a{color:var(--accent)}
+.hide{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>Στατιστικά παιχνιδιών</h1><span class="sub" id="upd"></span></header>
+
+<div class="card" id="login">
+  <h2>Κωδικός</h2>
+  <div class="sub">Γράψε τον κωδικό που έβαλες στο Cloudflare (STATS_KEY). Θα τον θυμάται αυτή η συσκευή.</div>
+  <form id="f"><input id="k" type="password" autocomplete="current-password" placeholder="Κωδικός" required><button class="main">Άνοιγμα</button></form>
+  <div class="err" id="err"></div>
+</div>
+
+<div id="main" class="hide">
+  <div class="games" id="games"></div>
+
+  <div class="card">
+    <h2>Παίκτες ανά ημέρα</h2>
+    <div class="sub">Διαφορετικές συσκευές που άνοιξαν κάθε παιχνίδι, τις τελευταίες 30 ημέρες (ώρα Ελλάδας)</div>
+    <div class="legend" id="lg"></div>
+    <div class="chart" id="ch"><div class="tip" id="tip"></div></div>
+    <details style="margin-top:10px"><summary>Πίνακας με τα νούμερα</summary><div id="dtab" style="overflow:auto;margin-top:8px"></div></details>
+  </div>
+
+  <div class="card">
+    <h2>Τι παίζουν</h2>
+    <div class="sub">Τελευταίες 7 ημέρες</div>
+    <div class="tabs" id="mt"></div>
+    <div id="mtab" style="overflow:auto"></div>
+  </div>
+
+  <div class="card">
+    <h2>Από πού παίζουν</h2>
+    <div class="sub">Τελευταίες 30 ημέρες. «Εφαρμογή» είναι το APK από το dApp Store, οι υπόλοιποι παίζουν από browser.</div>
+    <div id="stab" style="overflow:auto;margin-top:8px"></div>
+  </div>
+
+  <p class="note">Ανώνυμα στοιχεία: κάθε συσκευή έχει έναν τυχαίο αριθμό, χωρίς πορτοφόλι, ονόματα ή IP. Ο χρόνος μετράει μόνο όταν το παιχνίδι φαίνεται στην οθόνη. Αν κάποιος σβήσει τα δεδομένα του browser, μετράει ως νέος παίκτης. <a href="#" id="out">Αποσύνδεση</a></p>
+</div>
+</div>
+<script>
+(function(){
+const G=[['bullrun','Bull Run','--s1'],['blockspace','Blockspace','--s2'],['arcade','Arcade','--s3']];
+const MODE={menu:'Μενού',garage:'Γκαράζ',track:'Πίστες',endless:'Ατελείωτη διαδρομή',daily:'Καθημερινή πίστα',play:'Παιχνίδι',
+ 'blockspace:daily':'Ημερήσια πρόκληση','blockspace:play':'Κανονικό παιχνίδι',lobby:'Αρχική',mahjong:'Mahjong','mahjong-daily':'Mahjong ημερήσιο',battlegrounds:'Battlegrounds',poker:'Rugpull Poker',rug:'Escape the Rug','rug-daily':'Escape ημερήσιο'};
+const SRC={app:'Εφαρμογή (Seeker / Android)','app-seeker':'Εφαρμογή στο Seeker',android:'Browser σε Android','android-seeker':'Browser στο Seeker',ios:'Browser σε iPhone',desktop:'Υπολογιστής',other:'Άλλο'};
+const $=id=>document.getElementById(id);
+const nf=new Intl.NumberFormat('el-GR');
+const mins=s=>{s=+s||0;if(s<60)return s+' δευτ.';const m=Math.round(s/60);if(m<60)return m+' λεπ.';const h=Math.floor(m/60);return h+' ώρ. '+(m%60)+' λεπ.'};
+const css=v=>getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let key='';try{key=localStorage.getItem('sv_stats_key')||''}catch(e){}
+let D=null,mg='bullrun';
+
+async function load(){
+  $('err').textContent='';
+  try{
+    const r=await fetch('/stats',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({key})});
+    const j=await r.json();
+    if(j.error==='nokey'){$('err').textContent='Δεν έχει μπει ακόμα ο κωδικός STATS_KEY στο Cloudflare.';return show(false)}
+    if(!r.ok){$('err').textContent='Λάθος κωδικός.';try{localStorage.removeItem('sv_stats_key')}catch(e){}return show(false)}
+    try{localStorage.setItem('sv_stats_key',key)}catch(e){}
+    D=j;show(true);render();
+  }catch(e){$('err').textContent='Δεν ήταν δυνατή η σύνδεση. Δοκίμασε ξανά.';show(false)}
+}
+function show(ok){$('login').classList.toggle('hide',ok);$('main').classList.toggle('hide',!ok)}
+$('f').onsubmit=e=>{e.preventDefault();key=$('k').value.trim();load()};
+$('out').onclick=e=>{e.preventDefault();try{localStorage.removeItem('sv_stats_key')}catch(x){}key='';show(false)};
+
+function days(){const out=[];const [y,m,d]=D.today.split('-').map(Number);const t=Date.UTC(y,m-1,d);for(let i=29;i>=0;i--)out.push(new Date(t-i*864e5).toISOString().slice(0,10));return out}
+const by=(arr,g)=>arr.filter(r=>r.game===g);
+function render(){
+  $('upd').textContent='Ενημέρωση: '+new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'});
+  // per-game cards
+  $('games').innerHTML=G.map(([g,name,c])=>{
+    const td=D.daily.find(r=>r.game===g&&r.day===D.today)||{};
+    const wk=D.week.find(r=>r.game===g)||{},tot=D.total.find(r=>r.game===g)||{},bk=D.back.find(r=>r.game===g)||{};
+    const avg=wk.players?Math.round(wk.secs/wk.players):0;
+    return `<div class="card game"><h2><i class="sw" style="background:var(${c})"></i>${name}</h2>
+      <div class="hero">${nf.format(td.players||0)}<small>παίκτες σήμερα</small></div>
+      <div class="kv"><span>Έπαιξαν σήμερα (όχι μόνο μενού)</span><b>${nf.format(td.gamers||0)}</b>
+      <span>Χρόνος σήμερα</span><b>${mins(td.secs)}</b>
+      <span>Παίκτες, 7 ημέρες</span><b>${nf.format(wk.players||0)}</b>
+      <span>Χρόνος ανά παίκτη, 7 ημέρες</span><b>${mins(avg)}</b>
+      <span>Ξαναήρθαν (2+ μέρες), 30 ημέρες</span><b>${nf.format(bk.players||0)}</b>
+      <span>Όλοι οι παίκτες${tot.since?' από '+tot.since.split('-').reverse().join('/'):''}</span><b>${nf.format(tot.players||0)}</b>
+      <span>Συνολικός χρόνος</span><b>${mins(tot.secs)}</b></div></div>`}).join('');
+  chart();modes();srcs();
+}
+function chart(){
+  const ds=days(),W=Math.max(300,Math.round($('ch').clientWidth||960)),H=W<600?220:260,L=32,R=14,T=12,B=28,iw=W-L-R,ih=H-T-B;
+  const val=(g,d)=>{const r=D.daily.find(x=>x.game===g&&x.day===d);return r?r.players:0};
+  const max=Math.max(4,...G.flatMap(([g])=>ds.map(d=>val(g,d))));
+  const step=max<=10?2:max<=50?10:max<=200?50:Math.pow(10,Math.floor(Math.log10(max)));const top=Math.ceil(max/step)*step;
+  const x=i=>L+iw*i/(ds.length-1),y=v=>T+ih*(1-v/top);
+  let s=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Παίκτες ανά ημέρα για κάθε παιχνίδι">`;
+  for(let v=0;v<=top;v+=step)s+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--grid)" stroke-width="1"/><text x="${L-6}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--muted)">${v}</text>`;
+  const ev=W<600?10:5;ds.forEach((d,i)=>{if((ds.length-1-i)%ev===0)s+=`<text x="${x(i)}" y="${H-8}" text-anchor="${i===ds.length-1?'end':'middle'}" font-size="11" fill="var(--muted)">${d.slice(8)}/${d.slice(5,7)}</text>`});
+  for(const [g,,c] of G){const pts=ds.map((d,i)=>x(i).toFixed(1)+','+y(val(g,d)).toFixed(1)).join(' ');
+    s+=`<polyline points="${pts}" fill="none" stroke="var(${c})" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>`;}
+  s+=`<line id="xh" x1="0" x2="0" y1="${T}" y2="${T+ih}" stroke="var(--muted)" stroke-width="1" stroke-dasharray="3 3" visibility="hidden"/>`;
+  for(const [g,,c] of G)s+=`<circle class="dot" data-g="${g}" r="4" fill="var(${c})" stroke="var(--card)" stroke-width="2" visibility="hidden"/>`;
+  s+=`<rect x="${L}" y="${T}" width="${iw}" height="${ih}" fill="transparent" id="hit"/></svg>`;
+  const ch=$('ch');ch.querySelector('svg')&&ch.querySelector('svg').remove();ch.insertAdjacentHTML('beforeend',s);
+  $('lg').innerHTML=G.map(([,n,c])=>`<span><i class="sw" style="background:var(${c})"></i>${n}</span>`).join('');
+  const svg=ch.querySelector('svg'),tip=$('tip'),xh=svg.querySelector('#xh');
+  function at(ev){const r=svg.getBoundingClientRect();const px=(ev.clientX-r.left)*W/r.width;const i=Math.max(0,Math.min(ds.length-1,Math.round((px-L)/iw*(ds.length-1))));
+    xh.setAttribute('x1',x(i));xh.setAttribute('x2',x(i));xh.setAttribute('visibility','visible');
+    svg.querySelectorAll('.dot').forEach(c=>{c.setAttribute('cx',x(i));c.setAttribute('cy',y(val(c.dataset.g,ds[i])));c.setAttribute('visibility','visible')});
+    const d=ds[i];tip.innerHTML=`<b>${d.slice(8)}/${d.slice(5,7)}/${d.slice(0,4)}</b>`+G.map(([g,n,c])=>`<div><i style="background:var(${c})"></i>${n}<em>${val(g,d)}</em></div>`).join('');
+    tip.style.display='block';const left=x(i)*r.width/W;const tw=tip.offsetWidth;tip.style.left=Math.min(Math.max(0,left+12+tw>r.width?left-tw-12:left+12),r.width-tw)+'px';tip.style.top='10px';}
+  const off=()=>{tip.style.display='none';xh.setAttribute('visibility','hidden');svg.querySelectorAll('.dot').forEach(c=>c.setAttribute('visibility','hidden'))};
+  const hit=svg.querySelector('#hit');hit.addEventListener('pointermove',at);hit.addEventListener('pointerdown',at);hit.addEventListener('pointerleave',off);
+  $('dtab').innerHTML=`<table><thead><tr><th>Ημέρα</th>${G.map(([,n])=>`<th>${n}: παίκτες</th><th>χρόνος</th>`).join('')}</tr></thead><tbody>${ds.slice().reverse().map(d=>`<tr><td>${d.split('-').reverse().join('/')}</td>${G.map(([g])=>{const r=D.daily.find(x=>x.game===g&&x.day===d)||{};return `<td>${r.players||0}</td><td>${mins(r.secs)}</td>`}).join('')}</tr>`).join('')}</tbody></table>`;
+}
+function modes(){
+  $('mt').innerHTML=G.map(([g,n])=>`<button data-g="${g}" aria-pressed="${g===mg}">${n}</button>`).join('');
+  $('mt').querySelectorAll('button').forEach(b=>b.onclick=()=>{mg=b.dataset.g;modes()});
+  const c=G.find(x=>x[0]===mg)[2];
+  const rows=by(D.modes,mg).sort((a,b)=>b.secs-a.secs);const mx=Math.max(1,...rows.map(r=>r.secs));
+  $('mtab').innerHTML=rows.length?`<table><thead><tr><th>Λειτουργία</th><th>Παίκτες</th><th>Συνολικός χρόνος</th><th>Ανά παίκτη</th><th class="barc" style="width:30%"></th></tr></thead><tbody>${rows.map(r=>`<tr><td>${esc(MODE[mg+':'+r.mode]||MODE[r.mode]||r.mode)}</td><td>${nf.format(r.players)}</td><td>${mins(r.secs)}</td><td>${mins(Math.round(r.secs/r.players))}</td><td class="barc"><div class="bar"><i style="width:${Math.max(2,100*r.secs/mx)}%;background:var(${c})"></i></div></td></tr>`).join('')}</tbody></table>`:'<p class="sub">Δεν υπάρχουν ακόμα στοιχεία.</p>';
+}
+function srcs(){
+  const keys=[...new Set(D.srcs.map(r=>r.src))].sort();
+  $('stab').innerHTML=keys.length?`<table><thead><tr><th>Από πού</th>${G.map(([,n])=>`<th>${n}</th>`).join('')}</tr></thead><tbody>${keys.map(k=>`<tr><td>${esc(SRC[k]||k)}</td>${G.map(([g])=>{const r=D.srcs.find(x=>x.game===g&&x.src===k);return `<td>${r?nf.format(r.players):'–'}</td>`}).join('')}</tr>`).join('')}</tbody></table>`:'<p class="sub">Δεν υπάρχουν ακόμα στοιχεία.</p>';
+}
+if(key)load();else show(false);
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(D)chart()},150)});
+setInterval(()=>{if(D&&key&&document.visibilityState==='visible')load()},120000);
+})();
+</script>
+</body>
+</html>

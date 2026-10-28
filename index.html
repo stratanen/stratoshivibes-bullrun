@@ -2212,5 +2212,49 @@ function frame(now){
 }
 requestAnimationFrame(frame);
 
+// Anonymous play counter (StratoshiVibes). Sends: the game, what is on screen (menu or a game mode), seconds played,
+// a random device number made on this device, and whether it runs in the app or a browser.
+// No cookies, no wallet address, no names, no IP stored. Counts only while the page is visible.
+(function(){
+  if (window.SVStats || navigator.webdriver) return;
+  const EP = 'https://lb.stratoshivibes.com/ping';
+  const ls = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, v); } catch(e){} } };
+  let dev = ls.get('sv_dev');
+  if (!dev || !/^[a-z0-9]{12,32}$/.test(dev)) { const b = new Uint8Array(10); crypto.getRandomValues(b); dev = [...b].map(x => x.toString(36).padStart(2, '0')).join('').slice(0, 16); ls.set('sv_dev', dev); }
+  let src = null; try { src = sessionStorage.getItem('sv_src'); } catch(e){}
+  if (!src) {
+    const ua = navigator.userAgent || '';
+    const app = /^android-app:/.test(document.referrer || '') || /; wv\)/.test(ua) || matchMedia('(display-mode: standalone)').matches;
+    src = (app ? 'app' : /Android/.test(ua) ? 'android' : /iPhone|iPad/.test(ua) ? 'ios' : 'desktop') + (/seeker/i.test(ua) ? '-seeker' : '');
+    try { sessionStorage.setItem('sv_src', src); } catch(e){}
+  }
+  let game = null, getMode = () => 'menu';
+  const acc = {};               // mode -> seconds not yet sent
+  let lastSend = Date.now();
+  function send(){
+    lastSend = Date.now();
+    const modes = Object.keys(acc).filter(m => acc[m] > 0);
+    if (!game || !modes.length) return;
+    const body = JSON.stringify({ g: game, d: dev, p: src, t: modes.map(m => [m, Math.min(120, acc[m])]) });
+    for (const m of modes) delete acc[m];
+    try { if (navigator.sendBeacon && navigator.sendBeacon(EP, body)) return; } catch(e){}
+    try { fetch(EP, { method: 'POST', body, keepalive: true, mode: 'no-cors' }); } catch(e){}
+  }
+  setInterval(() => {
+    if (!game || document.visibilityState !== 'visible') return;
+    let m = 'menu'; try { m = String(getMode() || 'menu').toLowerCase().replace(/[^a-z0-9:_-]/g, '').slice(0, 24) || 'menu'; } catch(e){}
+    acc[m] = (acc[m] || 0) + 1;
+    if (Date.now() - lastSend >= 60000) send();
+  }, 1000);
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') send(); });
+  addEventListener('pagehide', send);
+  window.SVStats = { start(g, fn){ game = g; if (fn) getMode = fn; } };
+})();
+if (window.SVStats) SVStats.start('bullrun', () => {
+  if (state === 'garage') return 'garage';
+  if (state === 'race' || state === 'count' || state === 'ending') return isDaily() ? 'daily' : mode === 'endless' ? 'endless' : 'track';
+  return 'menu';
+});
+
 </script>
 </body></html>

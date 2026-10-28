@@ -12,7 +12,7 @@ h2{font-size:18px;margin:32px 0 8px}
 p,li{color:var(--fg)} .muted{color:var(--muted)} a{color:var(--gold)}
 </style></head><body><main>
 <h1>Privacy Policy</h1>
-<p class="muted">StratoshiVibes Bull Run · Last updated: 28 October 2026 (Seeker perks added)</p>
+<p class="muted">StratoshiVibes Bull Run · Last updated: 29 October 2026 (anonymous play counter added)</p>
 
 <h2>Summary</h2>
 <p>StratoshiVibes Bull Run is a free arcade racing game. It does not ask for an account and does not collect or sell personal data. Connecting a wallet is optional.</p>
@@ -44,10 +44,13 @@ p,li{color:var(--fg)} .muted{color:var(--muted)} a{color:var(--gold)}
 <h2>Purchases</h2>
 <p>When you buy an extra, the payment is a public Solana transaction from your wallet to the StratoshiVibes wallet, with a note naming the item (for example "svbullrun:garage"). Like every blockchain transaction, it is permanently visible to anyone. To show prices, the game asks Jupiter for current SOL and SKR prices; this request does not include your address. "Restore purchases" reads your wallet's public transaction history through Helius.</p>
 
+<h2>Anonymous play counter</h2>
+<p>To know how many people play and for how long, the game counts play time anonymously. About once a minute while the game is on screen, it sends to our server (lb.stratoshivibes.com, a Cloudflare Worker): the game's name, what is on screen (menu or a game mode), the seconds spent there, a random number created on your device, and whether it runs in the app or a browser. It does not send your wallet address, name, or any account, and the server does not store your IP address. The data is kept for up to 400 days and is only used to see totals, such as players per day. Clearing the app's data creates a new random number.</p>
+
 <h2>What we do not do</h2>
 <ul>
 <li>No sign-up or email collection (joining the ranking uses your wallet, not an account)</li>
-<li>No analytics, advertising, or tracking tools</li>
+<li>No third-party analytics, advertising, or tracking tools, and no cookies. The only count is the anonymous play counter described above.</li>
 <li>No signing requests, except the one ranking sign-in message and the single transfer you approve when you buy an extra in the Shop</li>
 <li>No tokens or real-money rewards. The only purchases are the optional Shop extras described above, and they change only how your car looks.</li>
 </ul>

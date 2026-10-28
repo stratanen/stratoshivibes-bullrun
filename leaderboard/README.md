@@ -1,4 +1,4 @@
-# Κατάταξη Bull Run
+# Κατάταξη και στατιστικά
 
 Το Bull Run χρησιμοποιεί τον ίδιο server κατάταξης με το Blockspace, το Cloudflare Worker στο `lb.stratoshivibes.com`, και την ίδια βάση D1. Δεν χρειάζεται νέα βάση ούτε νέος πίνακας. Τα αποτελέσματα του Bull Run αποθηκεύονται χωριστά, με δικό τους πρόθεμα (`br|`), οπότε δεν μπλέκονται με του Blockspace.
 
@@ -30,3 +30,19 @@
   `DELETE FROM scores WHERE addr = 'ΔΙΕΥΘΥΝΣΗ' AND period LIKE 'br|%';`
 
 Σημείωση: το ίδιο `worker.js` πρέπει να μπει και στο repo του Blockspace (`leaderboard/worker.js`), ώστε τα δύο αντίγραφα να είναι ίδια. Αυτό δεν είναι επείγον, γιατί το Cloudflare χρησιμοποιεί αυτό που επικόλλησες.
+
+## Στατιστικά παικτών (σελίδα /dash)
+
+Ο ίδιος server μετράει ανώνυμα πόσοι παίζουν Bull Run, Blockspace και Arcade, και για πόσο. Τα στατιστικά φαίνονται στη σελίδα:
+`https://lb.stratoshivibes.com/dash`
+
+Η σελίδα ανοίγει μόνο με κωδικό. Ο κωδικός μπαίνει μία φορά στο Cloudflare:
+
+1. dash.cloudflare.com → **Workers & Pages** → `blockspace-leaderboard`.
+2. **Settings** → **Variables and Secrets** → **Add**.
+3. Type: **Secret**, Variable name: `STATS_KEY`, Value: ένας κωδικός της επιλογής σου (μεγάλος, π.χ. 4 τυχαίες λέξεις).
+4. **Deploy** (ή **Save**).
+
+Ο πίνακας `plays` στη βάση φτιάχνεται αυτόματα με το πρώτο ping. Τα δεδομένα κρατιούνται 400 ημέρες.
+
+Η σελίδα είναι το `dash.html`. Αν αλλάξει, τρέχει το `python3 build-dash.py`, που το βάζει μέσα στο `worker.js`.

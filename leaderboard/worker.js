@@ -61,7 +61,7 @@ async function sgtMints(rpcUrl, owner, timeoutMs){
   } finally { if (to) clearTimeout(to); }
 }
 
-// Seeker owners: checked on the chain at every Bull Run ranking sign-in (after the signature proves the address).
+// Seeker owners: checked on the chain at every ranking sign-in (Blockspace and Bull Run) (after the signature proves the address).
 // The table is created on first use, so no manual SQL is needed. RPC_URL can be set as a Worker variable; the public endpoint is the fallback.
 let seekerTableReady = false;
 async function ensureSeekerTable(env){
@@ -118,8 +118,7 @@ export default {
         if (!ok) return json({ error: 'signature does not match this address' }, 401);
         const token = randHex(32);
         await env.DB.prepare('INSERT INTO sessions (token, addr, exp) VALUES (?, ?, ?)').bind(token, addr, Date.now() + SESSION_DAYS * 864e5).run();
-        if (game === 'bullrun') return json({ token, addr, seeker: await refreshSeeker(env, addr) });
-        return json({ token, addr });
+        return json({ token, addr, seeker: await refreshSeeker(env, addr) });
       }
 
       if (url.pathname === '/score' && req.method === 'POST') {
@@ -173,8 +172,9 @@ export default {
         const sc = url.searchParams.get('scope');
         const scope = sc === 'all' ? 'all' : sc === 'day' ? 'd-' + utcDay(Date.now()) : isoWeek(Date.now());
         const addr = url.searchParams.get('addr');
-        const top = await env.DB.prepare('SELECT addr, best FROM scores WHERE period = ? ORDER BY best DESC, at ASC LIMIT 20').bind(scope).all();
-        const out = { scope, top: top.results || [] };
+        await ensureSeekerTable(env);
+        const top = await env.DB.prepare('SELECT s.addr, s.best, k.addr AS sk FROM scores s LEFT JOIN seekers k ON k.addr = s.addr WHERE s.period = ? ORDER BY s.best DESC, s.at ASC LIMIT 20').bind(scope).all();
+        const out = { scope, top: (top.results || []).map(r => ({ addr: r.addr, best: r.best, seeker: !!r.sk })) };
         if (validAddr(addr || '')) Object.assign(out, await standing(env, addr, scope));
         return json(out);
       }

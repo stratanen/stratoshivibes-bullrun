@@ -1,7 +1,7 @@
 // Offline support: keeps a copy of the game on the device after the first online launch.
 // Pages load network-first (players get updates when online), everything else comes from the cache.
 // Raise the number in CACHE every time you change a file, so phones pick up the change.
-const CACHE = 'sv-bullrun-v5';
+const CACHE = 'sv-bullrun-v6';
 const CORE = [
   './',
   './index.html',
@@ -46,7 +46,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET' || new URL(req.url).origin !== location.origin) return;
   const isPage = req.mode === 'navigate' || req.destination === 'document';
   if (isPage) {
-    e.respondWith(fetch(req).then(res => {
+    // always ask GitHub for the newest page (GitHub Pages lets browsers reuse a page for 10 minutes otherwise)
+    e.respondWith(fetch(req.url, { cache: 'no-cache', credentials: 'same-origin' }).then(res => {
       const copy = res.clone(); caches.open(CACHE).then(c => c.put(req, copy)); return res;
     }).catch(() => caches.match(req, { ignoreSearch: true }).then(r => r || caches.match('./index.html'))));
     return;

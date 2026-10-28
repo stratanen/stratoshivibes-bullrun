@@ -307,6 +307,9 @@ h3.lab{margin:4px 0 0}
   .steer svg{width:30px;height:30px;padding:16px}
   .ped{height:84px}.ped.gas{height:100px}
 }
+.tiltind{position:fixed;left:max(24px, env(safe-area-inset-left, 0px) + 8px);bottom:calc(env(safe-area-inset-bottom, 0px) + 34px);width:150px;height:10px;border-radius:5px;background:var(--glass);border:1px solid var(--line);pointer-events:none}
+.tiltind::after{content:"";position:absolute;left:50%;top:-4px;width:1px;height:16px;background:var(--line)}
+.tiltind i{position:absolute;left:calc(50% - 9px);top:-5px;width:18px;height:18px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);transform:translateX(0);will-change:transform}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 </style>
 
@@ -347,6 +350,7 @@ h3.lab{margin:4px 0 0}
     <span id="sL"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 4 7 12l8 8"/></svg></span>
     <span id="sR"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 4 8 8-8 8"/></svg></span>
   </div>
+  <div class="tiltind" id="tiltInd" hidden aria-hidden="true"><i id="tiltDot"></i></div>
   <div class="rcol">
     <button class="nitro" id="bN" type="button"><b>NITRO</b><span class="pips" id="pips"><u></u><u></u><u></u></span></button>
     <div class="pedals">
@@ -402,6 +406,7 @@ h3.lab{margin:4px 0 0}
     <div class="bar"><button class="back" type="button" data-home aria-label="Back"><svg aria-hidden="true"><use href="#i-back"/></svg></button><h2 data-t="settings"></h2></div>
     <div class="opts">
       <div class="opt"><span class="lab" data-t="throttle"></span><div class="seg" id="segGas"><button type="button" data-v="manual" data-t="manual"></button><button type="button" data-v="auto" data-t="auto"></button></div></div>
+      <div class="opt"><span class="lab" data-t="steering"></span><div class="seg" id="segSteer"><button type="button" data-v="btn" data-t="btnSteer"></button><button type="button" data-v="tilt" data-t="tiltSteer"></button></div></div>
       <div class="opt"><span class="lab" data-t="music"></span><div class="seg" id="segMus"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="sound"></span><div class="seg" id="segSnd"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="lang"></span><div class="seg" id="segLang"><button type="button" data-v="el">ΕΛ</button><button type="button" data-v="en">EN</button></div></div>
@@ -474,7 +479,7 @@ const T = {
     proto:'Πρωτότυπο 3 · πληκτρολόγιο: βελάκια για οδήγηση, Space για nitro, P για παύση', nitroGot:'Nitro +1', cp:'+{s} δευτ.' }
 };
 Object.assign(T.en, {
-  music:'Music', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
+  music:'Music', steering:'Steering', btnSteer:'Buttons', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
   tag:'Arcade racing on crypto highways. Nine tracks, an endless run, and a garage to fill.',
   races:'Races', endless:'Endless run', garage:'Garage', lb:'Ranking', shop:'Shop', settings:'Settings', how:'How to play',
   r5:'Endless run: checkpoints add time. Traffic and barriers cost speed.', r6:'Races: reach the finish line. Faster times earn up to 3 stars and unlock the next track.',
@@ -508,7 +513,7 @@ Object.assign(T.en, {
   historyErr:'Could not read the history right now.', genericErr:'Something went wrong. Nothing was charged unless your wallet shows a sent payment.', loading:'Loading'
 });
 Object.assign(T.el, {
-  music:'Μουσική', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
+  music:'Μουσική', steering:'Στρίψιμο', btnSteer:'Κουμπιά', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
   tag:'Arcade αγώνες σε crypto αυτοκινητόδρομους. Εννιά πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.',
   races:'Αγώνες', endless:'Ατελείωτη διαδρομή', garage:'Γκαράζ', lb:'Κατάταξη', shop:'Shop', settings:'Ρυθμίσεις', how:'Πώς παίζεται',
   r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα.', r6:'Αγώνες: φτάσε στον τερματισμό. Όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3), και ξεκλειδώνει η επόμενη πίστα.',
@@ -1256,6 +1261,37 @@ function musicTick(){
   }
 }
 
+/* ================= tilt steering (device motion) ================= */
+// Gravity along the screen's left-right axis gives the tilt angle, whatever way the phone is held.
+// The angle at the start of each race is taken as straight ahead. 2.5° dead zone, full lock at 20°.
+let tiltMode = store.get('bullrun_steer') === 'tilt';
+const TILT = { ok: false, seen: false, raw: 0, zero: 0, zeroN: 0, zeroSum: 0, val: 0, listening: false };
+function onMotion(e){
+  const g = e.accelerationIncludingGravity; if (!g || g.x == null) return;
+  TILT.seen = true;
+  const a = ((screen.orientation && screen.orientation.angle) || window.orientation || 0) * Math.PI / 180;
+  let sx = g.x * Math.cos(a) - g.y * Math.sin(a);
+  if (/iPhone|iPad|iPod/.test(navigator.userAgent)) sx = -sx;
+  TILT.raw = Math.asin(clamp(-sx / 9.81, -1, 1)) * 180 / Math.PI;
+  if (TILT.zeroN >= 0 && TILT.zeroN < 20) { TILT.zeroSum += TILT.raw; TILT.zeroN++; TILT.zero = TILT.zeroSum / TILT.zeroN; }
+  const d = TILT.raw - TILT.zero, dz = 2.5, full = 20;
+  TILT.val = Math.abs(d) < dz ? 0 : clamp((d - Math.sign(d) * dz) / (full - dz), -1, 1);
+}
+function tiltRecenter(){ TILT.zeroN = 0; TILT.zeroSum = 0; }
+async function tiltStart(fromClick){
+  if (TILT.listening) return true;
+  try {
+    if (typeof DeviceMotionEvent !== 'undefined' && typeof DeviceMotionEvent.requestPermission === 'function') {
+      if (!fromClick) return false;
+      const r = await DeviceMotionEvent.requestPermission(); if (r !== 'granted') return false;
+    }
+    addEventListener('devicemotion', onMotion); TILT.listening = true; return true;
+  } catch (e) { return false; }
+}
+function tiltCheckLater(){
+  setTimeout(() => { if (tiltMode && !TILT.seen) { tiltMode = false; store.set('bullrun_steer', 'btn'); toast(T[lang].tiltOff); applyLang(); setUI(); } }, 1600);
+}
+
 /* ================= input ================= */
 const keys = { left: false, right: false, gas: false, brake: false }, touch = { left: false, right: false, gas: false, brake: false };
 addEventListener('keydown', e => {
@@ -1327,6 +1363,7 @@ function hud(){
   } else {
     setT('hDist', dist.toFixed(2)); setT('hDistOf', 'km'); setT('hTime', String(Math.max(0, Math.ceil(timeLeft)))); setT('hTarget', '');
   }
+  if (tiltMode) { const tv = Math.round(steer * 66); if (tv !== hc.tilt) { hc.tilt = tv; $('tiltDot').style.transform = 'translateX(' + tv + 'px)'; } }
   const bar = Math.round(clamp(v / NITRO_V, 0, 1) * 40);
   if (bar !== lastBar) { lastBar = bar; $('hBar').style.transform = 'scaleX(' + (bar / 40) + ')'; }
   $('hTimeBox').classList.toggle('low', timeLeft < 8 && state === 'race');
@@ -1387,7 +1424,8 @@ function update(dt){
     updateFx(dt, 0); updateChunks(sP); return;
   }
   trackAt(sP + PLEN / 2, tA); const k = tA.k;
-  const target = (inR ? 1 : 0) - (inL ? 1 : 0);
+  const btnT = (inR ? 1 : 0) - (inL ? 1 : 0);
+  const target = tiltMode && TILT.seen && state === 'race' && !bot && btnT === 0 ? TILT.val : btnT;
   const rate = target === 0 ? 9 : (steer !== 0 && Math.sign(target) !== Math.sign(steer) ? 13 : 6.5);
   steer += clamp(target - steer, -rate * dt, rate * dt);
   if (nitroTime > 0) nitroTime -= dt;
@@ -1639,6 +1677,7 @@ function setUI(){
   $('hud').hidden = !(racing || state === 'ending');
   $('hProg').hidden = mode !== 'track';
   $('pad').hidden = !racing; $('pauseBtn').hidden = !racing; $('bG').hidden = autoGas;
+  $('steer').hidden = tiltMode; $('tiltInd').hidden = !tiltMode;
   $('start').hidden = !(state === 'menu' && screen === 'home');
   $('tracks').hidden = !(state === 'menu' && screen === 'tracks');
   $('settings').hidden = !(state === 'menu' && screen === 'settings');
@@ -1653,6 +1692,7 @@ function startRace(opt){
   reset(mode === 'track' ? TR.seed : (typeof opt.seed === 'number' ? opt.seed : (Date.now() ^ (Math.random() * 1e9)) >>> 0));
   equipValid();
   state = 'count'; countT = 3.2; countShown = ''; lastPips = -1; lastBar = -1; hc.prog = -1;
+  if (tiltMode) { tiltStart(true); tiltRecenter(); tiltCheckLater(); }
   setUI(); perf.reset();
 }
 function endRace(won, tFinish){
@@ -1722,7 +1762,7 @@ function finish(){
   releaseAll(); setUI(); engineTick(false);
 }
 function pause(){ if (state !== 'race' && state !== 'count') return; prevState = state; state = 'paused'; releaseAll(); setUI(); engineTick(false); }
-function resume(){ if (state !== 'paused') return; state = prevState; if (state === 'count') countShown = ''; setUI(); audioStart(); }
+function resume(){ if (state !== 'paused') return; state = prevState; if (state === 'count') countShown = ''; if (tiltMode) tiltRecenter(); setUI(); audioStart(); }
 function toMenu(scr){
   mode = 'endless'; TR = null; reset(12345); v = MAXV * .6; state = 'menu'; screen = scr || 'home'; releaseAll(); equipValid();
   if (screen === 'tracks') renderTracks(); renderHome(); setUI();
@@ -1764,7 +1804,7 @@ function segSet(id, val){ for (const b of $(id).children) b.setAttribute('aria-p
 function applyLang(){
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach(el => { const t = T[lang][el.dataset.t]; if (typeof t === 'string') el.textContent = t; });
-  segSet('segLang', lang); segSet('segGas', autoGas ? 'auto' : 'manual'); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off');
+  segSet('segLang', lang); segSet('segGas', autoGas ? 'auto' : 'manual'); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off'); segSet('segSteer', tiltMode ? 'tilt' : 'btn');
   renderHome(); if (screen === 'tracks') renderTracks(); if (state === 'garage') renderGarage();
 }
 const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -2013,6 +2053,10 @@ async function restore(){
 /* ================= wiring ================= */
 $('segLang').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; lang = b.dataset.v; store.set('bullrun_lang', lang); applyLang(); });
 $('segGas').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; autoGas = b.dataset.v === 'auto'; store.set('bullrun_gas', autoGas ? 'auto' : 'manual'); applyLang(); setUI(); });
+$('segSteer').addEventListener('click', async e => { const b = e.target.closest('button'); if (!b) return;
+  if (b.dataset.v === 'tilt') { const ok = await tiltStart(true); if (!ok) { toast(T[lang].tiltOff); return; } tiltMode = true; store.set('bullrun_steer', 'tilt'); toast(T[lang].tiltOk, T[lang].tiltHint); tiltCheckLater(); }
+  else { tiltMode = false; store.set('bullrun_steer', 'btn'); }
+  applyLang(); setUI(); });
 $('segMus').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; musicOn = b.dataset.v === 'on'; store.set('bullrun_music', musicOn ? '1' : '0'); audioStart(); applyLang(); });
 $('segSnd').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; muted = b.dataset.v === 'off'; store.set('bullrun_mute', muted ? '1' : '0'); if (!muted) audioStart(); else engineTick(false); applyLang(); });
 $('goTracks').addEventListener('click', () => { audioStart(); go('tracks'); });
@@ -2053,9 +2097,10 @@ resize();
 toMenu();
 applyLang();
 if (WAL.addr && ONLINE) checkHolder(false);
+if (tiltMode) tiltStart(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
 window.__bullrun = { get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
-  jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
+  get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },
   gcam(x){ GCAM = x; }, paint(id){ showPaint(id); }, cam(b, h, la, ly){ CAMP = [b, h, la, ly]; }, camL(b, h, la, ly){ CAMP_L = [b, h, la, ly]; } };

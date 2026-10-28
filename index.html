@@ -280,6 +280,12 @@ h3.lab{margin:4px 0 0}
   .trk .lk{position:static;grid-column:3;grid-row:1 / 3;width:18px;height:18px}
   .trk:disabled .st{display:none}
 }
+.go.day{background:linear-gradient(90deg,#3fe6ff,#14f0a0);box-shadow:0 6px 22px rgba(20,240,160,.3);font-size:20px;align-items:center}
+.go.day .dn>span{white-space:nowrap}
+#dailyInfo{white-space:nowrap}
+.go.day .dn{display:flex;flex-direction:column;gap:2px}
+.go.day .dn small{font:800 11.5px var(--fb);font-style:normal;opacity:.7;letter-spacing:.04em}
+.bonus{margin:0;font:italic 900 20px var(--fd);color:var(--sol-b)}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 </style>
 
@@ -337,6 +343,7 @@ h3.lab{margin:4px 0 0}
     <p class="tag" data-t="tag"></p>
     <div class="mainbtns">
       <button class="go" id="goTracks" type="button"><span data-t="races"></span><small id="starSum"></small></button>
+      <button class="go day" id="goDaily" type="button"><span class="dn"><span data-t="daily"></span><small id="dailyName"></small></span><small id="dailyInfo"></small></button>
       <button class="go alt" id="goEndless" type="button"><span data-t="endless"></span><small id="endlessBest"></small></button>
     </div>
     <div class="tiles">
@@ -374,6 +381,7 @@ h3.lab{margin:4px 0 0}
     <div class="bar"><button class="back" type="button" data-home aria-label="Back"><svg aria-hidden="true"><use href="#i-back"/></svg></button><h2 data-t="settings"></h2></div>
     <div class="opts">
       <div class="opt"><span class="lab" data-t="throttle"></span><div class="seg" id="segGas"><button type="button" data-v="manual" data-t="manual"></button><button type="button" data-v="auto" data-t="auto"></button></div></div>
+      <div class="opt"><span class="lab" data-t="music"></span><div class="seg" id="segMus"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="sound"></span><div class="seg" id="segSnd"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="lang"></span><div class="seg" id="segLang"><button type="button" data-v="el">ΕΛ</button><button type="button" data-v="en">EN</button></div></div>
     </div>
@@ -445,10 +453,11 @@ const T = {
     proto:'Πρωτότυπο 3 · πληκτρολόγιο: βελάκια για οδήγηση, Space για nitro, P για παύση', nitroGot:'Nitro +1', cp:'+{s} δευτ.' }
 };
 Object.assign(T.en, {
+  music:'Music', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
   tag:'Arcade racing on crypto highways. Nine tracks, an endless run, and a garage to fill.',
   races:'Races', endless:'Endless run', garage:'Garage', lb:'Ranking', shop:'Shop', settings:'Settings', how:'How to play',
   r5:'Endless run: checkpoints add time. Traffic and barriers cost speed.', r6:'Races: reach the finish line. Faster times earn up to 3 stars and unlock the next track.',
-  restart:'Restart', privacy:'Privacy', terms:'Terms', proto:'Bull Run 0.4',
+  restart:'Restart', privacy:'Privacy', terms:'Terms', proto:'Bull Run 1.1',
   finish:'Finish', timeUp:'Out of time', next:'Next track', retry:'Retry', tracksBtn:'Tracks', bestTime:'Best time', rank:'Rank',
   locked:'Finish the previous track', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', starsWord:'stars',
   noRun:'not raced yet', bankShort:'Tokens to spend', earned:'Tokens earned', bankWord:'tokens to spend',
@@ -478,10 +487,11 @@ Object.assign(T.en, {
   historyErr:'Could not read the history right now.', genericErr:'Something went wrong. Nothing was charged unless your wallet shows a sent payment.', loading:'Loading'
 });
 Object.assign(T.el, {
+  music:'Μουσική', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
   tag:'Arcade αγώνες σε crypto αυτοκινητόδρομους. Εννιά πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.',
   races:'Αγώνες', endless:'Ατελείωτη διαδρομή', garage:'Γκαράζ', lb:'Κατάταξη', shop:'Shop', settings:'Ρυθμίσεις', how:'Πώς παίζεται',
   r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα.', r6:'Αγώνες: φτάσε στον τερματισμό. Όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3), και ξεκλειδώνει η επόμενη πίστα.',
-  restart:'Από την αρχή', privacy:'Απόρρητο', terms:'Όροι', proto:'Bull Run 0.4',
+  restart:'Από την αρχή', privacy:'Απόρρητο', terms:'Όροι', proto:'Bull Run 1.1',
   finish:'Τερματισμός', timeUp:'Τέλος χρόνου', next:'Επόμενη πίστα', retry:'Ξανά', tracksBtn:'Πίστες', bestTime:'Ρεκόρ', rank:'Θέση',
   locked:'Τερμάτισε την προηγούμενη πίστα', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', starsWord:'αστέρια',
   noRun:'χωρίς χρόνο ακόμα', bankShort:'Tokens για ξόδεμα', earned:'Tokens που μάζεψες', bankWord:'tokens για ξόδεμα',
@@ -535,6 +545,17 @@ const TRACKS = [
   { id:'t8', b:2, len:4400, diff:7, seed:3208, el:'Βρόχος Ρευστοποίησης', en:'Liquidation Loop', par:64.26 },
   { id:'t9', b:2, len:5000, diff:8, seed:3309, el:'Capitulation', en:'Capitulation', par:73.36 }
 ];
+/* daily track: a new road every UTC day, the same for everyone */
+const DAILY_LEN = 3600, DAILY_BONUS = 50, MONTHS = { el: ['Ιαν','Φεβ','Μαρ','Απρ','Μαΐ','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'], en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] };
+function dailyTrack(){
+  const n = Math.floor(Date.now() / 864e5), d = new Date(n * 864e5), key = d.toISOString().slice(0, 10);
+  const ds = l => d.getUTCDate() + ' ' + MONTHS[l][d.getUTCMonth()];
+  return { id: 'daily', key, b: n % 3, len: DAILY_LEN, diff: 1 + (n % 7), seed: (Math.imul(n, 2654435761) >>> 0) || 7,
+    el: 'Ημερήσια · ' + ds('el'), en: 'Daily · ' + ds('en'), par: DAILY_LEN / 66 };
+}
+function dayState(){ const k = dailyTrack().key; let D = readJSON('bullrun_daily') || {}; if (D.key !== k) D = { key: k, best: null, bonus: false }; return D; }
+const saveDay = D => store.set('bullrun_daily', JSON.stringify(D));
+const isDaily = () => mode === 'track' && TR && TR.id === 'daily';
 const STAR_K = [1.4, 1.1, 0.97];   // 1, 2, 3 stars: finish within par x this
 const starTimes = tr => [tr.par * STAR_K[0], tr.par * STAR_K[1], tr.par * STAR_K[2]];
 const trName = tr => tr[lang] || tr.en;
@@ -668,7 +689,7 @@ const TEX = { road: BIOMES.map(roadTex), token: tokenFace(), plate: plateTex(), 
 TEX.win.wrapS = TEX.win.wrapT = THREE.RepeatWrapping;
 const finishMats = {};
 function finishMat(){
-  const key = TR.id + lang;
+  const key = TR.id + (TR.key || '') + lang;
   if (!finishMats[key]) finishMats[key] = new THREE.MeshBasicMaterial({ map: bannerTex(lang === 'el' ? 'ΤΕΡΜΑΤΙΣΜΟΣ' : 'FINISH', trName(TR).toUpperCase(), '#ffc24a') });
   return finishMats[key];
 }
@@ -1116,6 +1137,7 @@ function audioStart(){
       noiseBuf = AC.createBuffer(1, AC.sampleRate, AC.sampleRate); const dd = noiseBuf.getChannelData(0); for (let i = 0; i < dd.length; i++) dd[i] = Math.random() * 2 - 1;
     }
     if (AC.state === 'suspended') AC.resume();
+    musicInit();
   } catch (e) {}
 }
 function tone(f, du, type, vol, f2, delay){
@@ -1141,6 +1163,76 @@ function engineTick(throttle){
   eO1.frequency.setTargetAtTime(f, t, .04); eO2.frequency.setTargetAtTime(f * .5 + 1.5, t, .04);
   eF.frequency.setTargetAtTime(480 + rpm * 1500 + (nitroTime > 0 ? 600 : 0), t, .05);
   eG.gain.setTargetAtTime(.03 + (throttle ? .045 : .014), t, .06);
+}
+
+/* ================= music: synthwave played live by the game (no audio files) ================= */
+// One song per market. Bass, pad, arpeggio and drums are scheduled a little ahead of time on the Web Audio clock.
+// Menu: pad and arpeggio only, quieter. Race: full band. Off with the Music switch, or with Sound off.
+let musicOn = store.get('bullrun_music') !== '0';
+const SONGS = [
+  { bpm: 112, root: 45, chords: [[0, 'm'], [-4, 'M'], [3, 'M'], [-2, 'M']] },   // Bull Market: A minor, bright
+  { bpm: 100, root: 40, chords: [[0, 'm'], [-2, 'M'], [-4, 'M'], [-2, 'M']] },   // Halving Canyon: E minor, slower and wider
+  { bpm: 118, root: 38, chords: [[0, 'm'], [-4, 'M'], [-7, 'M'], [-5, 'm']] }    // Bear Market: D minor, darker and faster
+];
+const MUS = { bus: null, filt: null, next: 0, step: 0, bar: 0, song: 0, timer: 0, level: 0 };
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+const chordNotes = (root, q) => [root, root + (q === 'm' ? 3 : 4), root + 7];
+function musicInit(){
+  if (!AC || MUS.bus) return;
+  MUS.bus = AC.createGain(); MUS.bus.gain.value = 0;
+  MUS.filt = AC.createBiquadFilter(); MUS.filt.type = 'lowpass'; MUS.filt.frequency.value = 9000;
+  MUS.bus.connect(MUS.filt); MUS.filt.connect(master);
+  MUS.next = AC.currentTime + .1;
+  MUS.timer = setInterval(musicTick, 30);
+}
+function mNote(t, f, dur, type, vol, cutoff, att){
+  const o = AC.createOscillator(), g = AC.createGain(), fl = AC.createBiquadFilter();
+  o.type = type; o.frequency.setValueAtTime(f, t);
+  fl.type = 'lowpass'; fl.frequency.setValueAtTime(cutoff, t); fl.Q.value = 2;
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + (att || .008)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(fl); fl.connect(g); g.connect(MUS.bus); o.start(t); o.stop(t + dur + .05);
+}
+function mDrum(t, kind){
+  if (kind === 'k') {
+    const o = AC.createOscillator(), g = AC.createGain();
+    o.frequency.setValueAtTime(130, t); o.frequency.exponentialRampToValueAtTime(42, t + .14);
+    g.gain.setValueAtTime(.55, t); g.gain.exponentialRampToValueAtTime(.0001, t + .26);
+    o.connect(g); g.connect(MUS.bus); o.start(t); o.stop(t + .3); return;
+  }
+  const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+  s.buffer = noiseBuf; s.playbackRate.value = kind === 'h' ? 1.5 : 1;
+  f.type = kind === 'h' ? 'highpass' : 'bandpass'; f.frequency.value = kind === 'h' ? 7000 : 1800; f.Q.value = kind === 'h' ? .7 : .9;
+  const v0 = kind === 'h' ? .07 : .22, d = kind === 'h' ? .05 : .18;
+  g.gain.setValueAtTime(v0, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+  s.connect(f); f.connect(g); g.connect(MUS.bus); s.start(t, Math.random() * .5); s.stop(t + d + .05);
+}
+function musicTick(){
+  if (!AC || !MUS.bus) return;
+  const racing = state === 'race' || state === 'count' || state === 'ending', on = musicOn && !muted && !document.hidden && state !== 'paused';
+  const target = !on ? 0 : racing ? .34 : state === 'over' ? .2 : .24;
+  if (Math.abs(target - MUS.level) > .001) { MUS.level = target; MUS.bus.gain.setTargetAtTime(target, AC.currentTime, .4); }
+  MUS.filt.frequency.setTargetAtTime(racing ? 9000 : 2600, AC.currentTime, .6);
+  if (!on) { MUS.next = AC.currentTime + .1; return; }
+  const full = state === 'race' || state === 'ending';
+  while (MUS.next < AC.currentTime + .15) {
+    const t = MUS.next, st = MUS.step % 16;
+    if (st === 0) { MUS.bar++; const want = curB; if (want !== MUS.song && MUS.bar % 4 === 1) MUS.song = want; }
+    const S = SONGS[MUS.song], sd = 60 / S.bpm / 4, ch = S.chords[Math.floor(MUS.bar / 2) % 4];
+    const notes = chordNotes(S.root + ch[0], ch[1]);
+    // pad: whole chord, every two bars
+    if (st === 0 && MUS.bar % 2 === 0) for (const n of notes) for (const det of [-6, 6]) { const o = mNote; o(t, mtof(n + 12) * Math.pow(2, det / 1200), sd * 32, 'sawtooth', .022, 1400, .6); }
+    // arpeggio: 16th notes over two octaves
+    const arp = [0, 1, 2, 1, 2, 3, 2, 1][MUS.step % 8], an = notes[arp % 3] + 24 + (arp === 3 ? 12 : 0);
+    mNote(t, mtof(an), sd * .9, 'square', full ? .028 : .02, full ? 3200 : 1800);
+    if (full) {
+      // bass: driving 8ths with an octave jump
+      if (st % 2 === 0) mNote(t, mtof(notes[0] - 12 + (st % 8 === 6 ? 12 : 0)), sd * 1.8, 'sawtooth', .085, 700);
+      if (st % 4 === 0) mDrum(t, 'k');
+      if (st === 4 || st === 12) mDrum(t, 's');
+      if (st % 2 === 1) mDrum(t, 'h');
+    }
+    MUS.next += sd; MUS.step++;
+  }
 }
 
 /* ================= input ================= */
@@ -1206,7 +1298,7 @@ function hud(){
   if (mode === 'track') {
     setT('hDist', dist.toFixed(2)); setT('hDistOf', '/ ' + (TR.len / 1000).toFixed(1) + ' km');
     setT('hTime', fmtShort(raceT));
-    const st = starTimes(TR), nxt = [2, 1, 0].find(i => raceT <= st[i]);
+    const st = starTimes(TR), nxt = isDaily() ? null : [2, 1, 0].find(i => raceT <= st[i]);
     const tg = nxt == null ? '' : '★'.repeat(nxt + 1) + ' ' + fmtShort(st[nxt]);
     setT('hTarget', tg);
     const pr = Math.round(clamp(dist * 1000 / TR.len, 0, 1) * 60);
@@ -1536,7 +1628,7 @@ function go(scr){ screen = scr; if (scr === 'tracks') renderTracks(); if (scr ==
 function startRace(opt){
   opt = opt || {};
   audioStart(); releaseAll(); closeDlg();
-  if (opt.track != null) { mode = 'track'; TR = TRACKS[opt.track]; } else if (opt.endless) { mode = 'endless'; TR = null; }
+  if (opt.daily) { mode = 'track'; TR = dailyTrack(); } else if (opt.track != null) { mode = 'track'; TR = TRACKS[opt.track]; } else if (opt.endless) { mode = 'endless'; TR = null; }
   reset(mode === 'track' ? TR.seed : (typeof opt.seed === 'number' ? opt.seed : (Date.now() ^ (Math.random() * 1e9)) >>> 0));
   equipValid();
   state = 'count'; countT = 3.2; countShown = ''; lastPips = -1; lastBar = -1; hc.prog = -1;
@@ -1554,7 +1646,24 @@ function finish(){
   totalTok += tokens; store.set('bullrun_tokens', String(totalTok));
   bank += tokens; saveBank();
   const L = T[lang], oc = $('overCard');
-  if (mode === 'track') {
+  if (isDaily()) {
+    const D0 = dayState(); let isBest = false, bonus = 0;
+    if (result.won) {
+      isBest = D0.best == null || result.t < D0.best; if (isBest) D0.best = result.t;
+      if (!D0.bonus) { D0.bonus = true; bonus = DAILY_BONUS; bank += bonus; saveBank(); }
+      saveDay(D0); lbSubmit('d:' + TR.key, Math.round(result.t * 1000));
+    }
+    oc.innerHTML = '<div class="ol"><div class="eyebrow">' + (result.won ? L.finish : L.timeUp).toUpperCase() + ' · ' + esc(trName(TR)) + '</div>' +
+      (result.won ? '<div class="res">' + fmtTime(result.t) + '</div>' : '<div class="res">' + dist.toFixed(2) + '<small>/ ' + (TR.len / 1000).toFixed(1) + ' km</small></div>') +
+      (isBest && !bonus ? '<span class="chip">' + L.newBest + '</span>' : '') +
+      (bonus ? '<p class="bonus">+' + bonus + ' ' + L.dailyBonus + '</p>' : '') +
+      '<p class="meta">' + L.dailyNew + '</p></div>' +
+      '<div class="or"><div class="stats"><div><span class="lab">' + L.earned + '</span><b>' + (tokens + bonus) + '</b></div><div><span class="lab">' + L.top + '</span><b>' + topKmh + '</b></div>' +
+      '<div><span class="lab">' + L.bestToday + '</span><b>' + (D0.best ? fmtTime(D0.best) : '--') + '</b></div>' + (ONLINE && lbSignedIn() ? '<div><span class="lab">' + L.rank + '</span><b id="oRank">…</b></div>' : '<div><span class="lab">' + L.bankShort + '</span><b>' + bank + '</b></div>') + '</div>' +
+      '<div class="row"><button class="go" id="oRetry" type="button">' + L.retry + '</button><button class="go alt" id="oMenu" type="button">' + L.menu + '</button></div></div>';
+    $('oRetry').onclick = () => startRace({ daily: true });
+    $('oMenu').onclick = () => toMenu();
+  } else if (mode === 'track') {
     const idx = TRACKS.indexOf(TR), st = starTimes(TR), prev = PROG[TR.id] || { s: 0, b: null };
     let stars = 0, isBest = false;
     if (result.won) {
@@ -1605,6 +1714,9 @@ function renderHome(){
   const L = T[lang];
   $('starSum').textContent = starTotal() + ' / 27 ★';
   $('endlessBest').textContent = best > 0 ? L.best + ' ' + best.toFixed(2) + ' km' : '';
+  const dt = dailyTrack(), D0 = dayState();
+  $('dailyName').textContent = trName(dt).split(' · ')[1] + ' · ' + L['market' + dt.b];
+  $('dailyInfo').textContent = D0.best ? fmtTime(D0.best) : D0.bonus ? '' : '+' + DAILY_BONUS + ' tokens';
   $('meta').textContent = bank + ' ' + L.bankWord;
   paintWalletBtn();
 }
@@ -1631,7 +1743,7 @@ function segSet(id, val){ for (const b of $(id).children) b.setAttribute('aria-p
 function applyLang(){
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach(el => { const t = T[lang][el.dataset.t]; if (typeof t === 'string') el.textContent = t; });
-  segSet('segLang', lang); segSet('segGas', autoGas ? 'auto' : 'manual'); segSet('segSnd', muted ? 'off' : 'on');
+  segSet('segLang', lang); segSet('segGas', autoGas ? 'auto' : 'manual'); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off');
   renderHome(); if (screen === 'tracks') renderTracks(); if (state === 'garage') renderGarage();
 }
 const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -1729,10 +1841,11 @@ function lbSubmit(board, val){
 }
 async function openLb(){
   if (!ONLINE) return appOnly();
-  const L = T[lang], boards = [['endless', L.endless], ...TRACKS.map((t, i) => ['t:' + t.id, String(i + 1)])];
+  const L = T[lang], dk = 'd:' + dailyTrack().key, boards = [[dk, L.dailyShort], ['endless', L.endless], ...TRACKS.map((t, i) => ['t:' + t.id, String(i + 1)])];
+  if (lbBoard.startsWith('d:') && lbBoard !== dk) lbBoard = dk;
   dlg('<h2>' + L.lb + '</h2><div class="tabs" id="lbB">' + boards.map(([k, n]) => '<button type="button" data-b="' + k + '" class="' + (k === lbBoard ? 'on' : '') + '">' + esc(n) + '</button>').join('') + '</div>' +
-    (lbBoard !== 'endless' ? '<p><b>' + esc(trName(TRACKS.find(t => 't:' + t.id === lbBoard))) + '</b></p>' : '') +
-    '<div class="tabs" id="lbS"><button type="button" data-s="week" class="' + (lbScope === 'week' ? 'on' : '') + '">' + L.lbWeek + '</button><button type="button" data-s="all" class="' + (lbScope === 'all' ? 'on' : '') + '">' + L.lbAll + '</button></div>' +
+    (lbBoard.startsWith('t:') ? '<p><b>' + esc(trName(TRACKS.find(t => 't:' + t.id === lbBoard))) + '</b></p>' : lbBoard.startsWith('d:') ? '<p><b>' + esc(trName(dailyTrack())) + '</b> · ' + L.dailyLbNote + '</p>' : '') +
+    '<div class="tabs" id="lbS"' + (lbBoard.startsWith('d:') ? ' hidden' : '') + '><button type="button" data-s="week" class="' + (lbScope === 'week' ? 'on' : '') + '">' + L.lbWeek + '</button><button type="button" data-s="all" class="' + (lbScope === 'all' ? 'on' : '') + '">' + L.lbAll + '</button></div>' +
     '<ol class="lblist" id="lbList"><li><span></span><span>' + L.lbLoading + '</span><span></span></li></ol><p id="lbMe"></p>' +
     (lbSignedIn() ? '' : '<p>' + L.lbJoinTxt + '</p><button class="go" type="button" id="lbJoin">' + L.lbJoin + '</button><p class="serr" id="lbErr" hidden></p>') +
     '<p class="fine">' + L.lbFine + '</p><div class="wbtns">' + (lbSignedIn() ? '<button class="btn2" type="button" id="lbLeave">' + L.lbLeave + '</button>' : '') + '<button class="btn2" type="button" id="lbClose">' + L.close + '</button></div>');
@@ -1879,8 +1992,10 @@ async function restore(){
 /* ================= wiring ================= */
 $('segLang').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; lang = b.dataset.v; store.set('bullrun_lang', lang); applyLang(); });
 $('segGas').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; autoGas = b.dataset.v === 'auto'; store.set('bullrun_gas', autoGas ? 'auto' : 'manual'); applyLang(); setUI(); });
+$('segMus').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; musicOn = b.dataset.v === 'on'; store.set('bullrun_music', musicOn ? '1' : '0'); audioStart(); applyLang(); });
 $('segSnd').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; muted = b.dataset.v === 'off'; store.set('bullrun_mute', muted ? '1' : '0'); if (!muted) audioStart(); else engineTick(false); applyLang(); });
 $('goTracks').addEventListener('click', () => { audioStart(); go('tracks'); });
+$('goDaily').addEventListener('click', () => startRace({ daily: true }));
 $('goEndless').addEventListener('click', () => startRace({ endless: true }));
 $('tGarage').addEventListener('click', openGarage);
 $('tLb').addEventListener('click', openLb);
@@ -1888,8 +2003,8 @@ $('tShop').addEventListener('click', openShop);
 $('tSet').addEventListener('click', () => go('settings'));
 $('walletBtn').addEventListener('click', openWallet);
 document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => { if (state === 'garage') { equipValid(); toMenu(); } else go('home'); }));
-$('quit').addEventListener('click', () => toMenu(mode === 'track' ? 'tracks' : 'home'));
-$('restart').addEventListener('click', () => startRace(mode === 'track' ? { track: TRACKS.indexOf(TR) } : { endless: true }));
+$('quit').addEventListener('click', () => toMenu(mode === 'track' && !isDaily() ? 'tracks' : 'home'));
+$('restart').addEventListener('click', () => startRace(isDaily() ? { daily: true } : mode === 'track' ? { track: TRACKS.indexOf(TR) } : { endless: true }));
 $('resume').addEventListener('click', resume);
 $('pauseBtn').addEventListener('click', pause);
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
@@ -1918,7 +2033,7 @@ toMenu();
 applyLang();
 if (WAL.addr && ONLINE) checkHolder(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
-window.__bullrun = { get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
+window.__bullrun = { get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
   jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },

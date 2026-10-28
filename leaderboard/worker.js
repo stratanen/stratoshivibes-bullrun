@@ -10,8 +10,15 @@ const ALLOWED_ORIGINS = ['https://blockspace.stratoshivibes.com', 'https://bullr
 const BULLRUN_TRACK_LEN = { t1: 2600, t2: 3200, t3: 3800, t4: 3200, t5: 3800, t6: 4400, t7: 3800, t8: 4400, t9: 5000 };
 const BULLRUN_NITRO_MS = 93.8;          // metres per second at full nitro
 const BULLRUN_MAX_ENDLESS = 500000;     // 500 km in one endless run is treated as tampering
+const BULLRUN_DAILY_LEN = 3600;         // the daily track ('d:YYYY-MM-DD') is always 3.6 km; today's and yesterday's boards accept results
 function bullrunCheck(board, value) {
   if (!Number.isInteger(value) || value <= 0) return null;
+  const dm = /^d:(\d{4}-\d{2}-\d{2})$/.exec(board || '');
+  if (dm) {
+    const now = Date.now();
+    if (dm[1] !== utcDay(now) && dm[1] !== utcDay(now - 864e5)) return null;
+    return value >= Math.floor(BULLRUN_DAILY_LEN / BULLRUN_NITRO_MS * 1000) && value <= 30 * 60e3 ? -value : null;
+  }
   if (board === 'endless') return value <= BULLRUN_MAX_ENDLESS ? value : null;
   const m = /^t:(t[1-9])$/.exec(board || '');
   if (!m) return null;
@@ -70,7 +77,7 @@ export default {
           const now = Date.now();
           if (now - s.last < MIN_GAP_MS) return json({ error: 'too fast' }, 429);
           await env.DB.prepare('UPDATE sessions SET last = ? WHERE token = ?').bind(now, token).run();
-          const periods = [brPeriod(board, isoWeek(now)), brPeriod(board, 'all')];
+          const periods = board.startsWith('d:') ? [brPeriod(board, 'all')] : [brPeriod(board, isoWeek(now)), brPeriod(board, 'all')];
           for (const period of periods) {
             await env.DB.prepare(
               'INSERT INTO scores (addr, period, best, at) VALUES (?1, ?2, ?3, ?4) ' +
@@ -98,7 +105,7 @@ export default {
       if (url.pathname === '/top' && req.method === 'GET' && url.searchParams.get('game') === 'bullrun') {
         const board = url.searchParams.get('board') || 'endless';
         if (bullrunCheck(board, board === 'endless' ? 1 : 10 * 60e3) === null) return json({ error: 'unknown board' }, 400);
-        const period = brPeriod(board, url.searchParams.get('scope') === 'all' ? 'all' : isoWeek(Date.now()));
+        const period = brPeriod(board, board.startsWith('d:') || url.searchParams.get('scope') === 'all' ? 'all' : isoWeek(Date.now()));
         const top = await env.DB.prepare('SELECT addr, best FROM scores WHERE period = ? ORDER BY best DESC, at ASC LIMIT 20').bind(period).all();
         const out = { board, top: (top.results || []).map(r => ({ addr: r.addr, value: Math.abs(r.best) })) };
         const addr = url.searchParams.get('addr');

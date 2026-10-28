@@ -253,7 +253,8 @@ h3.lab{margin:4px 0 0}
 .tile:focus-visible,.trk:focus-visible,.sw:focus-visible,.back:focus-visible,.wbtn:focus-visible,.btn2:focus-visible,.tabs button:focus-visible,.sbuy:focus-visible{outline:2px solid #fff;outline-offset:2px}
 @media (orientation: landscape) and (max-height: 560px){
   .card.home{width:min(100%, 820px);display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:32px;row-gap:12px;align-items:start;
-    grid-template-areas:"eb main" "ti main" "ti tiles" "tag wallet" "tag meta"}
+    grid-template-areas:"eb main" "ti main" "ti tiles" "perk wallet" "tag meta"}
+  .home .perkcard{grid-area:perk}
   .home .eyebrow{grid-area:eb} .home .title{grid-area:ti;font-size:clamp(44px, 17vh, 80px)} .home .tag{grid-area:tag;font-size:14px}
   .home .mainbtns{grid-area:main} .home .tiles{grid-area:tiles} .home .wbtn{grid-area:wallet} .home .meta{grid-area:meta}
   .card.wide{width:min(100%, 860px)}
@@ -310,6 +311,25 @@ h3.lab{margin:4px 0 0}
 .tiltind{position:fixed;left:max(24px, env(safe-area-inset-left, 0px) + 8px);bottom:calc(env(safe-area-inset-bottom, 0px) + 34px);width:150px;height:10px;border-radius:5px;background:var(--glass);border:1px solid var(--line);pointer-events:none}
 .tiltind::after{content:"";position:absolute;left:50%;top:-4px;width:1px;height:16px;background:var(--line)}
 .tiltind i{position:absolute;left:calc(50% - 9px);top:-5px;width:18px;height:18px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);transform:translateX(0);will-change:transform}
+.perkcard{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:11px 14px;border-radius:16px;cursor:pointer;color:var(--ink);text-align:left;
+  border:1px solid rgba(97,245,196,.45);background:linear-gradient(100deg,rgba(18,88,79,.65),rgba(14,10,38,.55));font:inherit}
+.perkcard b{display:block;font:italic 900 17px/1.1 var(--fd);letter-spacing:.02em}
+.perkcard small{display:block;font:700 11.5px var(--fb);color:#9be9cf;letter-spacing:.04em}
+.perkcard .ps{font:800 11px var(--fb);letter-spacing:.06em;color:#9be9cf;white-space:nowrap}
+.perkcard.on{border-color:#61f5c4;box-shadow:0 0 18px rgba(97,245,196,.28)}
+.perkcard.on .ps{color:#0c2a24;background:#61f5c4;padding:4px 8px;border-radius:999px}
+.perkcard:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.seekmark{width:30px;height:30px;border-radius:9px;flex:none;background:conic-gradient(from 210deg,#61f5c4,#1fb5a0,#12584f,#61f5c4);position:relative;box-shadow:0 0 12px rgba(97,245,196,.45)}
+.seekmark::after{content:"";position:absolute;inset:8px;border-radius:50%;border:2.5px solid #071a17}
+.seekhd{display:flex;gap:12px;align-items:center}
+.seekhd .seekmark{width:42px;height:42px;border-radius:12px}
+.seekhd .seekmark::after{inset:11px}
+.perks{list-style:none;margin:0;padding:12px;border-radius:14px;background:rgba(255,255,255,.05);display:grid;gap:10px}
+.perks li{display:grid;grid-template-columns:22px 1fr;gap:10px;align-items:start;font-size:14px;line-height:1.4}
+.perks .pk{width:20px;height:20px;color:rgba(255,255,255,.3)}
+.perks.on .pk{color:#61f5c4}
+.sbadge{font:800 9.5px var(--fb);font-style:normal;letter-spacing:.08em;color:#0c2a24;background:#61f5c4;padding:2px 6px;border-radius:999px;margin-left:6px;vertical-align:1px}
+.paints{grid-template-columns:repeat(8,minmax(0,1fr));gap:6px}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 </style>
 
@@ -377,6 +397,7 @@ h3.lab{margin:4px 0 0}
       <button class="tile" id="tShop" type="button"><svg aria-hidden="true"><use href="#i-bag"/></svg><span data-t="shop"></span></button>
       <button class="tile" id="tSet" type="button"><svg aria-hidden="true"><use href="#i-gear"/></svg><span data-t="settings"></span></button>
     </div>
+    <button class="perkcard" id="perkCard" type="button"><span class="seekmark" aria-hidden="true"></span><span class="pt"><b data-t="seekerPerks"></b><small data-t="seekerSub"></small></span><span class="ps" id="perkState"></span></button>
     <button class="wbtn" id="walletBtn" type="button"></button>
     <p class="meta" id="meta"></p>
   </div>
@@ -479,7 +500,7 @@ const T = {
     proto:'Πρωτότυπο 3 · πληκτρολόγιο: βελάκια για οδήγηση, Space για nitro, P για παύση', nitroGot:'Nitro +1', cp:'+{s} δευτ.' }
 };
 Object.assign(T.en, {
-  music:'Music', steering:'Steering', btnSteer:'Buttons', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
+  music:'Music', seekerPerks:'Seeker Perks', seekerSub:'For Seeker owners', perkPaint:'Genesis paint, only for Seeker owners', perkBonus:'Double daily bonus: +100 tokens', perkBadge:'Seeker badge next to your name in the ranking', perkOn:'Unlocked on this wallet', perkConnect:'Connect the wallet on your Seeker to unlock them.', perkNone:'No Seeker Genesis Token found in this wallet. Connect the wallet on your Seeker (Seed Vault).', perkChecking:'Checking for a Seeker Genesis Token…', perkHow:'Every Seeker holds a Seeker Genesis Token. Bull Run reads it from the blockchain; nothing is signed or paid. The ranking badge appears after you join the ranking.', perkActive:'Seeker perks on', seekerPaint:'Seeker owners only · Seeker Genesis Token', getSeeker:'Unlock with your Seeker wallet', badgeT:'Seeker owner', perksShort:'3 perks', perkOnShort:'Active', steering:'Steering', btnSteer:'Buttons', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
   tag:'Arcade racing on crypto highways. Nine tracks, an endless run, and a garage to fill.',
   races:'Races', endless:'Endless run', garage:'Garage', lb:'Ranking', shop:'Shop', settings:'Settings', how:'How to play',
   r5:'Endless run: checkpoints add time. Traffic and barriers cost speed.', r6:'Races: reach the finish line. Faster times earn up to 3 stars and unlock the next track.',
@@ -513,7 +534,7 @@ Object.assign(T.en, {
   historyErr:'Could not read the history right now.', genericErr:'Something went wrong. Nothing was charged unless your wallet shows a sent payment.', loading:'Loading'
 });
 Object.assign(T.el, {
-  music:'Μουσική', steering:'Στρίψιμο', btnSteer:'Κουμπιά', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
+  music:'Μουσική', seekerPerks:'Seeker Perks', seekerSub:'Για κατόχους Seeker', perkPaint:'Χρώμα Genesis, μόνο για κατόχους Seeker', perkBonus:'Διπλό ημερήσιο μπόνους: +100 tokens', perkBadge:'Σήμα Seeker δίπλα στο όνομά σου στην κατάταξη', perkOn:'Ενεργά σε αυτό το πορτοφόλι', perkConnect:'Σύνδεσε το πορτοφόλι του Seeker σου για να τα ξεκλειδώσεις.', perkNone:'Δεν βρέθηκε Seeker Genesis Token σε αυτό το πορτοφόλι. Σύνδεσε το πορτοφόλι του Seeker σου (Seed Vault).', perkChecking:'Ελέγχω για Seeker Genesis Token…', perkHow:'Κάθε Seeker έχει ένα Seeker Genesis Token. Το Bull Run το διαβάζει από το blockchain· δεν υπογράφεις και δεν πληρώνεις τίποτα. Το σήμα στην κατάταξη εμφανίζεται όταν μπεις στην κατάταξη.', perkActive:'Τα Seeker Perks είναι ενεργά', seekerPaint:'Μόνο για κατόχους Seeker · Seeker Genesis Token', getSeeker:'Ξεκλείδωμα με το πορτοφόλι του Seeker', badgeT:'Κάτοχος Seeker', perksShort:'3 προνόμια', perkOnShort:'Ενεργά', steering:'Στρίψιμο', btnSteer:'Κουμπιά', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
   tag:'Arcade αγώνες σε crypto αυτοκινητόδρομους. Εννιά πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.',
   races:'Αγώνες', endless:'Ατελείωτη διαδρομή', garage:'Γκαράζ', lb:'Κατάταξη', shop:'Shop', settings:'Ρυθμίσεις', how:'Πώς παίζεται',
   r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα.', r6:'Αγώνες: φτάσε στον τερματισμό. Όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3), και ξεκλειδώνει η επόμενη πίστα.',
@@ -1631,7 +1652,9 @@ const PAINTS = [
   { id:'gold',    hex:'#e8b84a', m:1,  r:.2,  how:'shop', el:'Gold Leaf', en:'Gold Leaf' },
   { id:'candy',   hex:'#ff3fc8', m:.7, r:.16, how:'shop', el:'Candy', en:'Candy' },
   { id:'neon',    hex:'#14f0a0', m:.3, r:.3,  how:'shop', glow:.45, el:'Neon Mint', en:'Neon Mint' },
-  { id:'degen',   hex:'#16131f', m:.8, r:.28, how:'nft', plate:'DEGEN', trim:'#ffc24a', el:'Degen', en:'Degen' }
+  { id:'magma',   hex:'#ff5a1f', m:.3, r:.4,  how:'tok', cost:1500, el:'Magma', en:'Magma' },
+  { id:'degen',   hex:'#16131f', m:.8, r:.28, how:'nft', plate:'DEGEN', trim:'#ffc24a', el:'Degen', en:'Degen' },
+  { id:'genesis', hex:'#12584f', m:.9, r:.2,  how:'seeker', glow:.18, plate:'SEEKER', trim:'#61f5c4', el:'Genesis', en:'Genesis' }
 ];
 let OWNP = readJSON('bullrun_paints') || [];
 let paintSel = store.get('bullrun_paint') || 'red', paintView = paintSel;
@@ -1647,12 +1670,13 @@ function hasPaint(pt){
   if (pt.how === 'tok') return OWNP.includes(pt.id);
   if (pt.how === 'shop') return !!(SH.own && SH.own.garage);
   if (pt.how === 'nft') return !!(WAL.total > 0);
+  if (pt.how === 'seeker') return !!WAL.seeker;
   return false;
 }
 function showPaint(id){
   const pt = paintById(id), mats = player.material.slice(); mats[0] = paintMat(pt); player.material = mats;
   const pl = pt.plate || 'BULL'; if (pl !== plateText) { plateText = pl; TEX.plate.userData.redraw(); }
-  under.material.color.set(pt.id === 'degen' ? '#ffc24a' : pt.id === 'candy' ? '#ff4fd8' : '#3fe6ff');
+  under.material.color.set(pt.id === 'degen' ? '#ffc24a' : pt.id === 'candy' ? '#ff4fd8' : pt.id === 'genesis' ? '#61f5c4' : '#3fe6ff');
 }
 function equipValid(){ if (!hasPaint(paintById(paintSel))) { paintSel = 'red'; store.set('bullrun_paint', 'red'); } showPaint(paintSel); }
 
@@ -1671,7 +1695,7 @@ function renderGarage(){
   }
   const pt = paintById(paintView), own = hasPaint(pt), act = $('pAct');
   $('pName').textContent = pt[lang];
-  $('pNote').textContent = pt.how === 'free' ? T[lang].freePaint : pt.how === 'tok' ? T[lang].earnPaint : pt.how === 'shop' ? T[lang].shopPaint : T[lang].nftPaint;
+  $('pNote').textContent = pt.how === 'seeker' ? T[lang].seekerPaint : pt.how === 'free' ? T[lang].freePaint : pt.how === 'tok' ? T[lang].earnPaint : pt.how === 'shop' ? T[lang].shopPaint : T[lang].nftPaint;
   act.disabled = false; act.onclick = null;
   if (own) {
     act.textContent = pt.id === paintSel ? T[lang].inUse : T[lang].use; act.disabled = pt.id === paintSel;
@@ -1682,6 +1706,7 @@ function renderGarage(){
         tone(1320, .12, 'triangle', .1); tone(1980, .2, 'triangle', .08, 0, .08); toast(T[lang].unlockedT + ': ' + pt[lang]); renderGarage(); }; }
     else { act.textContent = T[lang].needMore.replace('{n}', pt.cost - bank); act.disabled = true; }
   } else if (pt.how === 'shop') { act.textContent = T[lang].getShop; act.onclick = openShop; }
+  else if (pt.how === 'seeker') { act.textContent = T[lang].getSeeker; act.onclick = openPerks; }
   else { act.textContent = W_ADDR() ? T[lang].getNft : T[lang].connectNft; act.disabled = !!W_ADDR(); act.onclick = () => openWallet(); }
 }
 
@@ -1726,7 +1751,7 @@ function finish(){
     const D0 = dayState(); let isBest = false, bonus = 0;
     if (result.won) {
       isBest = D0.best == null || result.t < D0.best; if (isBest) D0.best = result.t;
-      if (!D0.bonus) { D0.bonus = true; bonus = DAILY_BONUS; bank += bonus; saveBank(); }
+      if (!D0.bonus) { D0.bonus = true; bonus = dailyBonus(); bank += bonus; saveBank(); }
       saveDay(D0); lbSubmit('d:' + TR.key, Math.round(result.t * 1000));
     }
     oc.innerHTML = '<div class="ol"><div class="eyebrow">' + (result.won ? L.finish : L.timeUp).toUpperCase() + ' · ' + esc(trName(TR)) + '</div>' +
@@ -1792,7 +1817,8 @@ function renderHome(){
   $('endlessBest').textContent = best > 0 ? L.best + ' ' + best.toFixed(2) + ' km' : '';
   const dt = dailyTrack(), D0 = dayState();
   $('dailyName').textContent = trName(dt).split(' · ')[1] + ' · ' + L['market' + dt.b];
-  $('dailyInfo').textContent = D0.best ? fmtTime(D0.best) : D0.bonus ? '' : '+' + DAILY_BONUS + ' tokens';
+  $('dailyInfo').textContent = D0.best ? fmtTime(D0.best) : D0.bonus ? '' : '+' + dailyBonus() + ' tokens';
+  renderPerkCard();
   $('meta').textContent = bank + ' ' + L.bankWord;
   paintWalletBtn();
 }
@@ -1859,7 +1885,63 @@ async function checkHolder(force){
     const j = await r.json(); if (j.error) throw new Error(j.error.message);
     WAL.total = ((j.result && j.result.items) || []).length; WAL.status = 'ok'; WAL.t = Date.now();
   } catch (e) { console.warn(e); WAL.status = 'error'; }
-  finally { wLoading = false; saveW(); paintWalletBtn(); if (!$('dlg').hidden && D().dataset.k === 'acct') openAccount(); if (state === 'garage') renderGarage(); }
+  try { const was = !!WAL.seeker; WAL.seeker = (await sgtMints(WCFG.rpc, WAL.addr, 9000)).length > 0; WAL.seekerChecked = true; if (WAL.seeker && !was) toast(T[lang].perkActive, T[lang].perksShort); }
+  catch (e) { console.warn(e); }
+  finally { wLoading = false; saveW(); renderHome(); if (!$('dlg').hidden && D().dataset.k === 'acct') openAccount(); if (!$('dlg').hidden && D().dataset.k === 'perks') openPerks(); if (state === 'garage') renderGarage(); }
+}
+// Seeker Genesis Token check, ported from @solana-mobile/skr-genesis-token (Apache-2.0) without dependencies.
+// An SGT is a Token-2022 mint whose TokenGroupMember extension points at the SGT group and whose MetadataPointer points at the same address.
+const SGT_GROUP = 'GT22s89nU4iWFkNXj1Bw6uYhJJWDRPpShHt4Bk8f99Te', TOKEN_2022 = 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb';
+const B58A = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+function b58enc(bytes){ let n = 0n; for (const x of bytes) n = n * 256n + BigInt(x); let s = ''; while (n > 0n) { s = B58A[Number(n % 58n)] + s; n /= 58n; } for (const x of bytes) { if (x === 0) s = '1' + s; else break; } return s; }
+function b64bytes(str){ const bin = atob(str); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); return u; }
+function isSgtMint(d){
+  if (d.length < 166 || d[165] !== 1) return false;
+  let off = 166, group = null, meta = null, member = false;
+  while (off + 4 <= d.length) {
+    const type = d[off] | (d[off + 1] << 8), len = d[off + 2] | (d[off + 3] << 8), s = off + 4, e = s + len;
+    if (type === 0 || e > d.length) break;
+    if (type === 18 && len === 64) meta = b58enc(d.subarray(s + 32, s + 64));
+    else if (type === 23 && len === 72) { group = b58enc(d.subarray(s + 32, s + 64)); member = true; }
+    off = e;
+  }
+  return member && group === SGT_GROUP && meta === SGT_GROUP;
+}
+async function sgtMints(rpcUrl, owner, timeoutMs){
+  const ctl = typeof AbortController !== 'undefined' ? new AbortController() : null, to = ctl && setTimeout(() => ctl.abort(), timeoutMs || 8000);
+  const call = (method, params) => fetch(rpcUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), signal: ctl && ctl.signal })
+    .then(r => r.json()).then(j => { if (j.error) throw new Error(j.error.message || 'rpc error'); return j.result; });
+  try {
+    const ta = await call('getTokenAccountsByOwner', [owner, { programId: TOKEN_2022 }, { encoding: 'jsonParsed', commitment: 'confirmed' }]);
+    const mints = [...new Set((ta.value || []).filter(a => a.account.data.parsed.info.tokenAmount.amount !== '0').map(a => a.account.data.parsed.info.mint))];
+    const out = [];
+    for (let i = 0; i < mints.length; i += 100) {
+      const batch = mints.slice(i, i + 100), r = await call('getMultipleAccounts', [batch, { encoding: 'base64', commitment: 'confirmed' }]);
+      (r.value || []).forEach((acc, k) => { if (acc && acc.owner === TOKEN_2022 && isSgtMint(b64bytes(acc.data[0]))) out.push(batch[k]); });
+    }
+    return out;
+  } finally { if (to) clearTimeout(to); }
+}
+
+const dailyBonus = () => DAILY_BONUS * (WAL.seeker ? 2 : 1);
+function renderPerkCard(){
+  const c = $('perkCard'); if (!c) return; const L = T[lang];
+  c.classList.toggle('on', !!WAL.seeker);
+  $('perkState').textContent = WAL.seeker ? L.perkOnShort : L.perksShort;
+}
+function openPerks(){
+  if (!ONLINE) return appOnly();
+  const L = T[lang], on = !!WAL.seeker, ck = '<svg class="pk" viewBox="0 0 20 20" aria-hidden="true"><path d="M4 10.5l4 4 8-9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  dlg('<div class="seekhd"><span class="seekmark" aria-hidden="true"></span><div><h2>' + L.seekerPerks + '</h2><p>' + L.seekerSub + '</p></div></div>' +
+    '<ul class="perks' + (on ? ' on' : '') + '"><li>' + ck + '<span>' + L.perkPaint + '</span></li><li>' + ck + '<span>' + L.perkBonus + '</span></li><li>' + ck + '<span>' + L.perkBadge + '</span></li></ul>' +
+    '<p>' + (on ? '<b>' + L.perkOn + '</b>' : !WAL.addr ? L.perkConnect : wLoading ? L.perkChecking : WAL.seekerChecked ? L.perkNone : L.perkChecking) + '</p>' +
+    '<p class="fine">' + L.perkHow + '</p>' +
+    '<div class="wbtns">' + (WAL.addr ? '<button class="btn2" type="button" data-r>' + L.wRefresh + '</button>' : '<button class="go" type="button" data-c>' + L.wConnect + '</button>') + '<button class="btn2" type="button" data-x>' + L.close + '</button></div>');
+  D().dataset.k = 'perks';
+  D().querySelector('[data-x]').onclick = closeDlg;
+  const r = D().querySelector('[data-r]'); if (r) r.onclick = () => { checkHolder(true); openPerks(); };
+  const c = D().querySelector('[data-c]'); if (c) c.onclick = () => { loadBundle(); openPicker(); };
+  if (WAL.addr && !WAL.seekerChecked && !wLoading) checkHolder(true);
 }
 let bundleState = 0;
 function loadBundle(){
@@ -1935,7 +2017,7 @@ async function openLb(){
     const r = await lbFetch('/top?game=bullrun&board=' + encodeURIComponent(lbBoard) + '&scope=' + lbScope + (WAL.addr ? '&addr=' + WAL.addr : ''));
     const list = $('lbList'); if (!list) return;
     const top = (r.b && r.b.top) || [];
-    list.innerHTML = top.length ? top.map((x, i) => '<li class="' + (x.addr === WAL.addr ? 'me' : '') + '"><span class="r">' + (i + 1) + '</span><span>' + (x.addr === WAL.addr ? L.lbYou + ' · ' : '') + shortAddr(x.addr) + '</span><span class="s">' + lbFmt(lbBoard, x.value) + '</span></li>').join('')
+    list.innerHTML = top.length ? top.map((x, i) => '<li class="' + (x.addr === WAL.addr ? 'me' : '') + '"><span class="r">' + (i + 1) + '</span><span>' + (x.addr === WAL.addr ? L.lbYou + ' · ' : '') + shortAddr(x.addr) + (x.seeker ? ' <i class="sbadge" title="' + L.badgeT + '">SEEKER</i>' : '') + '</span><span class="s">' + lbFmt(lbBoard, x.value) + '</span></li>').join('')
       : '<li><span></span><span>' + L.lbEmpty + '</span><span></span></li>';
     if (WAL.addr) $('lbMe').textContent = r.b && r.b.me ? L.lbMe(r.b.me.rank, lbFmt(lbBoard, r.b.me.value)) : L.lbNoScore;
   } catch (e) { const list = $('lbList'); if (list) list.innerHTML = '<li><span></span><span>' + L.lbErr + '</span><span></span></li>'; }
@@ -1953,7 +2035,8 @@ async function lbJoin(){
     const b64 = btoa(String.fromCharCode(...new Uint8Array(sig)));
     const r = await lbFetch('/login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ addr: WAL.addr, nonce: n.b.nonce, signature: b64, game: 'bullrun' }) });
     if (!r.b || !r.b.token) throw uerr(L.lbSignFail);
-    LBS = { addr: WAL.addr, token: r.b.token }; store.set('bullrun_lb', JSON.stringify(LBS)); toast(L.lbJoined);
+    LBS = { addr: WAL.addr, token: r.b.token }; store.set('bullrun_lb', JSON.stringify(LBS)); toast(L.lbJoined, r.b.seeker ? L.badgeT : '');
+    if (r.b.seeker && !WAL.seeker) { WAL.seeker = true; WAL.seekerChecked = true; saveW(); renderPerkCard(); }
     // send this phone's existing bests once
     if (best > 0) lbQueue.push(['endless', Math.round(best * 1000)]);
     for (const t of TRACKS) if (PROG[t.id] && PROG[t.id].b) lbQueue.push(['t:' + t.id, Math.round(PROG[t.id].b * 1000)]);
@@ -2082,6 +2165,7 @@ $('tLb').addEventListener('click', openLb);
 $('tShop').addEventListener('click', openShop);
 $('tSet').addEventListener('click', () => go('settings'));
 $('walletBtn').addEventListener('click', openWallet);
+$('perkCard').addEventListener('click', openPerks);
 document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => { if (state === 'garage') { equipValid(); toMenu(); } else go('home'); }));
 $('quit').addEventListener('click', () => toMenu(mode === 'track' && !isDaily() ? 'tracks' : 'home'));
 $('restart').addEventListener('click', () => startRace(isDaily() ? { daily: true } : mode === 'track' ? { track: TRACKS.indexOf(TR) } : { endless: true }));

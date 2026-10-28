@@ -286,6 +286,27 @@ h3.lab{margin:4px 0 0}
 .go.day .dn{display:flex;flex-direction:column;gap:2px}
 .go.day .dn small{font:800 11.5px var(--fb);font-style:normal;opacity:.7;letter-spacing:.04em}
 .bonus{margin:0;font:italic 900 20px var(--fd);color:var(--sol-b)}
+
+/* big steering zone: the whole lower-left of the screen. Left half of the zone steers left, right half steers right. */
+.steer{position:fixed;left:0;bottom:0;width:58vw;height:62vh;max-width:none;display:flex;background:none;border:0;border-radius:0;overflow:visible;z-index:3;
+  padding:0 0 calc(env(safe-area-inset-bottom, 0px) + 16px) max(16px, env(safe-area-inset-left, 0px));backdrop-filter:none;-webkit-backdrop-filter:none}
+.steer span{flex:1;display:flex;align-items:flex-end;justify-content:center;position:relative;transition:none}
+.steer span+span{border-left:0}
+.steer span::before{content:"";position:absolute;inset:0;opacity:0;transition:opacity .08s;pointer-events:none}
+.steer span::before{background:radial-gradient(ellipse 50% 65% at 50% 100%,rgba(63,230,255,.3),rgba(63,230,255,0))}
+.steer span.on::before{opacity:1}
+.steer span.on{background:none}
+.steer svg{width:34px;height:34px;padding:19px;box-sizing:content-box;border-radius:50%;background:var(--glass);border:1px solid var(--line);
+  backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:transform .08s,background .08s}
+.steer span.on svg{background:rgba(63,230,255,.35);border-color:rgba(63,230,255,.8);transform:scale(1.08)}
+.steer::after{content:"";position:absolute;left:calc(50% + max(8px, env(safe-area-inset-left, 0px)) / 2);bottom:calc(env(safe-area-inset-bottom, 0px) + 24px);width:1px;height:56px;background:var(--line)}
+.rcol{margin-left:auto}
+.ped{width:76px;height:104px}.ped.gas{width:84px;height:124px}
+@media (orientation: landscape) and (max-height: 560px){
+  .steer{width:46vw;height:78vh}
+  .steer svg{width:30px;height:30px;padding:16px}
+  .ped{height:84px}.ped.gas{height:100px}
+}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
 </style>
 

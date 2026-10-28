@@ -1,7 +1,7 @@
 // Offline support: keeps a copy of the game on the device after the first online launch.
 // Pages load network-first (players get updates when online), everything else comes from the cache.
 // Raise the number in CACHE every time you change a file, so phones pick up the change.
-const CACHE = 'sv-bullrun-v7';
+const CACHE = 'sv-bullrun-v8';
 const CORE = [
   './',
   './index.html',

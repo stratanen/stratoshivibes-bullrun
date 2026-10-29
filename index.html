@@ -2256,5 +2256,46 @@ if (window.SVStats) SVStats.start('bullrun', () => {
   return 'menu';
 });
 
+// Rating request (StratoshiVibes). Shown once, only inside the dApp Store app, after enough real play,
+// and only while the player is on a menu (never in the middle of a game). "Not now" closes it for good.
+window.SVRate = function (o) {
+  const IN_APP = /; wv\)/.test(navigator.userAgent) || /^android-app:/.test(document.referrer || '');
+  const ls = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, v); } catch(e){} } };
+  if (!IN_APP || ls.get('sv_rate')) return;
+  let played = +(ls.get('sv_rate_play') || 0), shown = false;
+  const T = {
+    el: { h: 'Σου αρέσει το ' + o.name + ';', p: 'Μια σύντομη αξιολόγηση στο dApp Store βοηθάει πολύ έναν μικρό δημιουργό. Γράψε ειλικρινά τη γνώμη σου, θετική ή αρνητική: μου λέει τι να βελτιώσω.', go: 'Αξιολόγησε στο dApp Store', no: 'Όχι τώρα' },
+    en: { h: 'Enjoying ' + o.name + '?', p: 'A quick rating on the dApp Store helps a small creator a lot. Please be honest, good or bad: it tells me what to improve.', go: 'Rate on the dApp Store', no: 'Not now' }
+  };
+  function show() {
+    shown = true; ls.set('sv_rate', 'asked');
+    const t = T[o.lang() === 'el' ? 'el' : 'en'];
+    const w = document.createElement('div');
+    w.setAttribute('translate', 'no'); w.className = 'notranslate';
+    w.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:20px;background:rgba(4,6,20,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)';
+    const F = 'font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;letter-spacing:normal;text-transform:none;text-align:center;';
+    w.innerHTML = '<div role="dialog" aria-modal="true" style="all:initial;display:block;' + F + 'max-width:340px;width:100%;box-sizing:border-box;padding:24px 20px 18px;border-radius:20px;background:linear-gradient(160deg,#141a3f,#0b0f26);border:1px solid rgba(155,107,255,.55);box-shadow:0 0 40px rgba(155,107,255,.35);color:#eef0ff;font-size:15px;line-height:1.45">' +
+      '<span style="all:initial;display:block;' + F + 'font-size:24px;line-height:1;margin-bottom:10px;color:#f6c744;letter-spacing:4px">★★★★★</span>' +
+      '<h2 style="all:initial;display:block;' + F + 'margin:0 0 10px;font-size:21px;font-weight:800;line-height:1.25;color:#fff"></h2>' +
+      '<p style="all:initial;display:block;' + F + 'margin:0 0 18px;font-size:15px;line-height:1.45;color:#b9bedf"></p>' +
+      '<a style="all:initial;display:block;' + F + 'cursor:pointer;padding:13px 16px;border-radius:14px;background:linear-gradient(90deg,#22e4ff,#9b6bff,#ff4fd8);color:#0a0d22;font-size:16px;font-weight:800"></a>' +
+      '<button type="button" style="all:initial;display:block;box-sizing:border-box;' + F + 'cursor:pointer;margin-top:10px;width:100%;padding:12px;border-radius:14px;border:1px solid rgba(34,228,255,.4);color:#cfe9ff;font-size:15px;font-weight:600"></button></div>';
+    w.querySelector('h2').textContent = t.h; w.querySelector('p').textContent = t.p;
+    const a = w.querySelector('a'); a.textContent = t.go; a.href = 'solanadappstore://details?id=' + o.pkg;
+    const b = w.querySelector('button'); b.textContent = t.no;
+    a.addEventListener('click', () => { ls.set('sv_rate', 'opened'); setTimeout(() => w.remove(), 400); });
+    b.addEventListener('click', () => w.remove());
+    document.body.appendChild(w);
+  }
+  setInterval(() => {
+    if (shown || document.visibilityState !== 'visible') return;
+    let m = 'menu'; try { m = o.mode(); } catch(e){}
+    if (m === 'play') { played++; if (played % 5 === 0) ls.set('sv_rate_play', String(played)); }
+    else if (m === 'menu' && played >= o.after) { ls.set('sv_rate_play', String(played)); setTimeout(show, 600); shown = true; }
+  }, 1000);
+};
+SVRate({ name: 'Bull Run', pkg: 'com.stratoshivibes.bullrun', after: 480, lang: () => lang,
+  mode: () => (state === 'race' || state === 'count' || state === 'ending') ? 'play' : (state === 'menu' && screen === 'home') ? 'menu' : 'other' });
+
 </script>
 </body></html>

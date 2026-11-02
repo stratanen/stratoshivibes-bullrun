@@ -1350,7 +1350,7 @@ function onMotion(e){
   // while the phone is held nearly level, so a small lean never turns into a constant pull to one side
   if (TILT.zeroN >= 0 && TILT.zeroN < 40) { TILT.zeroSum += TILT.raw; TILT.zeroN++; TILT.zero = TILT.zeroSum / TILT.zeroN; }
   else if (TILT.zeroN >= 40 && Math.abs(TILT.raw - TILT.zero) < 6) TILT.zero += (TILT.raw - TILT.zero) * Math.min(1, edt / 5);
-  const d = TILT.raw - TILT.zero, dz = 3.5, full = 20;
+  const d = TILT.raw - TILT.zero, dz = 3, full = 16;
   TILT.val = Math.abs(d) < dz ? 0 : clamp((d - Math.sign(d) * dz) / (full - dz), -1, 1);
 }
 function tiltRecenter(){ TILT.zeroN = -1; TILT.zeroSum = 0; TILT.zero = TILT.raw; }   // measuring starts late in the countdown (see update)
@@ -1505,7 +1505,7 @@ function update(dt){
   trackAt(sP + PLEN / 2, tA); const k = tA.k;
   const btnT = (inR ? 1 : 0) - (inL ? 1 : 0);
   const target = tiltMode && TILT.seen && state === 'race' && !bot && btnT === 0 ? TILT.val : btnT;
-  const rate = target === 0 ? 9 : (steer !== 0 && Math.sign(target) !== Math.sign(steer) ? 13 : 6.5);
+  const rate = target === 0 ? 12 : (steer !== 0 && Math.sign(target) !== Math.sign(steer) ? 18 : 11);
   steer += clamp(target - steer, -rate * dt, rate * dt);
   if (nitroTime > 0) nitroTime -= dt;
   const cap = nitroTime > 0 ? NITRO_V : MAXV, pct = v / MAXV;
@@ -1517,8 +1517,8 @@ function update(dt){
   if (offroad && v > MAXV * .6) v = Math.max(MAXV * .6, v - MAXV * 1.2 * dt);
   v = clamp(v, 0, NITRO_V);
   const sp = Math.min(1, v / MAXV);
-  d += steer * dt * 7.4 * (.4 + .6 * sp);
-  d += k * v * v * .042 * dt;
+  d += steer * dt * 8.6 * (.45 + .55 * sp);
+  d += k * v * v * .034 * dt;
   if (Math.abs(d) > X_MAX) {
     d = Math.sign(d) * X_MAX;
     if (v > MAXV * .2 && state === 'race') {

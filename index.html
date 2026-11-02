@@ -635,9 +635,40 @@ const BIOMES = [
 ];
 const col = h => new THREE.Color(h);
 
+/* ================= no WebGL: explain instead of a broken menu ================= */
+function hasWebGL(){
+  try { const t = document.createElement('canvas'); return !!(window.WebGLRenderingContext && (t.getContext('webgl2') || t.getContext('webgl'))); }
+  catch (e) { return false; }
+}
+function noWebGL(){
+  const el = lang === 'el';
+  const box = document.createElement('div');
+  box.setAttribute('role', 'alert');
+  box.style.cssText = 'position:fixed;inset:0;z-index:99999;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0820;color:#f2eefc;font:16px/1.55 system-ui,sans-serif;text-align:center';
+  const inner = document.createElement('div');
+  inner.style.cssText = 'max-width:420px';
+  const h = document.createElement('h2');
+  h.style.cssText = 'margin:0 0 12px;font-size:22px;color:#ff8a3d';
+  h.textContent = el ? 'Χρειάζονται γραφικά 3D' : '3D graphics needed';
+  const p = document.createElement('p');
+  p.style.cssText = 'margin:0 0 10px';
+  p.textContent = el
+    ? 'Το Bull Run χρειάζεται γραφικά 3D (WebGL), που είναι κλειστά σε αυτόν τον browser.'
+    : 'Bull Run needs 3D graphics (WebGL), which are turned off in this browser.';
+  const p2 = document.createElement('p');
+  p2.style.cssText = 'margin:0;color:#b9b2d6;font-size:14px';
+  p2.textContent = el
+    ? 'Ενεργοποίησε την επιτάχυνση γραφικών (graphics acceleration) στις ρυθμίσεις του browser, κάνε επανεκκίνηση και άνοιξε ξανά το παιχνίδι.'
+    : 'Turn on graphics acceleration in your browser settings, restart the browser and open the game again.';
+  inner.append(h, p, p2); box.append(inner); document.body.append(box);
+}
+if (!hasWebGL()) { noWebGL(); throw new Error('WebGL unavailable'); }
+
 /* ================= renderer ================= */
 const canvas = $('c');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
+let renderer;
+try { renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' }); }
+catch (e) { noWebGL(); throw e; }
 renderer.toneMapping = THREE.ACESFilmicToneMapping; renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 const scene = new THREE.Scene();

@@ -9,7 +9,7 @@ const ALLOWED_ORIGINS = ['https://blockspace.stratoshivibes.com', 'https://bullr
 // The minimum times are the track length driven at nitro speed the whole way, so anything faster is impossible.
 const BULLRUN_TRACK_LEN = { t1: 2600, t2: 3200, t3: 3800, t4: 3200, t5: 3800, t6: 4400, t7: 3800, t8: 4400, t9: 5000 };
 const BULLRUN_NITRO_MS = 93.8;          // metres per second at full nitro
-const BULLRUN_NITRO2_MS = 75.4;         // the same since November 2026 (58 m/s x 1.3)
+const BULLRUN_NITRO2_MS = 83.1;         // the same since November 2026 (63.9 m/s x 1.3)
 const BULLRUN_MAX_ENDLESS = 500000;     // 500 km in one endless run is treated as tampering
 const BULLRUN_DAILY_LEN = 3600;         // the daily track ('d:YYYY-MM-DD') is always 3.6 km; today's and yesterday's boards accept results
 function bullrunCheck(board, value) {
@@ -21,7 +21,7 @@ function bullrunCheck(board, value) {
     return value >= Math.floor(BULLRUN_DAILY_LEN / BULLRUN_NITRO_MS * 1000) && value <= 30 * 60e3 ? -value : null;
   }
   if (board === 'endless') return value <= BULLRUN_MAX_ENDLESS ? value : null;
-  // 't:' boards = the first version (top speed 260 km/h). 't2:' boards = since November 2026 (top speed 209 km/h, four lanes).
+  // 't:' boards = the first version (top speed 260 km/h). 't2:' boards = since November 2026 (top speed 230 km/h, four lanes).
   const m = /^(t2?):(t[1-9])$/.exec(board || '');
   if (!m) return null;
   const minMs = Math.floor(BULLRUN_TRACK_LEN[m[2]] / (m[1] === 't2' ? BULLRUN_NITRO2_MS : BULLRUN_NITRO_MS) * 1000);

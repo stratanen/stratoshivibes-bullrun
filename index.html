@@ -575,22 +575,22 @@ let totalTok = +(store.get('bullrun_tokens') || 0) || 0;
 
 /* ================= constants (metres, seconds) ================= */
 const STEP = 2, CHUNK = 250, CP_LEN = 2000, ROAD_HALF = 7.8, CURB = 7.0, LANES = [-5.1, -1.7, 1.7, 5.1], LANE_V = [32, 32, 32, 32];   // four lanes, 3.4 m each. Same speed in every lane, so the gaps between cars never close up into a wall
-const MAXV = 58, NITRO_V = MAXV * 1.3, PLEN = 4.5, PW = 1.92, RAIL_D = 8.7, X_MAX = RAIL_D - PW / 2 - 0.15;
-const START_TIME = 52, AHEAD = 1100, BEHIND = 40;
+const MAXV = 63.9, NITRO_V = MAXV * 1.3, PLEN = 4.5, PW = 1.92, RAIL_D = 8.7, X_MAX = RAIL_D - PW / 2 - 0.15;
+const START_TIME = 48, AHEAD = 1100, BEHIND = 40;
 
 /* ================= tracks ================= */
 // Nine fixed tracks, three per market. Each has its own seed, so the road is the same every time.
 // diff only tightens the curves (traffic stays the same). par = time in seconds a clean drive without nitro needs (measured with the bot).
 const TRACKS = [
-  { id:'t1', b:0, len:2600, diff:0, seed:1101, el:'Λεωφόρος Ταύρου', en:'Bull Boulevard', par:47.02 },
-  { id:'t2', b:0, len:3200, diff:1, seed:1202, el:'Πράσινα Κεριά', en:'Green Candles', par:57.37 },
-  { id:'t3', b:0, len:3800, diff:2, seed:1303, el:'All-Time High', en:'All-Time High', par:67.71 },
-  { id:'t4', b:1, len:3200, diff:3, seed:2104, el:'Πέρασμα Halving', en:'Halving Pass', par:57.37 },
-  { id:'t5', b:1, len:3800, diff:4, seed:2205, el:'Φαράγγι Mempool', en:'Mempool Canyon', par:67.71 },
-  { id:'t6', b:1, len:4400, diff:5, seed:2306, el:'Κύκλος 4 Ετών', en:'Four-Year Cycle', par:78.06 },
-  { id:'t7', b:2, len:3800, diff:6, seed:3107, el:'Λεωφόρος Αρκούδας', en:'Bear Avenue', par:67.71 },
-  { id:'t8', b:2, len:4400, diff:7, seed:3208, el:'Βρόχος Ρευστοποίησης', en:'Liquidation Loop', par:78.06 },
-  { id:'t9', b:2, len:5000, diff:8, seed:3309, el:'Capitulation', en:'Capitulation', par:88.4 }
+  { id:'t1', b:0, len:2600, diff:0, seed:1101, el:'Λεωφόρος Ταύρου', en:'Bull Boulevard', par:42.88 },
+  { id:'t2', b:0, len:3200, diff:1, seed:1202, el:'Πράσινα Κεριά', en:'Green Candles', par:52.27 },
+  { id:'t3', b:0, len:3800, diff:2, seed:1303, el:'All-Time High', en:'All-Time High', par:61.66 },
+  { id:'t4', b:1, len:3200, diff:3, seed:2104, el:'Πέρασμα Halving', en:'Halving Pass', par:52.27 },
+  { id:'t5', b:1, len:3800, diff:4, seed:2205, el:'Φαράγγι Mempool', en:'Mempool Canyon', par:61.66 },
+  { id:'t6', b:1, len:4400, diff:5, seed:2306, el:'Κύκλος 4 Ετών', en:'Four-Year Cycle', par:71.05 },
+  { id:'t7', b:2, len:3800, diff:6, seed:3107, el:'Λεωφόρος Αρκούδας', en:'Bear Avenue', par:61.66 },
+  { id:'t8', b:2, len:4400, diff:7, seed:3208, el:'Βρόχος Ρευστοποίησης', en:'Liquidation Loop', par:71.05 },
+  { id:'t9', b:2, len:5000, diff:8, seed:3309, el:'Capitulation', en:'Capitulation', par:80.44 }
 ];
 /* daily track: a new road every UTC day, the same for everyone */
 const DAILY_LEN = 3600, DAILY_BONUS = 50, MONTHS = { el: ['Ιαν','Φεβ','Μαρ','Απρ','Μαΐ','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'], en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] };
@@ -598,7 +598,7 @@ function dailyTrack(){
   const n = Math.floor(Date.now() / 864e5), d = new Date(n * 864e5), key = d.toISOString().slice(0, 10);
   const ds = l => d.getUTCDate() + ' ' + MONTHS[l][d.getUTCMonth()];
   return { id: 'daily', key, b: n % 3, len: DAILY_LEN, diff: 1 + (n % 7), seed: (Math.imul(n, 2654435761) >>> 0) || 7,
-    el: 'Ημερήσια · ' + ds('el'), en: 'Daily · ' + ds('en'), par: DAILY_LEN / 53 };
+    el: 'Ημερήσια · ' + ds('el'), en: 'Daily · ' + ds('en'), par: DAILY_LEN / 58.5 };
 }
 function dayState(){ const k = dailyTrack().key; let D = readJSON('bullrun_daily') || {}; if (D.key !== k) D = { key: k, best: null, bonus: false }; return D; }
 const saveDay = D => store.set('bullrun_daily', JSON.stringify(D));
@@ -1543,7 +1543,7 @@ function update(dt){
     for (const [, ch] of chunks) for (const it of ch.items) if (!it.taken && it.s >= sP - .5 && it.s <= sP + PLEN && Math.abs(it.d - d) < PW / 2 + .55) take(it);
     if (mode === 'endless' && sP >= nextGate) {
       cps++; nextGate += CP_LEN;
-      const bonus = Math.max(17, 31 - cps);
+      const bonus = Math.max(16, 28 - cps);
       timeLeft += bonus; flashT = .45;
       flash(BIOMES[cps % 3].name, 'CHECKPOINT  ' + T[lang].cp.replace('{s}', bonus), 'warm');
       tone(660, .2, 'triangle', .12); tone(880, .2, 'triangle', .12, 0, .1); tone(1320, .35, 'triangle', .12, 0, .2);

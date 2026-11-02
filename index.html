@@ -603,8 +603,9 @@ function dailyTrack(){
 function dayState(){ const k = dailyTrack().key; let D = readJSON('bullrun_daily') || {}; if (D.key !== k) D = { key: k, best: null, bonus: false }; return D; }
 const saveDay = D => store.set('bullrun_daily', JSON.stringify(D));
 const isDaily = () => mode === 'track' && TR && TR.id === 'daily';
-const STAR_K = [1.6, 1.15, 0.98];   // 1, 2, 3 stars: finish within par x this
-const starTimes = tr => [tr.par * STAR_K[0], tr.par * STAR_K[1], tr.par * STAR_K[2]];
+const STAR_K = [1.8, 1.15, 0.98];   // 1, 2, 3 stars: finish within par x this (the 1-star time is also the time limit)
+const DAILY_K = 2.2;                 // the daily track only needs a finish, so its time limit is looser
+const starTimes = tr => [tr.par * (tr.id === 'daily' ? DAILY_K : STAR_K[0]), tr.par * STAR_K[1], tr.par * STAR_K[2]];
 const trName = tr => tr[lang] || tr.en;
 let mode = 'endless', TR = null, raceT = 0, finishS = Infinity, result = null, bot = false;
 const readJSON = k => { try { return JSON.parse(store.get(k) || 'null'); } catch (e) { return null; } };

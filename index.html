@@ -1544,7 +1544,7 @@ function update(dt){
     for (const [, ch] of chunks) for (const it of ch.items) if (!it.taken && it.s >= sP - .5 && it.s <= sP + PLEN && Math.abs(it.d - d) < PW / 2 + .55) take(it);
     if (mode === 'endless' && sP >= nextGate) {
       cps++; nextGate += CP_LEN;
-      const bonus = Math.max(24, 36 - cps);
+      const bonus = Math.max(26, 45 - cps);
       timeLeft += bonus; flashT = .45;
       flash(BIOMES[cps % 3].name, 'CHECKPOINT  ' + T[lang].cp.replace('{s}', bonus), 'warm');
       tone(660, .2, 'triangle', .12); tone(880, .2, 'triangle', .12, 0, .1); tone(1320, .35, 'triangle', .12, 0, .2);

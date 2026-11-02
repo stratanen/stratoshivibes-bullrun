@@ -576,7 +576,7 @@ let totalTok = +(store.get('bullrun_tokens') || 0) || 0;
 /* ================= constants (metres, seconds) ================= */
 const STEP = 2, CHUNK = 250, CP_LEN = 2000, ROAD_HALF = 7.8, CURB = 7.0, LANES = [-5.1, -1.7, 1.7, 5.1], LANE_V = [32, 32, 32, 32];   // four lanes, 3.4 m each. Same speed in every lane, so the gaps between cars never close up into a wall
 const MAXV = 63.9, NITRO_V = MAXV * 1.3, PLEN = 4.5, PW = 1.92, RAIL_D = 8.7, X_MAX = RAIL_D - PW / 2 - 0.15;
-const START_TIME = 48, AHEAD = 1100, BEHIND = 40;
+const START_TIME = 60, AHEAD = 1100, BEHIND = 40;
 
 /* ================= tracks ================= */
 // Nine fixed tracks, three per market. Each has its own seed, so the road is the same every time.
@@ -1544,7 +1544,7 @@ function update(dt){
     for (const [, ch] of chunks) for (const it of ch.items) if (!it.taken && it.s >= sP - .5 && it.s <= sP + PLEN && Math.abs(it.d - d) < PW / 2 + .55) take(it);
     if (mode === 'endless' && sP >= nextGate) {
       cps++; nextGate += CP_LEN;
-      const bonus = Math.max(16, 28 - cps);
+      const bonus = Math.max(24, 36 - cps);
       timeLeft += bonus; flashT = .45;
       flash(BIOMES[cps % 3].name, 'CHECKPOINT  ' + T[lang].cp.replace('{s}', bonus), 'warm');
       tone(660, .2, 'triangle', .12); tone(880, .2, 'triangle', .12, 0, .1); tone(1320, .35, 'triangle', .12, 0, .2);

@@ -61,6 +61,12 @@ jobs:
             --keystore-alias stratoshivibes \
             --force < /dev/null
 
+      - name: Add Android developer verification file (assets/adi-registration.properties)
+        run: |
+          mkdir -p android/app/src/main/assets
+          cp android-assets/adi-registration.properties android/app/src/main/assets/adi-registration.properties
+          cat android/app/src/main/assets/adi-registration.properties
+
       - name: Build signed release APK
         env:
           SOLANA_MOBILE_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
@@ -74,6 +80,7 @@ jobs:
 
       - name: Check APK signature
         run: |
+          unzip -p *.apk assets/adi-registration.properties | grep -q DASGCIH7GLK46 && echo 'verification file present'
           APKSIGNER=$(ls $ANDROID_HOME/build-tools/*/apksigner | tail -1)
           $APKSIGNER verify --print-certs stratoshivibes-bullrun-*.apk
 

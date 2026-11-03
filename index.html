@@ -1410,7 +1410,7 @@ $('bN').addEventListener('pointerdown', e => { e.preventDefault(); fireNitro(); 
 function releaseAll(){ for (const k in touch) touch[k] = false; for (const k in keys) keys[k] = false; steerPtrs.clear(); steerCalc(); $('bG').classList.remove('on'); $('bB').classList.remove('on'); }
 function fireNitro(){
   if (state !== 'race' || nitroCharges <= 0 || nitroTime > 0) return;
-  nitroCharges--; nitroTime = 2.6; shake = Math.max(shake, .15);
+  nitroCharges--; nitroTime = 4.5; shake = Math.max(shake, .15);
   noise(.9, 1600, .22); tone(180, .7, 'sawtooth', .05, 520);
   try { navigator.vibrate && navigator.vibrate(20); } catch (e) {}
 }

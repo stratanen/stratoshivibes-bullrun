@@ -1,0 +1,134 @@
+name: Build Google Play bundle (AAB)
+
+# Google Play edition of Bull Run, built as a Trusted Web Activity (Bubblewrap) with Google Play Billing.
+# The app opens https://bullrun.stratoshivibes.com/?edition=play: no wallet, no Seeker Perks;
+# the Shop sells the Supporter Garage through Google Play Billing (checked by pay.stratoshivibes.com,
+# the Worker kept in the Blockspace repo under play-billing/).
+# Separate package name so it can sit next to the dApp Store version on the same phone.
+
+on:
+  workflow_dispatch:
+    inputs:
+      version_code:
+        description: "Android versionCode for Google Play (whole number, must increase every upload)"
+        required: true
+        default: "1"
+      version_name:
+        description: "Version name shown to players"
+        required: true
+        default: "1.0.0"
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5      # Bubblewrap requires JDK 17
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+
+      - name: Prepare Android SDK for Bubblewrap
+        run: |
+          SDKM="$ANDROID_SDK_ROOT/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" --install "build-tools;36.1.0" "platforms;android-36" > /dev/null
+          # Bubblewrap looks for <sdk>/bin (newer SDK layout); the runner keeps the tools in cmdline-tools/latest/bin
+          [ -e "$ANDROID_SDK_ROOT/bin" ] || sudo ln -s "$ANDROID_SDK_ROOT/cmdline-tools/latest/bin" "$ANDROID_SDK_ROOT/bin"
+          ls "$ANDROID_SDK_ROOT/build-tools" | tail -3
+
+      - name: Decrypt upload keystore
+        env:
+          PW: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          test -n "$PW" || { echo "Add the KEYSTORE_PASSWORD secret in Settings > Secrets and variables > Actions"; exit 1; }
+          openssl enc -d -aes-256-cbc -pbkdf2 -iter 200000 -in release.keystore.enc \
+            -out "$RUNNER_TEMP/release.keystore" -pass env:PW
+
+      - name: Show upload key fingerprint (for .well-known/assetlinks.json)
+        env:
+          PW: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          FP=$(keytool -list -v -keystore "$RUNNER_TEMP/release.keystore" -alias stratoshivibes -storepass "$PW" \
+               | sed -n 's/^[[:space:]]*SHA256: *//p' | head -1)
+          echo "Upload key SHA-256: $FP"
+          echo "::notice title=Upload key SHA-256::$FP"
+
+      - name: Generate the TWA project (Bubblewrap)
+        env:
+          VCODE: ${{ inputs.version_code }}
+          VNAME: ${{ inputs.version_name }}
+        run: |
+          HOST="$(tr -d '[:space:]' < CNAME)"
+          mkdir -p ~/.bubblewrap twa
+          printf '{"jdkPath":"%s","androidSdkPath":"%s"}\n' "$JAVA_HOME" "$ANDROID_SDK_ROOT" > ~/.bubblewrap/config.json
+          HOST="$HOST" KS="$RUNNER_TEMP/release.keystore" node -e '
+            const h = process.env.HOST, c = "#0b0820";
+            const m = {
+              packageId: "com.stratoshivibes.bullrace", host: h, name: "Bull Run", launcherName: "Bull Run",
+              display: "standalone", orientation: "any",
+              themeColor: c, themeColorDark: c, navigationColor: c, navigationColorDark: c,
+              navigationDividerColor: c, navigationDividerColorDark: c, backgroundColor: c,
+              enableNotifications: true,              // required by Bubblewrap for Play Billing
+              startUrl: "/?edition=play",
+              iconUrl: "https://" + h + "/icons/icon-512.png",
+              splashScreenFadeOutDuration: 300,
+              signingKey: { path: process.env.KS, alias: "stratoshivibes" },
+              appVersionName: process.env.VNAME, appVersionCode: +process.env.VCODE,
+              shortcuts: [], generatorApp: "bubblewrap-cli",
+              webManifestUrl: "https://" + h + "/manifest.webmanifest",
+              fallbackType: "webview",          // opens in an in-app WebView if no TWA browser is available (no Play Billing there)
+              features: { playBilling: { enabled: true } },
+              alphaDependencies: { enabled: false },
+              enableSiteSettingsShortcut: true, isChromeOSOnly: false, isMetaQuest: false,   // site-settings shortcut must exist: androidbrowserhelper 2.7 toggles ManageDataLauncherActivity on start
+              fullScopeUrl: "https://" + h + "/", minSdkVersion: 24,            // androidbrowserhelper 2.7 needs Android 7+
+              fingerprints: [], additionalTrustedOrigins: [], retainedBundles: []
+            };
+            require("fs").writeFileSync("twa/twa-manifest.json", JSON.stringify(m, null, 2));'
+          cd twa
+          npx --yes @bubblewrap/cli@1.27.0 update --skipVersionUpgrade < /dev/null
+          # Bubblewrap turns on R8 (minifyEnabled true) without any keep rules, so R8 renamed an
+          # androidbrowserhelper component and LauncherActivity crashed on start
+          # ("Component class G0.u does not exist"). The app is tiny, so ship it unminified.
+          sed -i 's/minifyEnabled true/minifyEnabled false/' app/build.gradle
+          grep -n "minifyEnabled" app/build.gradle
+          grep -n "launchUrl\|versionCode\|androidbrowserhelper" app/build.gradle
+
+      - name: Build signed App Bundle
+        env:
+          BUBBLEWRAP_KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          BUBBLEWRAP_KEY_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          cd twa
+          npx --yes @bubblewrap/cli@1.27.0 build --skipPwaValidation < /dev/null
+          cd ..
+          cp twa/app-release-bundle.aab "bullrun-play-${{ inputs.version_name }}-build${{ inputs.version_code }}.aab"
+          # Test APK (same app, signed with the upload key) for installing directly on a phone, outside Google Play
+          cp twa/app-release-signed.apk "bullrun-play-${{ inputs.version_name }}-build${{ inputs.version_code }}-test.apk"
+
+      - name: Check bundle signature
+        run: jarsigner -verify -verbose:summary bullrun-play-*.aab | tail -5
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bullrun-play-aab
+          path: bullrun-play-*.aab
+
+      - name: Publish the bundle on the Releases page (pre-release, not for players)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="play-v${{ inputs.version_name }}-build${{ inputs.version_code }}"
+          gh release delete "$TAG" --yes --cleanup-tag 2>/dev/null || true
+          gh release create "$TAG" bullrun-play-*.aab bullrun-play-*-test.apk \
+            --title "Google Play bundle ${{ inputs.version_name }} (build ${{ inputs.version_code }})" \
+            --notes "App bundle (.aab) for upload to Google Play Console. The -test.apk installs directly on a phone for testing (uninstall the Play version first)." \
+            --prerelease --latest=false

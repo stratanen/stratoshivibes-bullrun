@@ -1,0 +1,56 @@
+name: Diagnose Play build on an emulator
+
+# Installs the Google Play test APK from a release on an Android emulator,
+# launches it and prints the crash log (adb logcat) into the job log.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag that has the -test.apk"
+        required: true
+        default: "play-v1.0.0-build1"
+      api_level:
+        description: "Android API level of the emulator"
+        required: true
+        default: "34"
+
+permissions:
+  contents: read
+
+jobs:
+  run:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - name: Enable KVM
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Download test APK
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download "${{ inputs.tag }}" -R "${{ github.repository }}" -p '*-test.apk' -O app.apk
+          ls -la app.apk
+
+      - name: Run on emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: ${{ inputs.api_level }}
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim
+          script: |
+            adb install -r app.apk
+            adb logcat -c
+            adb shell monkey -p com.stratoshivibes.bullrace -c android.intent.category.LAUNCHER 1 || true
+            sleep 20
+            echo "===== FATAL / AndroidRuntime ====="
+            adb logcat -d -b crash || true
+            adb logcat -d | grep -E "AndroidRuntime|FATAL|Exception|Caused by|at com\.|at androidx\.|at android\.|stratoshivibes|TWA|LauncherActivity|TrustedWebActivity|CustomTabs" | head -300 || true
+            echo "===== Top activity ====="
+            adb shell dumpsys activity activities | grep -E "mResumedActivity|topResumedActivity" || true

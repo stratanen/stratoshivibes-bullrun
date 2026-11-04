@@ -256,7 +256,9 @@ h3.lab{margin:4px 0 0}
     grid-template-areas:"eb main" "ti main" "ti tiles" "perk wallet" "tag meta"}
   .home .perkcard{grid-area:perk}
   .home .eyebrow{grid-area:eb} .home .title{grid-area:ti;font-size:clamp(44px, 17vh, 80px)} .home .tag{grid-area:tag;font-size:14px}
-  .home .mainbtns{grid-area:main} .home .tiles{grid-area:tiles} .home .wbtn{grid-area:wallet} .home .meta{grid-area:meta}
+  .home .mainbtns{grid-area:main;display:grid;grid-template-columns:1fr 1fr;gap:10px} .home .tiles{grid-area:tiles}
+  .home .mainbtns .go{flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;padding:12px 14px;font-size:17px;min-height:74px}
+  .home .mainbtns .go>small{font-size:11px} .home .wbtn{grid-area:wallet} .home .meta{grid-area:meta}
   .card.wide{width:min(100%, 860px)}
   .tlist{grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   .trow{grid-template-columns:1fr}
@@ -281,6 +283,16 @@ h3.lab{margin:4px 0 0}
   .trk .lk{position:static;grid-column:3;grid-row:1 / 3;width:18px;height:18px}
   .trk:disabled .st{display:none}
 }
+.go.chase{background:linear-gradient(90deg,#ff2340,#ff8a2a);color:#1a0608;box-shadow:0 6px 22px rgba(255,35,64,.32);font-size:20px;align-items:center}
+.go.chase .dn{display:flex;flex-direction:column;gap:2px}.go.chase .dn>span{white-space:nowrap}
+.go.chase .dn small{font:800 11.5px var(--fb);font-style:normal;opacity:.75;letter-spacing:.04em}
+.go.chase>small{font:800 12px var(--fb);font-style:normal;opacity:.8}
+.liqglow{position:fixed;left:0;right:0;bottom:0;height:34vh;pointer-events:none;z-index:3;opacity:0;transition:opacity .3s;
+ background:radial-gradient(60% 100% at 30% 100%,rgba(255,35,64,.45),transparent 70%),radial-gradient(60% 100% at 70% 100%,rgba(255,174,42,.38),transparent 70%)}
+.liqglow.on{opacity:1;animation:liqp .42s steps(2) infinite}
+@keyframes liqp{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(-40deg)}}
+@media (prefers-reduced-motion:reduce){.liqglow.on{animation:none}}
+.hud.chase #hTime{letter-spacing:.12em;color:#ffd0d6}
 .go.day{background:linear-gradient(90deg,#3fe6ff,#14f0a0);box-shadow:0 6px 22px rgba(20,240,160,.3);font-size:20px;align-items:center}
 .go.day .dn>span{white-space:nowrap}
 #dailyInfo{white-space:nowrap}
@@ -366,6 +378,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
 </div>
 <button class="pausebtn" id="pauseBtn" type="button" aria-label="Pause" hidden><svg viewBox="0 0 16 16"><rect x="3" y="2" width="3.6" height="12" rx="1"/><rect x="9.4" y="2" width="3.6" height="12" rx="1"/></svg></button>
 <div class="flash" id="flash"></div>
+<div class="liqglow" id="liqGlow" aria-hidden="true"></div>
 <div class="count" id="count"></div>
 
 <div class="pad" id="pad" hidden>
@@ -393,6 +406,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
       <button class="go" id="goTracks" type="button"><span data-t="races"></span><small id="starSum"></small></button>
       <button class="go day" id="goDaily" type="button"><span class="dn"><span data-t="daily"></span><small id="dailyName"></small></span><small id="dailyInfo"></small></button>
       <button class="go alt" id="goEndless" type="button"><span data-t="endless"></span><small id="endlessBest"></small></button>
+      <button class="go chase" id="goChase" type="button"><span class="dn"><span>Liquidation Chase</span><small data-t="chaseSub"></small></span><small id="chaseBest"></small></button>
     </div>
     <div class="tiles">
       <button class="tile" id="tGarage" type="button"><svg aria-hidden="true"><use href="#i-car"/></svg><span data-t="garage"></span></button>
@@ -442,6 +456,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
       <li><svg aria-hidden="true"><use href="#i-tok"/></svg><span data-t="r3"></span></li>
       <li><svg viewBox="0 0 22 22" aria-hidden="true"><path d="M13 1 4 13h6l-2 8 9-12h-6z" fill="#3fe6ff"/></svg><span data-t="r4"></span></li>
       <li><svg aria-hidden="true" style="color:#ffc24a"><use href="#i-star"/></svg><span data-t="r6"></span></li>
+      <li><svg aria-hidden="true" style="color:#ff2340"><use href="#i-flag"/></svg><span data-t="r7"></span></li>
       <li><svg aria-hidden="true" style="color:#ffc24a"><use href="#i-flag"/></svg><span data-t="r5"></span></li>
     </ul>
     <p class="proto"><span data-t="proto"></span> · <a id="privLink" href="https://bullrun.stratoshivibes.com/privacy.html" target="_blank" rel="noopener" data-t="privacy"></a> · <a href="https://bullrun.stratoshivibes.com/terms.html" target="_blank" rel="noopener" data-t="terms"></a></p>
@@ -502,6 +517,16 @@ const T = {
     again:'Ξανά', menu:'Μενού', paused:'Παύση', resume:'Συνέχεια', newBest:'Νέο ρεκόρ', gas:'ΓΚΑΖΙ', brake:'ΦΡΕΝΟ',
     proto:'Πρωτότυπο 3 · πληκτρολόγιο: βελάκια για οδήγηση, Space για nitro, P για παύση', nitroGot:'Nitro +1', cp:'+{s} δευτ.' }
 };
+Object.assign(T.en, {
+  chaseSub:'Outrun the liquidators', newMode:'New', collateral:'Collateral', liqComing:'LIQUIDATOR INCOMING', liqDown:'LIQUIDATOR DOWN', liqEscaped:'ESCAPED',
+  liquidated:'LIQUIDATED', collHit:'COLLATERAL HIT', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Knocked out', liqEscapes:'Escaped',
+  r7:'Liquidation Chase: liquidators overtake you and cut in to brake. Dodge them, use nitro to get away, lead them into traffic. Three hits and you are liquidated; every checkpoint gives back one collateral.'
+});
+Object.assign(T.el, {
+  chaseSub:'Ξέφυγε από τους liquidators', newMode:'Νέο', collateral:'Collateral', liqComing:'ΕΡΧΕΤΑΙ LIQUIDATOR', liqDown:'LIQUIDATOR ΕΚΤΟΣ', liqEscaped:'ΞΕΦΥΓΕΣ',
+  liquidated:'ΡΕΥΣΤΟΠΟΙΗΘΗΚΕΣ', collHit:'ΧΤΥΠΗΜΑ ΣΤΟ COLLATERAL', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Εκτός μάχης', liqEscapes:'Ξέφυγες',
+  r7:'Liquidation Chase: οι liquidators σε προσπερνούν και μπαίνουν μπροστά σου για να φρενάρουν. Απόφυγέ τους, ξέφυγε με nitro ή ρίξ\' τους στην κίνηση. Τρία χτυπήματα και ρευστοποιείσαι· κάθε checkpoint σου δίνει πίσω ένα collateral.'
+});
 Object.assign(T.en, {
   gpIntro:'Optional extras that only change how your car looks. Payment goes through Google Play.',
   gpNote:'Payments use your Google Play account (card, PayPal and more). Purchases belong to your Google account, not to a wallet.',
@@ -1199,6 +1224,7 @@ function reset(seed){
   sP = 60; v = 0; d = 0; dCam = 0; steer = 0; timeLeft = mode === 'track' ? starTimes(TR)[0] : START_TIME; dist = 0; tokens = 0; topKmh = 0;
   nitroCharges = 1; nitroTime = 0; nitroFx = 0; hitT = 0; shake = 0; nextGate = CP_LEN; cps = 0; lean = 0; flashT = 0;
   parts.length = 0; aiLane = 1; beepSec = 99; curB = prevB = biomeAt(0); blendT = 1;
+  if (typeof chaseReset === 'function') chaseReset();
   for (let i = 0; i < 8; i++) updateChunks(sP);
 }
 
@@ -1461,13 +1487,19 @@ function hud(){
     setT('hTarget', tg);
     const pr = Math.round(clamp(dist * 1000 / TR.len, 0, 1) * 60);
     if (pr !== hc.prog) { hc.prog = pr; $('hProgBar').style.transform = 'scaleX(' + (pr / 60) + ')'; }
+  } else if (mode === 'chase') {
+    setT('hDist', dist.toFixed(2)); setT('hDistOf', 'km');
+    setT('hTime', '●'.repeat(Math.max(0, collateral)) + '○'.repeat(COLL_MAX - Math.max(0, collateral)));
+    const w = chaseWarnInfo();
+    setT('hTarget', w ? T[lang].liqShort + ' ' + Math.round(w.g) + ' m ' + (w.side < 0 ? '◀' : w.side > 0 ? '▶' : '▲') : '');
+    const near = w && w.g < 70 && state === 'race'; if (near !== hc.liqNear) { hc.liqNear = near; $('liqGlow').classList.toggle('on', !!near); }
   } else {
     setT('hDist', dist.toFixed(2)); setT('hDistOf', 'km'); setT('hTime', String(Math.max(0, Math.ceil(timeLeft)))); setT('hTarget', '');
   }
   if (tiltMode) { const tv = Math.round(steer * 66); if (tv !== hc.tilt) { hc.tilt = tv; $('tiltDot').style.transform = 'translateX(' + tv + 'px)'; } }
   const bar = Math.round(clamp(v / NITRO_V, 0, 1) * 40);
   if (bar !== lastBar) { lastBar = bar; $('hBar').style.transform = 'scaleX(' + (bar / 40) + ')'; }
-  $('hTimeBox').classList.toggle('low', timeLeft < 8 && state === 'race');
+  $('hTimeBox').classList.toggle('low', mode === 'chase' ? collateral <= 1 && state === 'race' : timeLeft < 8 && state === 'race');
   const pk = nitroCharges * 10 + (nitroTime > 0 ? 1 : 0);
   if (pk !== lastPips) {
     lastPips = pk; const u = $('pips').children;
@@ -1479,7 +1511,8 @@ function hud(){
 /* ================= update ================= */
 function aiSteer(){
   let bestL = aiLane, bestD = -1;
-  for (let L = 0; L < LANES.length; L++) { let dd = 1e9; for (const c of cars) { if (c.lane !== L) continue; const dz = c.s - sP; if (dz > -6 && dz < dd) dd = dz; } if (L === aiLane) dd += 40; if (dd > bestD) { bestD = dd; bestL = L; } }
+  for (let L = 0; L < LANES.length; L++) { let dd = 1e9; for (const c of cars) { if (c.lane !== L) continue; const dz = c.s - sP; if (dz > -6 && dz < dd) dd = dz; }
+    for (const c of chasers) { if (laneOf(c.d) !== L) continue; const dz = c.s - sP; if (dz > -6 && dz < dd) dd = Math.max(0, dz - 25); } if (L === aiLane) dd += 40; if (dd > bestD) { bestD = dd; bestL = L; } }
   aiLane = bestL; const tx = LANES[aiLane];
   return Math.abs(tx - d) < .3 ? 0 : Math.sign(tx - d);
 }
@@ -1510,12 +1543,115 @@ function take(it){
     flash('NITRO', T[lang].nitroGot); tone(520, .25, 'sawtooth', .06, 1040);
   }
 }
+/* ================= Liquidation Chase ================= */
+// Mode 'chase': an endless road with no clock. Liquidators (dark cars with flashing light bars) come up from behind,
+// overtake and cut into your lane to brake-check you. Each hit costs one collateral; lose all three and you are liquidated.
+// Nitro outruns them, and a liquidator that runs into traffic is knocked out. Checkpoints every 2 km give back one collateral.
+const COLL_MAX = 3, LIQ_VMAX = MAXV * 1.12;
+let chasers = [], collateral = COLL_MAX, chaseT = 0, ramT = 0, knocks = 0, escapes = 0, sirenT = 0, sirenHi = false, chaseBest = +(store.get('bullrun_chase_best') || 0);
+const LIQ_LIGHT_R = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff2340').multiplyScalar(3), toneMapped: false });
+const LIQ_LIGHT_A = new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffae2a').multiplyScalar(3), toneMapped: false });
+const LIQ_LIGHT_OFF = new THREE.MeshBasicMaterial({ color: '#2a2230' });
+const LIQ_TYPE = 'sedan';
+CAR_GEO[LIQ_TYPE].computeBoundingBox();
+const LIQ_ROOF = CAR_GEO[LIQ_TYPE].boundingBox.max.y, LIQ_LEN = CAR_GEO[LIQ_TYPE].userData.len, LIQ_W = CAR_GEO[LIQ_TYPE].userData.w;
+const liqPool = [];
+function liqMesh(){
+  let m = liqPool.find(x => !x.visible);
+  if (!m) {
+    m = new THREE.Mesh(CAR_GEO[LIQ_TYPE], carMats('#231d30')); m.castShadow = true;
+    const barGeo = new THREE.BoxGeometry(.64, .24, .4);
+    const l1 = new THREE.Mesh(barGeo, LIQ_LIGHT_R), l2 = new THREE.Mesh(barGeo, LIQ_LIGHT_A);
+    l1.position.set(-.35, LIQ_ROOF + .12, 0); l2.position.set(.35, LIQ_ROOF + .12, 0);
+    m.add(l1, l2); m.userData.lights = [l1, l2]; scene.add(m); liqPool.push(m);
+  }
+  m.visible = true; return m;
+}
+function chaseReset(){ for (const c of chasers) c.mesh.visible = false; chasers = []; collateral = COLL_MAX; chaseT = 6; ramT = 0; knocks = 0; escapes = 0; sirenT = 0; }
+const laneOf = x => { let b = 0; for (let i = 1; i < LANES.length; i++) if (Math.abs(LANES[i] - x) < Math.abs(LANES[b] - x)) b = i; return b; };
+const trafficAhead = (lane, s, ahead) => { let best = null; for (const c of cars) if (c.lane === lane && c.s > s - 2 && c.s - s < ahead && (!best || c.s < best.s)) best = c; return best; };
+const laneClear = (lane, s) => !cars.some(c => c.lane === lane && Math.abs(c.s - s) < 16);
+function chaseLevel(){ return Math.min(5, Math.floor(dist / 3)); }
+function spawnChaser(){
+  const pl = laneOf(d), side = pl === 0 ? 1 : pl === LANES.length - 1 ? -1 : (Math.random() < .5 ? -1 : 1);
+  const lane = pl + side;
+  chasers.push({ s: sP - 100 - Math.random() * 30, d: LANES[lane], lane, v: Math.max(v, MAXV * .8), phase: 'approach', t: 0, tries: 0, hitCd: 0, mesh: liqMesh() });
+  flash(T[lang].liqComing, '', 'warm'); tone(392, .25, 'sawtooth', .05, 523);
+}
+function chaserGone(c, why){
+  c.mesh.visible = false; chasers.splice(chasers.indexOf(c), 1);
+  if (why === 'down') {
+    knocks++; tokens += 25;
+    flash(T[lang].liqDown, '+25 tokens'); tone(220, .3, 'sawtooth', .08, 60); noise(.4, 500, .4, 'lowpass');
+  } else if (why === 'escaped') { escapes++; tokens += 10; flash(T[lang].liqEscaped, '+10 tokens'); tone(880, .15, 'triangle', .08); tone(1320, .2, 'triangle', .07, 0, .1); }
+}
+function updateChase(dt){
+  if (ramT > 0) ramT -= dt;
+  const lvl = chaseLevel(), maxN = Math.min(3, 1 + Math.floor(lvl / 2)), cap = LIQ_VMAX * (1 + lvl * .015);
+  chaseT -= dt;
+  if (chaseT <= 0 && chasers.length < maxN) { spawnChaser(); chaseT = Math.max(7, 16 - lvl * 1.5) + Math.random() * 6; }
+  const pl = laneOf(d);
+  for (let i = chasers.length - 1; i >= 0; i--) {
+    const c = chasers[i], gap = sP - c.s; c.t += dt; if (c.hitCd > 0) c.hitCd -= dt;
+    let tv;
+    if (c.phase === 'approach') { c.rt = .5;
+      tv = v + (gap > 60 ? 14 : 7);
+      if (c.lane === pl) { const alt = pl === 0 ? 1 : pl === LANES.length - 1 ? pl - 1 : pl + (c.d > d ? 1 : -1); if (laneClear(alt, c.s)) c.lane = alt; }
+      if (gap < -PLEN - 2) { c.phase = 'pass'; c.t = 0; }
+    } else if (c.phase === 'pass') {
+      tv = v + 6;
+      if (-gap > PLEN + 12) { c.phase = 'block'; c.t = 0; c.tries++; }
+    } else if (c.phase === 'block') {
+      // it reacts to your lane changes with a delay, so a quick move gets you past
+      c.rt = (c.rt || 0) - dt;
+      if (c.lane !== pl && c.rt <= 0 && laneClear(pl, c.s)) { c.lane = pl; c.rt = 1.3; }
+      tv = c.lane === pl && Math.abs(c.d - d) < 1.6 ? v - 5 : v + 2;
+      if (c.t > 3.2) { c.phase = c.tries >= 3 ? 'leave' : 'drop'; c.t = 0; }
+    } else if (c.phase === 'drop') {
+      tv = v - 14; if (gap > 18) { c.phase = 'approach'; c.t = 0; }
+    } else tv = v - 20;   // 'leave': it gives up and falls back
+    tv = clamp(tv, 0, cap);
+    c.v += clamp(tv - c.v, -MAXV * 1.1 * dt, MAXV * .55 * dt);
+    // traffic in its way: change lane, or crash into it
+    const ahead = trafficAhead(c.lane, c.s + LIQ_LEN, c.phase === 'block' ? 9 : 15);   // busy chasing you, it looks less far ahead
+    if (ahead) {
+      const opts = [c.lane - 1, c.lane + 1].filter(L => L >= 0 && L < LANES.length && laneClear(L, c.s + 6));
+      if (opts.length) c.lane = opts.sort((a, b) => Math.abs(a - pl) - Math.abs(b - pl))[0];
+      else if (ahead.s - (c.s + LIQ_LEN) < 1) { chaserGone(c, 'down'); continue; }
+    }
+    c.d += clamp(LANES[c.lane] - c.d, -6.5 * dt, 6.5 * dt);
+    c.s += c.v * dt;
+    if (gap > 170 || (c.phase === 'leave' && gap > 120)) { chaserGone(c, c.phase === 'leave' ? 'gone' : 'escaped'); continue; }
+    // hits on the player
+    if (state === 'race' && c.hitCd <= 0 && ramT <= 0 && c.s < sP + PLEN && c.s + LIQ_LEN > sP && Math.abs(d - c.d) < (PW + LIQ_W) / 2 * .86) {
+      c.hitCd = 2; ramT = 1.4; hitsN++; collateral--;
+      shake = .6; hitT = .8;
+      if (c.s > sP + 1) { v = Math.min(v, c.v * .8); sP = c.s - PLEN - .1; }   // you ran into its back
+      else { d += (d >= c.d ? 1 : -1) * 1.1; v *= .85; c.v *= .9; }           // it swiped you from the side
+      c.phase = 'drop'; c.t = 0;
+      const [x, y] = playerScreen(.8), k = fx.width / 400;
+      for (let j = 0; j < 26; j++) emit(x + (Math.random() - .5) * 60 * k, y, (Math.random() - .5) * 900 * k, -Math.random() * 700 * k, .6, Math.random() < .5 ? '#ff2340' : '#ffae2a', 2.4 * k, 'spark');
+      noise(.4, 300, .55, 'lowpass'); tone(90, .4, 'square', .1, 40);
+      try { navigator.vibrate && navigator.vibrate([60, 40, 60]); } catch (e) {}
+      if (collateral <= 0) { endRace(false); return; }
+      flash(T[lang].collHit, '●'.repeat(collateral) + '○'.repeat(COLL_MAX - collateral), 'warm');
+    }
+  }
+  // siren while one is close behind
+  let near = 1e9; for (const c of chasers) { const g = sP - c.s; if (g > -2 && g < near) near = g; }
+  sirenT -= dt;
+  if (near < 200 && sirenT <= 0) { sirenT = .42; sirenHi = !sirenHi; tone(sirenHi ? 960 : 720, .38, 'sawtooth', .018 + .03 * (1 - near / 200)); }
+}
+function chaseWarnInfo(){
+  let near = null; for (const c of chasers) { const g = sP - c.s; if (g > PLEN && (!near || g < near.g)) near = { g, side: Math.sign(c.d - d) }; }
+  return near;
+}
 function update(dt){
   tNow += dt;
   let inL = keys.left || touch.left, inR = keys.right || touch.right, inGas = keys.gas || touch.gas || autoGas, inBrake = keys.brake || touch.brake;
   if (state === 'garage') { v = 0; updateFx(dt, 0); return; }
   if (state === 'menu') { const a = aiSteer(); inL = a < 0; inR = a > 0; inGas = v < MAXV * .78; inBrake = false; }
-  if (bot && state === 'race') { const a = aiSteer(); inL = a < 0; inR = a > 0; inGas = true; inBrake = false; }
+  if (bot && state === 'race') { const a = aiSteer(); inL = a < 0; inR = a > 0; inGas = true; inBrake = false; if (mode === 'chase' && chasers.some(c => Math.abs(sP - c.s) < 30)) fireNitro(); }
   if (state === 'ending') { const a = aiSteer(); inL = a < 0; inR = a > 0; inGas = inBrake = false; }
   braking = inBrake && state === 'race';
   if (state === 'count') {
@@ -1566,6 +1702,15 @@ function update(dt){
       if (Math.abs(d - c.d) < (PW + c.w) / 2 * .86) { crash(c); break; }
     }
     for (const [, ch] of chunks) for (const it of ch.items) if (!it.taken && it.s >= sP - .5 && it.s <= sP + PLEN && Math.abs(it.d - d) < PW / 2 + .55) take(it);
+    if (mode === 'chase') {
+      updateChase(dt); if (state !== 'race') { dist += (sP - s0) / 1000; return updateFx(dt, sp); }
+      if (sP >= nextGate) {
+        cps++; nextGate += CP_LEN; flashT = .45;
+        const gain = collateral < COLL_MAX; if (gain) collateral++;
+        flash(BIOMES[cps % 3].name, 'CHECKPOINT' + (gain ? '  ' + T[lang].collBack : ''), 'warm');
+        tone(660, .2, 'triangle', .12); tone(880, .2, 'triangle', .12, 0, .1); tone(1320, .35, 'triangle', .12, 0, .2);
+      }
+    }
     if (mode === 'endless' && sP >= nextGate) {
       cps++; nextGate += CP_LEN;
       const bonus = Math.max(26, 45 - cps);
@@ -1575,12 +1720,13 @@ function update(dt){
     }
     dist += (sP - s0) / 1000;
     topKmh = Math.max(topKmh, kmh());
-    if (mode === 'track') { raceT += dt; timeLeft = starTimes(TR)[0] - raceT; } else timeLeft -= dt;
+    if (mode === 'track') { raceT += dt; timeLeft = starTimes(TR)[0] - raceT; } else if (mode === 'chase') { raceT += dt; timeLeft = 99; } else timeLeft -= dt;
     const sec = Math.ceil(timeLeft);
     if (timeLeft < 6 && sec !== beepSec && sec > 0) { beepSec = sec; tone(880, .08, 'square', .05); }
     if (mode === 'track' && sP >= finishS) endRace(true, raceT - (sP - finishS) / Math.max(1, v));
     else if (timeLeft <= 0) endRace(false);
   } else if (state === 'ending') {
+    if (mode === 'chase') for (const c of chasers) { c.v += (Math.max(0, v - 4) - c.v) * Math.min(1, dt * 2); c.s += c.v * dt; c.d += clamp(LANES[c.lane] - c.d, -6.5 * dt, 6.5 * dt); }
     v = Math.max(0, v - MAXV * (result && result.won ? .3 : .55) * dt); endT -= dt; if (endT <= 0) finish();
   }
   if (hitT > 0) hitT -= dt;
@@ -1643,6 +1789,10 @@ function render(dt){
   under.material.opacity = BIOMES[curB].night ? .7 : .28;
   const nf = nitroFx; flames.forEach(f => { f.visible = nf > .05; f.scale.set(.8 + Math.random() * .4, 1, nf * (.8 + Math.random() * .5)); });
   MAT.tail.emissiveIntensity = braking || hitT > .5 ? 2.6 : (BIOMES[curB].night ? 1.8 : 1.6);
+  if (chasers.length) {
+    const ph = Math.floor(tNow * 7) % 2;
+    for (const c of chasers) { placeCar(c.mesh, c.s, c.d, LIQ_LEN, 0, 0); const [l1, l2] = c.mesh.userData.lights; l1.material = ph ? LIQ_LIGHT_R : LIQ_LIGHT_OFF; l2.material = ph ? LIQ_LIGHT_OFF : LIQ_LIGHT_A; }
+  }
   // traffic
   for (const c of cars) placeCar(c.mesh, c.s, c.d, c.len, 0, 0);
   // tokens & nitro
@@ -1785,6 +1935,8 @@ function setUI(){
   const racing = state === 'race' || state === 'count';
   $('hud').hidden = !(racing || state === 'ending');
   $('hProg').hidden = mode !== 'track';
+  $('hTimeLab').textContent = mode === 'chase' ? T[lang].collateral : T[lang].time; $('hud').classList.toggle('chase', mode === 'chase');
+  if (!racing) $('liqGlow').classList.remove('on'), hc.liqNear = false;
   $('pad').hidden = !racing; $('pauseBtn').hidden = !racing; $('bG').hidden = autoGas;
   $('steer').hidden = tiltMode; $('tiltInd').hidden = !tiltMode;
   $('start').hidden = !(state === 'menu' && screen === 'home');
@@ -1797,7 +1949,7 @@ function go(scr){ screen = scr; if (scr === 'tracks') renderTracks(); if (scr ==
 function startRace(opt){
   opt = opt || {};
   audioStart(); releaseAll(); closeDlg();
-  if (opt.daily) { mode = 'track'; TR = dailyTrack(); } else if (opt.track != null) { mode = 'track'; TR = TRACKS[opt.track]; } else if (opt.endless) { mode = 'endless'; TR = null; }
+  if (opt.daily) { mode = 'track'; TR = dailyTrack(); } else if (opt.track != null) { mode = 'track'; TR = TRACKS[opt.track]; } else if (opt.endless) { mode = 'endless'; TR = null; } else if (opt.chase) { mode = 'chase'; TR = null; }
   reset(mode === 'track' ? TR.seed : (typeof opt.seed === 'number' ? opt.seed : (Date.now() ^ (Math.random() * 1e9)) >>> 0));
   equipValid();
   state = 'count'; countT = 3.2; countShown = ''; lastPips = -1; lastBar = -1; hc.prog = -1;
@@ -1808,6 +1960,7 @@ function endRace(won, tFinish){
   result = { won, t: won ? Math.max(1, tFinish) : null };
   state = 'ending'; endT = won ? 2.2 : 1.8; nitroTime = 0; setUI();
   if (mode === 'track' && won) { flash(T[lang].finish.toUpperCase(), fmtTime(result.t)); tone(660, .2, 'triangle', .12); tone(880, .2, 'triangle', .12, 0, .12); tone(1320, .5, 'triangle', .12, 0, .24); flashT = .5; }
+  else if (mode === 'chase') { flash(T[lang].liquidated, dist.toFixed(2) + ' km', 'warm'); noise(.8, 200, .5, 'lowpass'); }
   else flash((mode === 'track' ? T[lang].timeUp : T[lang].over).toUpperCase(), '', 'warm');
 }
 const starSvg = (on) => '<svg class="' + (on ? 'on' : '') + '" aria-hidden="true"><use href="#i-star"/></svg>';
@@ -1855,6 +2008,18 @@ function finish(){
     if ($('oNext')) $('oNext').onclick = () => startRace({ track: idx + 1 });
     $('oRetry').onclick = () => startRace({ track: idx });
     $('oTracks').onclick = () => toMenu('tracks');
+  } else if (mode === 'chase') {
+    const isBest = dist > chaseBest + 1e-6;
+    if (isBest) { chaseBest = dist; store.set('bullrun_chase_best', String(chaseBest)); }
+    lbSubmit('chase', Math.round(dist * 1000));
+    oc.innerHTML = '<div class="ol"><div class="eyebrow">' + L.liquidated + ' · LIQUIDATION CHASE</div><div class="res">' + dist.toFixed(2) + '<small>km</small></div>' +
+      (isBest && dist >= .05 ? '<span class="chip">' + L.newBest + '</span>' : '') + '</div>' +
+      '<div class="or"><div class="stats"><div><span class="lab">' + L.earned + '</span><b>' + tokens + '</b></div><div><span class="lab">' + L.liqKnocks + '</span><b>' + knocks + '</b></div>' +
+      '<div><span class="lab">' + L.liqEscapes + '</span><b>' + escapes + '</b></div><div><span class="lab">' + L.best + '</span><b>' + chaseBest.toFixed(2) + '</b></div></div>' +
+      '<p class="meta" id="oRankP"></p>' +
+      '<div class="row"><button class="go" id="oAgain" type="button">' + L.again + '</button><button class="go alt" id="oMenu" type="button">' + L.menu + '</button></div></div>';
+    $('oAgain').onclick = () => startRace({ chase: true });
+    $('oMenu').onclick = () => toMenu();
   } else {
     const isBest = dist > best + 1e-6;
     if (isBest) { best = dist; store.set('bullrun_best', String(best)); }
@@ -1884,6 +2049,7 @@ function renderHome(){
   const L = T[lang];
   $('starSum').textContent = starTotal() + ' / 27 ★';
   $('endlessBest').textContent = best > 0 ? L.best + ' ' + best.toFixed(2) + ' km' : '';
+  $('chaseBest').textContent = chaseBest > 0 ? L.best + ' ' + chaseBest.toFixed(2) + ' km' : L.newMode;
   const dt = dailyTrack(), D0 = dayState();
   $('dailyName').textContent = trName(dt).split(' · ')[1] + ' · ' + L['market' + dt.b];
   $('dailyInfo').textContent = D0.best ? fmtTime(D0.best) : D0.bonus ? '' : '+' + dailyBonus() + ' tokens';
@@ -2057,7 +2223,7 @@ let LBS = readJSON('bullrun_lb') || {}, lbOn = false, lbBoard = 'endless', lbSco
 const lbSignedIn = () => !!(LBS.token && WAL.addr && LBS.addr === WAL.addr);
 const lbFetch = (path, opt) => { const c = new AbortController(), to = setTimeout(() => c.abort(), 8000); return fetch(LB_API + path, { ...(opt || {}), signal: c.signal }).then(r => r.json().then(b => ({ s: r.status, b }))).finally(() => clearTimeout(to)); };
 if (ONLINE) lbFetch('/health').then(r => { if (r.b && r.b.ok) lbOn = true; }).catch(() => {});
-const lbFmt = (board, val) => board === 'endless' ? (val / 1000).toFixed(2) + ' km' : fmtTime(val / 1000);
+const lbFmt = (board, val) => board === 'endless' || board === 'chase' ? (val / 1000).toFixed(2) + ' km' : fmtTime(val / 1000);
 function lbSubmit(board, val){
   if (!ONLINE || !lbOn || !lbSignedIn() || !(val > 0)) return;
   lbFetch('/score', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: LBS.token, game: 'bullrun', board, value: val }) })
@@ -2068,7 +2234,7 @@ function lbSubmit(board, val){
 }
 async function openLb(){
   if (!ONLINE) return appOnly();
-  const L = T[lang], dk = 'd:' + dailyTrack().key, boards = [[dk, L.dailyShort], ['endless', L.endless], ...TRACKS.map((t, i) => ['t2:' + t.id, String(i + 1)])];
+  const L = T[lang], dk = 'd:' + dailyTrack().key, boards = [[dk, L.dailyShort], ['endless', L.endless], ['chase', 'Chase'], ...TRACKS.map((t, i) => ['t2:' + t.id, String(i + 1)])];
   if (lbBoard.startsWith('d:') && lbBoard !== dk) lbBoard = dk;
   dlg('<h2>' + L.lb + '</h2><div class="tabs" id="lbB">' + boards.map(([k, n]) => '<button type="button" data-b="' + k + '" class="' + (k === lbBoard ? 'on' : '') + '">' + esc(n) + '</button>').join('') + '</div>' +
     (lbBoard.startsWith('t2:') ? '<p><b>' + esc(trName(TRACKS.find(t => 't2:' + t.id === lbBoard))) + '</b></p>' : lbBoard.startsWith('d:') ? '<p><b>' + esc(trName(dailyTrack())) + '</b> · ' + L.dailyLbNote + '</p>' : '') +
@@ -2230,6 +2396,7 @@ $('segSnd').addEventListener('click', e => { const b = e.target.closest('button'
 $('goTracks').addEventListener('click', () => { audioStart(); go('tracks'); });
 $('goDaily').addEventListener('click', () => startRace({ daily: true }));
 $('goEndless').addEventListener('click', () => startRace({ endless: true }));
+$('goChase').addEventListener('click', () => startRace({ chase: true }));
 $('tGarage').addEventListener('click', openGarage);
 $('tLb').addEventListener('click', openLb);
 /* ---------- Google Play Billing (Play edition only, inside the Play Store app) ----------
@@ -2317,7 +2484,7 @@ $('walletBtn').addEventListener('click', openWallet);
 $('perkCard').addEventListener('click', openPerks);
 document.querySelectorAll('[data-home]').forEach(b => b.addEventListener('click', () => { if (state === 'garage') { equipValid(); toMenu(); } else go('home'); }));
 $('quit').addEventListener('click', () => toMenu(mode === 'track' && !isDaily() ? 'tracks' : 'home'));
-$('restart').addEventListener('click', () => startRace(isDaily() ? { daily: true } : mode === 'track' ? { track: TRACKS.indexOf(TR) } : { endless: true }));
+$('restart').addEventListener('click', () => startRace(isDaily() ? { daily: true } : mode === 'track' ? { track: TRACKS.indexOf(TR) } : mode === 'chase' ? { chase: true } : { endless: true }));
 $('resume').addEventListener('click', resume);
 $('pauseBtn').addEventListener('click', pause);
 document.addEventListener('visibilitychange', () => { if (document.hidden) pause(); });
@@ -2348,7 +2515,7 @@ if (WAL.addr && ONLINE) checkHolder(false);
 if (tiltMode) tiltStart(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
 window.__bullrun = { get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
-  get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
+  get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },
   gcam(x){ GCAM = x; }, paint(id){ showPaint(id); }, cam(b, h, la, ly){ CAMP = [b, h, la, ly]; }, camL(b, h, la, ly){ CAMP_L = [b, h, la, ly]; } };
@@ -2401,7 +2568,7 @@ requestAnimationFrame(frame);
 })();
 if (window.SVStats) SVStats.start('bullrun', () => {
   if (state === 'garage') return 'garage';
-  if (state === 'race' || state === 'count' || state === 'ending') return isDaily() ? 'daily' : mode === 'endless' ? 'endless' : 'track';
+  if (state === 'race' || state === 'count' || state === 'ending') return isDaily() ? 'daily' : mode === 'endless' ? 'endless' : mode === 'chase' ? 'chase' : 'track';
   return 'menu';
 });
 

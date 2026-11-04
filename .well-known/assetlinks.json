@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.stratoshivibes.bullrace",
+    "sha256_cert_fingerprints": [
+      "7C:39:71:09:1C:67:ED:9C:E3:8B:3A:7B:B7:CA:4A:82:20:68:23:61:19:BE:C4:1E:A5:AB:6F:6A:CA:B1:04:FC"
+    ]
+  }
+}]

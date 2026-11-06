@@ -525,12 +525,12 @@ const T = {
 Object.assign(T.en, {
   chaseSub:'Outrun the liquidators', newMode:'New', flyGot:'+1 charge', collateral:'Collateral', liqComing:'LIQUIDATOR INCOMING', liqDown:'LIQUIDATOR DOWN', liqEscaped:'ESCAPED',
   liquidated:'LIQUIDATED', collHit:'COLLATERAL HIT', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Knocked out', liqEscapes:'Escaped',
-  r7:'Liquidation Chase: liquidators overtake you and cut in to brake. Dodge them, use nitro to get away, lead them into traffic. Press FLY to lift off over traffic and liquidators for about 4.5 seconds (you start with one, pick up more on the road). Three hits and you are liquidated; every checkpoint gives back one collateral.'
+  r7:'Liquidation Chase: liquidators overtake you and cut in to brake. Dodge them, use nitro to get away, lead them into traffic. Press FLY to rocket over traffic and liquidators for about 4.5 seconds, faster than nitro (you start with one, pick up more on the road). Three hits and you are liquidated; every checkpoint gives back one collateral.'
 });
 Object.assign(T.el, {
   chaseSub:'Ξέφυγε από τους liquidators', newMode:'Νέο', flyGot:'+1 φορτίο', collateral:'Collateral', liqComing:'ΕΡΧΕΤΑΙ LIQUIDATOR', liqDown:'LIQUIDATOR ΕΚΤΟΣ', liqEscaped:'ΞΕΦΥΓΕΣ',
   liquidated:'ΡΕΥΣΤΟΠΟΙΗΘΗΚΕΣ', collHit:'ΧΤΥΠΗΜΑ ΣΤΟ COLLATERAL', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Εκτός μάχης', liqEscapes:'Ξέφυγες',
-  r7:'Liquidation Chase: οι liquidators σε προσπερνούν και μπαίνουν μπροστά σου για να φρενάρουν. Απόφυγέ τους, ξέφυγε με nitro ή ρίξ\' τους στην κίνηση. Με το FLY σηκώνεσαι για περίπου 4,5 δευτερόλεπτα πάνω από την κίνηση και τους liquidators (ξεκινάς με ένα, μαζεύεις κι άλλα στον δρόμο). Τρία χτυπήματα και ρευστοποιείσαι· κάθε checkpoint σου δίνει πίσω ένα collateral.'
+  r7:'Liquidation Chase: οι liquidators σε προσπερνούν και μπαίνουν μπροστά σου για να φρενάρουν. Απόφυγέ τους, ξέφυγε με nitro ή ρίξ\' τους στην κίνηση. Με το FLY σηκώνεσαι και τρέχεις πιο γρήγορα κι από το nitro για περίπου 4,5 δευτερόλεπτα πάνω από την κίνηση και τους liquidators (ξεκινάς με ένα, μαζεύεις κι άλλα στον δρόμο). Τρία χτυπήματα και ρευστοποιείσαι· κάθε checkpoint σου δίνει πίσω ένα collateral.'
 });
 Object.assign(T.en, {
   gpIntro:'Optional extras that only change how your car looks. Payment goes through Google Play.',
@@ -622,7 +622,7 @@ let totalTok = +(store.get('bullrun_tokens') || 0) || 0;
 
 /* ================= constants (metres, seconds) ================= */
 const STEP = 2, CHUNK = 250, CP_LEN = 2000, ROAD_HALF = 7.8, CURB = 7.0, LANES = [-5.1, -1.7, 1.7, 5.1], LANE_V = [32, 32, 32, 32];   // four lanes, 3.4 m each. Same speed in every lane, so the gaps between cars never close up into a wall
-const MAXV = 66.7, NITRO_V = MAXV * 1.3, PLEN = 4.5, PW = 1.92, RAIL_D = 8.7, X_MAX = RAIL_D - PW / 2 - 0.15;
+const MAXV = 66.7, NITRO_V = MAXV * 1.3, FLY_V = MAXV * 1.75, PLEN = 4.5, PW = 1.92, RAIL_D = 8.7, X_MAX = RAIL_D - PW / 2 - 0.15;
 const START_TIME = 60, AHEAD = 1100, BEHIND = 40;
 
 /* ================= tracks ================= */
@@ -1837,14 +1837,16 @@ function update(dt){
   const rate = target === 0 ? 12 : (steer !== 0 && Math.sign(target) !== Math.sign(steer) ? 18 : 11);
   steer += clamp(target - steer, -rate * dt, rate * dt);
   if (nitroTime > 0) nitroTime -= dt;
-  const cap = nitroTime > 0 ? NITRO_V : MAXV, pct = v / MAXV;
-  if (inBrake) v -= MAXV / 1.35 * dt;
+  // FLY: a rocket boost in the air, faster than nitro (about 420 km/h), easing back after touchdown
+  const air = flyT > 0 && flyH > .3, cap = air ? FLY_V : nitroTime > 0 ? NITRO_V : MAXV, pct = v / MAXV;
+  if (inBrake && !air) v -= MAXV / 1.35 * dt;
+  else if (air) { if (v < cap) v = Math.min(cap, v + MAXV * 1.5 * dt); }
   else if (inGas || nitroTime > 0) { if (v < cap) v = Math.min(cap, v + (nitroTime > 0 ? MAXV * .9 : MAXV / 3.4 * (1 - .6 * Math.min(1, pct))) * dt); }
   else v -= MAXV / 7 * dt;
   if (v > cap) v = Math.max(cap, v - MAXV * .45 * dt);
   const offroad = Math.abs(d) > CURB + .2;
-  if (offroad && v > MAXV * .6) v = Math.max(MAXV * .6, v - MAXV * 1.2 * dt);
-  v = clamp(v, 0, NITRO_V);
+  if (offroad && !air && v > MAXV * .6) v = Math.max(MAXV * .6, v - MAXV * 1.2 * dt);
+  v = clamp(v, 0, FLY_V);
   const sp = Math.min(1, v / MAXV);
   d += steer * dt * 8.6 * (.45 + .55 * sp);
   d += k * v * v * .034 * dt;
@@ -1905,7 +1907,7 @@ function update(dt){
   updateFx(dt, sp);
 }
 function updateFx(dt, sp){
-  nitroFx += ((nitroTime > 0 ? 1 : 0) - nitroFx) * Math.min(1, dt * 5);
+  nitroFx += ((nitroTime > 0 || flyT > 0 ? 1 : 0) - nitroFx) * Math.min(1, dt * 5);
   if (shake > 0) shake -= dt; if (flashT > 0) flashT -= dt;
   for (let i = parts.length - 1; i >= 0; i--) {
     const p = parts[i]; p.life -= dt; if (p.life <= 0) { parts.splice(i, 1); continue; }
@@ -1990,9 +1992,9 @@ function render(dt){
     camera.lookAt(player.position.x, player.position.y + (GCAM ? GCAM[3] : land ? .5 : -1.7), player.position.z);
     if (GCAM) camera.translateX(GCAM[4] || 0); else if (land) camera.translateX(2.4);
   }
-  const aspect = W / H, hTarget = state === 'garage' ? 56 : 60 + sp * 6 + nitroFx * 10;
+  const aspect = W / H, hTarget = state === 'garage' ? 56 : 60 + sp * 6 + nitroFx * 10 + clamp((v - NITRO_V) / (FLY_V - NITRO_V), 0, 1) * 9;
   let vf = 2 * Math.atan(Math.tan(hTarget * Math.PI / 360) / aspect) * 180 / Math.PI;
-  vf = clamp(vf, 50, 82 + nitroFx * 6);
+  vf = clamp(vf, 50, 82 + nitroFx * 6 + clamp((v - NITRO_V) / (FLY_V - NITRO_V), 0, 1) * 6);
   if (Math.abs(camera.fov - vf) > .01) { camera.fov = lerp(camera.fov, vf, Math.min(1, dt * 6)); camera.updateProjectionMatrix(); }
   // sky & far scenery follow the camera
   sky.position.copy(camera.position);
@@ -2688,7 +2690,7 @@ if (WAL.addr && ONLINE) checkHolder(false);
 if (tiltMode) tiltStart(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
 window.__bullrun = { get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state, track: !!MUS.chaseSrc, buf: !!MUS.chaseBuf }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
-  get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, get fly(){ return { charges: flyCharges, t: flyT, h: flyH }; }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
+  get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, get fly(){ return { charges: flyCharges, t: flyT, h: flyH, kmh: Math.round(v * 3.6) }; }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },
   gcam(x){ GCAM = x; }, paint(id){ showPaint(id); }, cam(b, h, la, ly){ CAMP = [b, h, la, ly]; }, camL(b, h, la, ly){ CAMP_L = [b, h, la, ly]; } };

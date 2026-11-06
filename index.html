@@ -489,7 +489,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
+import { mergeGeometries, toCreasedNormals } from 'three/addons/utils/BufferGeometryUtils.js';
 
 const $ = id => document.getElementById(id);
 const store = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k,v){ try { localStorage.setItem(k,v); } catch(e){} } };
@@ -841,8 +841,10 @@ const MAT = {
   neon: BIOMES.map(b => new THREE.MeshBasicMaterial({ color: new THREE.Color(b.gate).multiplyScalar(2), toneMapped: false })),
   neonStart: new THREE.MeshBasicMaterial({ color: new THREE.Color('#ff4fd8').multiplyScalar(2), toneMapped: false }),
   neonFinish: new THREE.MeshBasicMaterial({ color: new THREE.Color('#ffc24a').multiplyScalar(2), toneMapped: false }),
-  glass: envMat(new THREE.MeshStandardMaterial({ color: '#2b3866', metalness: .8, roughness: .08, flatShading: true })),
-  dark: new THREE.MeshStandardMaterial({ color: '#17151f', roughness: .85, flatShading: true }),
+  glass: new THREE.MeshStandardMaterial({ color: '#0c1222', metalness: .2, roughness: .18, envMapIntensity: .25 }),   // dark tinted, so the sky does not wash it out
+  trim: envMat(new THREE.MeshStandardMaterial({ color: '#0d0d14', metalness: .55, roughness: .32 })),
+  rim: envMat(new THREE.MeshStandardMaterial({ color: '#c3c6d4', metalness: 1, roughness: .28 })),
+  dark: new THREE.MeshStandardMaterial({ color: '#16151c', roughness: .9 }),
   chrome: envMat(new THREE.MeshStandardMaterial({ color: '#d4d4e0', metalness: 1, roughness: .25 })),
   tail: new THREE.MeshStandardMaterial({ color: '#ff2a44', emissive: '#ff1030', emissiveIntensity: 1 }),
   head: new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#fff4dc', emissiveIntensity: 1.6 }),
@@ -859,77 +861,114 @@ function carFog(m){
     '#ifdef USE_FOG\n float fogFactor = smoothstep(fogNear * 1.8, fogFar * .95, vFogDepth);\n gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, fogFactor);\n#endif'); };
   m.customProgramCacheKey = () => 'carFog'; return m;
 }
-for (const k of ['glass', 'dark', 'chrome', 'tail', 'head']) carFog(MAT[k]);
+for (const k of ['glass', 'dark', 'chrome', 'tail', 'head', 'trim', 'rim']) carFog(MAT[k]);
 const bodyMats = new Map();
-function bodyMat(hex){ if (!bodyMats.has(hex)) bodyMats.set(hex, carFog(envMat(new THREE.MeshStandardMaterial({ color: hex, metalness: .2, roughness: .5, flatShading: true })))); return bodyMats.get(hex); }
+function bodyMat(hex){ if (!bodyMats.has(hex)) bodyMats.set(hex, carFog(envMat(new THREE.MeshPhysicalMaterial({ color: hex, metalness: .25, roughness: .38, clearcoat: .7, clearcoatRoughness: .16 })))); return bodyMats.get(hex); }
 
 /* ================= geometry helpers ================= */
 const NI = g => g.index ? g.toNonIndexed() : g;
 function paint(g, hex){ g = NI(g); if (g.attributes.uv) g.deleteAttribute('uv'); const c = col(hex), n = g.attributes.position.count, a = new Float32Array(n * 3); for (let i = 0; i < n; i++) { a[i * 3] = c.r; a[i * 3 + 1] = c.g; a[i * 3 + 2] = c.b; } g.setAttribute('color', new THREE.BufferAttribute(a, 3)); return g; }
 function mergeColored(list){ const g = mergeGeometries(list, false); g.computeVertexNormals(); g.computeBoundingSphere(); return g; }
 
-/* ---- cars: side-profile extrusions, tapered, flat shaded ---- */
-function bodyExtrude(pts, width, bevel, taper){
+/* ---- cars: rounded side-profile extrusions, smooth shaded, glossy clear-coat paint ---- */
+// Profiles are smoothed with a Catmull-Rom curve and the edges bevelled, then normals are creased so curves look smooth
+// and real edges stay sharp.
+function smoothProfile(pts, n){
+  const c = new THREE.CatmullRomCurve3(pts.map(p => new THREE.Vector3(p[0], p[1], 0)), true, 'centripetal', .5);
+  return c.getPoints(n).slice(0, -1).map(q => [q.x, q.y]);
+}
+function bodyExtrude(pts, width, bevel, taper, smoothN){
+  if (smoothN) pts = smoothProfile(pts, smoothN);
   const sh = new THREE.Shape(); pts.forEach((p, i) => i ? sh.lineTo(p[0], p[1]) : sh.moveTo(p[0], p[1]));
-  let g = new THREE.ExtrudeGeometry(sh, { depth: width - 2 * bevel, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 2, steps: 1, curveSegments: 1 });
+  let g = new THREE.ExtrudeGeometry(sh, { depth: width - 2 * bevel, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4, steps: 2, curveSegments: 1 });
   g.translate(0, 0, -(width - 2 * bevel) / 2); g.rotateY(-Math.PI / 2);
   g = NI(g); const p = g.attributes.position;
   for (let i = 0; i < p.count; i++) p.setX(i, p.getX(i) * taper(p.getY(i), p.getZ(i)));
-  g.clearGroups(); g.computeVertexNormals(); return g;
+  g.clearGroups(); if (g.attributes.uv) g.deleteAttribute('uv');
+  return toCreasedNormals(g, .62);
 }
 const boxG = (w, h, d, x, y, z) => NI(new THREE.BoxGeometry(w, h, d).translate(x, y, z));
 const cylX = (r, w, x, y, z, seg) => NI(new THREE.CylinderGeometry(r, r, w, seg || 16).rotateZ(Math.PI / 2).translate(x, y, z));
-const cylZ = (r, l, x, y, z) => NI(new THREE.CylinderGeometry(r, r, l, 10).rotateX(Math.PI / 2).translate(x, y, z));
+const cylZ = (r, l, x, y, z) => NI(new THREE.CylinderGeometry(r, r, l, 12).rotateX(Math.PI / 2).translate(x, y, z));
 const CAR_SPECS = {
-  sport: { len: 4.5, w: 1.94, wr: .36, wz: [-1.38, 1.42], wx: .84,
-    low: [[-2.2,.3],[-2.26,.62],[-2.18,.84],[-1.2,.88],[.9,.86],[1.7,.76],[2.2,.6],[2.28,.42],[2.15,.24],[-2.05,.24]],
-    gh: [[-1.55,.86],[-.5,1.2],[.3,1.22],[1.05,.86]], ghW: 1.62, ghTop: .76, belt: .55, nose: [1.4, .14] },
-  sedan: { len: 4.7, w: 1.84, wr: .34, wz: [-1.45, 1.5], wx: .8,
-    low: [[-2.3,.32],[-2.35,.78],[-2.22,.92],[-1.5,.95],[1.1,.95],[1.8,.85],[2.3,.72],[2.38,.45],[2.25,.28],[-2.15,.28]],
-    gh: [[-1.6,.93],[-.95,1.42],[.55,1.44],[1.15,.93]], ghW: 1.66, ghTop: .82, belt: .6, nose: [1.6, .08] },
-  hatch: { len: 4.1, w: 1.8, wr: .33, wz: [-1.25, 1.3], wx: .78,
-    low: [[-1.95,.32],[-2.0,.9],[-1.9,.98],[1.0,.98],[1.6,.86],[2.05,.72],[2.1,.45],[1.95,.28],[-1.85,.28]],
-    gh: [[-1.93,.96],[-1.72,1.46],[.3,1.5],[1.0,.97]], ghW: 1.64, ghTop: .84, belt: .62, nose: [1.4, .08] },
-  van: { len: 4.95, w: 1.98, wr: .37, wz: [-1.6, 1.6], wx: .86,
-    low: [[-2.45,.35],[-2.45,1.05],[2.1,1.05],[2.45,.8],[2.5,.45],[2.35,.3],[-2.35,.3]],
-    gh: [[-2.45,1.02],[-2.42,2.0],[1.05,2.02],[2.1,1.03]], ghW: 1.92, ghTop: .94, belt: .7, nose: [1.9, .06], boxy: true }
+  sport: { len: 4.5, w: 1.96, wr: .38, wz: [-1.38, 1.4], wx: .84,
+    low: [[-2.2,.28],[-2.28,.6],[-2.2,.8],[-1.2,.9],[.55,.86],[1.5,.72],[2.2,.5],[2.29,.34],[2.16,.22],[-2.06,.22]],
+    gh: [[-1.95,.84],[-.55,1.17],[.2,1.19],[1.16,.84]], ghW: 1.6, ghTop: .74, belt: .55, nose: [1.3, .16] },
+  sedan: { len: 4.7, w: 1.86, wr: .36, wz: [-1.45, 1.5], wx: .8,
+    low: [[-2.3,.32],[-2.36,.76],[-2.24,.94],[-1.5,.97],[1.1,.95],[1.85,.84],[2.32,.68],[2.38,.45],[2.25,.27],[-2.15,.27]],
+    gh: [[-1.66,.95],[-1.0,1.4],[.5,1.43],[1.2,.94]], ghW: 1.64, ghTop: .8, belt: .6, nose: [1.6, .1] },
+  hatch: { len: 4.1, w: 1.82, wr: .35, wz: [-1.25, 1.3], wx: .78,
+    low: [[-1.96,.32],[-2.02,.88],[-1.92,1.0],[1.0,.99],[1.62,.87],[2.06,.7],[2.1,.45],[1.96,.28],[-1.86,.28]],
+    gh: [[-1.92,.98],[-1.68,1.47],[.3,1.5],[1.04,.98]], ghW: 1.64, ghTop: .82, belt: .62, nose: [1.4, .1] },
+  van: { len: 4.95, w: 2.0, wr: .38, wz: [-1.6, 1.6], wx: .86,
+    low: [[-2.45,.35],[-2.46,1.04],[2.05,1.06],[2.44,.8],[2.5,.45],[2.36,.3],[-2.36,.3]],
+    gh: [[-2.45,1.02],[-2.42,2.0],[1.0,2.02],[2.08,1.04]], ghW: 1.92, ghTop: .94, belt: .7, nose: [1.9, .06], boxy: true }
 };
+// material slots: 0 body, 1 glass, 2 tyre/dark, 3 chrome, 4 tail light, 5 head light, 6 plate, 7 gloss-black trim, 8 alloy rim
+function wheel(add, r, x, z, sx){
+  add(2, cylX(r, .3, x, r, z, 26));                              // tyre
+  add(2, cylX(r * .74, .31, x, r, z, 26));                       // sidewall step
+  const fx = x + sx * .155;
+  add(8, cylX(r * .7, .02, fx, r, z, 26));                       // rim face
+  for (let k = 0; k < 5; k++) {                                   // five spokes
+    const a = k / 5 * Math.PI * 2, g = boxG(.03, r * 1.22, .075, 0, 0, 0).rotateX(a); add(8, g.translate(fx + sx * .012, r, z));
+  }
+  add(3, cylX(r * .16, .05, fx + sx * .02, r, z, 12));            // centre cap
+  add(7, cylX(r * .66, .015, fx - sx * .004, r, z, 26));         // dark barrel behind the spokes
+}
 function carGeo(type){
-  const S = CAR_SPECS[type], B = [[],[],[],[],[],[],[]]; // 0 body,1 glass,2 dark,3 chrome,4 tail,5 head,6 plate
-  const add = (i, g) => { g = NI(g); g.clearGroups(); B[i].push(g); };
-  const yBelt = S.low[3][1];
-  add(0, bodyExtrude(S.low, S.w, .06, (y, z) => (1 - .07 * clamp((y - S.belt) / .4, 0, 1)) * (1 - S.nose[1] * clamp((z - S.nose[0]) / (S.len / 2 - S.nose[0]), 0, 1))));
+  const S = CAR_SPECS[type], B = [[],[],[],[],[],[],[],[],[]];
+  const add = (i, g) => { g = NI(g); g.clearGroups(); if (g.attributes.uv) g.deleteAttribute('uv'); B[i].push(g); };
+  const tuck = S.boxy ? .04 : .13;
+  add(0, bodyExtrude(S.low, S.w, .07, (y, z) => (1 - .1 * clamp((y - S.belt) / .4, 0, 1)) * (1 - tuck * clamp((.64 - y) / .3, 0, 1)) * (1 - S.nose[1] * clamp((z - S.nose[0]) / (S.len / 2 - S.nose[0]), 0, 1)), 0));
+  // fenders: a body-coloured arch over every wheel, with a dark wheel well inside
+  for (const z of S.wz) for (const sx of [-1, 1]) {
+    const x = sx * (S.wx + .02), arch = (r, w, i) => add(i, NI(new THREE.CylinderGeometry(r, r, w, 22, 1, false, Math.PI * .5 - 1.25, 2.5).rotateZ(Math.PI / 2).translate(x, S.wr, z)));
+    arch(S.wr + .13, .36, 0); arch(S.wr + .06, .38, 2);
+  }
   const ghTop = S.gh[1][1];
-  add(S.boxy ? 0 : 1, bodyExtrude(S.gh, S.ghW, .03, (y) => 1 - (1 - S.ghTop) * clamp((y - S.gh[0][1]) / (ghTop - S.gh[0][1]), 0, 1)));
-  if (S.boxy) { add(1, boxG(S.ghW * .86, .5, .04, 0, 1.5, -2.47)); add(1, boxG(.04, .5, 2.6, S.ghW / 2 * .96, 1.55, -.6)); add(1, boxG(.04, .5, 2.6, -S.ghW / 2 * .96, 1.55, -.6)); add(1, boxG(S.ghW * .9, .55, .04, 0, 1.55, 1.65).rotateX(-.35)); }
-  else { const top = S.gh[1], t2 = S.gh[2]; add(0, boxG(S.ghW * S.ghTop * .98, .035, (t2[0] - top[0]) * .92, 0, (top[1] + t2[1]) / 2 + .01, (top[0] + t2[0]) / 2)); }
-  for (const z of S.wz) for (const sx of [-1, 1]) { add(2, cylX(S.wr, .32, sx * (S.wx + .05), S.wr, z, 18)); add(3, cylX(S.wr * .6, .33, sx * (S.wx + .05), S.wr, z, 10)); }
-  add(2, boxG(S.w * .9, .08, S.len * .6, 0, .25, 0));
-  const rz = Math.min(...S.low.map(q => q[0])) - .07;
+  add(S.boxy ? 0 : 1, bodyExtrude(S.gh, S.ghW, .05, (y) => 1 - (1 - S.ghTop) * clamp((y - S.gh[0][1]) / (ghTop - S.gh[0][1]), 0, 1), S.boxy ? 0 : 24));
+  if (S.boxy) { add(1, boxG(S.ghW * .86, .5, .04, 0, 1.5, -2.47)); add(1, boxG(.04, .5, 2.6, S.ghW / 2 * .97, 1.55, -.6)); add(1, boxG(.04, .5, 2.6, -S.ghW / 2 * .97, 1.55, -.6)); add(1, boxG(S.ghW * .9, .55, .04, 0, 1.55, 1.65).rotateX(-.35)); }
+  else { const top = S.gh[1], t2 = S.gh[2]; add(7, boxG(S.ghW * S.ghTop * .96, .03, (t2[0] - top[0]) * .9, 0, (top[1] + t2[1]) / 2 + .02, (top[0] + t2[0]) / 2)); }
+  for (const z of S.wz) for (const sx of [-1, 1]) wheel(add, S.wr, sx * (S.wx + .05), z, sx);
+  add(2, boxG(S.w * .88, .08, S.len * .62, 0, .24, 0));                                     // floor
+  for (const sx of [-1, 1]) add(7, boxG(.06, .08, (S.wz[1] - S.wz[0]) - S.wr * 2.4, sx * (S.w / 2 * (1 - tuck) - .01), .3, (S.wz[0] + S.wz[1]) / 2));   // side skirts
+  const rz = Math.min(...S.low.map(q => q[0])) - .07, fz = Math.max(...S.low.map(q => q[0])) + .02;
   if (type === 'sport') {
-    add(4, boxG(1.5, .06, .05, 0, .72, rz - .05)); for (const sx of [-1, 1]) add(4, boxG(.42, .16, .05, sx * .66, .71, rz - .055));
-    add(2, boxG(1.92, .05, .34, 0, 1.03, -1.98)); for (const sx of [-1, 1]) add(2, boxG(.05, .18, .12, sx * .55, .94, -1.98));
-    add(2, boxG(1.4, .13, .3, 0, .3, rz + .05)); for (const sx of [-1, 1]) add(3, cylZ(.065, .14, sx * .36, .3, rz - .06));
-    for (const sx of [-1, 1]) add(5, boxG(.42, .08, .05, sx * .6, .64, 2.24));
-    add(2, boxG(1.5, .15, .04, 0, .56, rz - .055)); add(6, boxG(.5, .125, .02, 0, .43, rz - .075));
+    add(4, boxG(1.3, .035, .05, 0, .74, rz - .03));                                           // full-width LED strip
+    add(7, boxG(1.78, .26, .05, 0, .64, rz - .01));                                            // black tail panel
+    for (const sx of [-1, 1]) for (const ex of [.5, .74]) { add(4, cylZ(.09, .06, sx * ex, .64, rz - .04)); add(2, cylZ(.045, .07, sx * ex, .64, rz - .045)); }
+    add(7, boxG(1.8, .045, .34, 0, 1.0, -2.0)); for (const sx of [-1, 1]) { add(7, boxG(.05, .22, .12, sx * .5, .89, -2.0)); add(7, boxG(.04, .16, .38, sx * .9, 1.0, -2.0)); } // wing with end plates
+    add(7, boxG(1.5, .16, .34, 0, .3, rz + .06));                                             // diffuser
+    for (let k = -3; k <= 3; k++) add(7, boxG(.025, .14, .3, k * .2, .3, rz + .02));
+    for (const sx of [-1, 1]) for (const ex of [.28, .44]) add(3, cylZ(.055, .16, sx * ex, .3, rz - .05));
+    for (const sx of [-1, 1]) { add(5, boxG(.46, .045, .06, sx * .58, .64, fz - .1).rotateY(sx * -.18)); add(7, boxG(.5, .12, .05, sx * .58, .62, fz - .12)); }
+    add(7, boxG(1.1, .1, .05, 0, .36, fz - .05));                                             // front intake
+    add(6, boxG(.5, .125, .02, 0, .44, rz - .045));
   } else if (type === 'sedan') {
-    for (const sx of [-1, 1]) add(4, boxG(.5, .15, .05, sx * .6, .8, rz - .06));
-    add(2, boxG(1.7, .14, .1, 0, .35, rz - .04)); add(6, boxG(.5, .125, .02, 0, .56, rz - .07));
+    add(4, boxG(1.5, .04, .05, 0, .84, rz - .05));
+    for (const sx of [-1, 1]) add(4, boxG(.42, .12, .05, sx * .6, .8, rz - .055));
+    add(7, boxG(1.7, .14, .1, 0, .35, rz - .03)); add(6, boxG(.5, .125, .02, 0, .56, rz - .07));
+    for (const sx of [-1, 1]) add(5, boxG(.42, .06, .05, sx * .6, .72, fz - .06));
+    add(7, boxG(.9, .14, .05, 0, .48, fz - .04));
   } else if (type === 'hatch') {
-    for (const sx of [-1, 1]) add(4, boxG(.16, .34, .05, sx * .76, .86, rz - .03));
-    add(2, boxG(1.66, .14, .1, 0, .36, rz - .04)); add(6, boxG(.5, .125, .02, 0, .56, rz - .07));
+    for (const sx of [-1, 1]) { add(4, boxG(.16, .3, .05, sx * .74, .86, rz - .03)); add(4, boxG(.34, .05, .05, sx * .55, .96, rz - .03)); }
+    add(7, boxG(1.66, .14, .1, 0, .36, rz - .03)); add(6, boxG(.5, .125, .02, 0, .56, rz - .07));
+    for (const sx of [-1, 1]) add(5, boxG(.36, .07, .05, sx * .6, .76, fz - .06));
   } else {
-    for (const sx of [-1, 1]) add(4, boxG(.14, .3, .05, sx * .84, .78, rz - .03));
-    add(2, boxG(1.9, .16, .12, 0, .36, rz - .05)); add(6, boxG(.5, .125, .02, 0, .6, rz - .07));
+    for (const sx of [-1, 1]) add(4, boxG(.14, .34, .05, sx * .84, .8, rz - .03));
+    add(4, boxG(1.4, .04, .05, 0, 1.0, rz - .03));
+    add(7, boxG(1.9, .16, .12, 0, .36, rz - .04)); add(6, boxG(.5, .125, .02, 0, .6, rz - .07));
+    for (const sx of [-1, 1]) add(5, boxG(.4, .08, .05, sx * .66, .78, fz - .06));
   }
   const geos = [], idx = [];
-  B.forEach((arr, i) => { if (arr.length) { geos.push(mergeGeometries(arr, false)); idx.push(i); } });
+  B.forEach((arr, i) => { if (arr.length) { geos.push(mergeGeometries(arr.map(g => { if (!g.attributes.normal) g.computeVertexNormals(); return g; }), false)); idx.push(i); } });
   const g = mergeGeometries(geos, true); g.groups.forEach((gr, k) => gr.materialIndex = idx[k]);
   g.computeBoundingSphere(); g.userData = { len: S.len, w: S.w, rearZ: rz };
   return g;
 }
 const CAR_GEO = { sport: carGeo('sport'), sedan: carGeo('sedan'), hatch: carGeo('hatch'), van: carGeo('van') };
-const carMats = (hex, plate) => [bodyMat(hex), MAT.glass, MAT.dark, MAT.chrome, MAT.tail, MAT.head, plate ? MAT.plate : MAT.dark];
+const carMats = (hex, plate) => [bodyMat(hex), MAT.glass, MAT.dark, MAT.chrome, MAT.tail, MAT.head, plate ? MAT.plate : MAT.trim, MAT.trim, MAT.rim];
 const TRAFFIC_COLS = ['#3fa9ff', '#ffd04a', '#ff8fb0', '#8a6bff', '#2fd6a0', '#f0eef8', '#ff8a3a', '#3a4060', '#66e0ff', '#c9c6d6'];
 
 /* ---- props (vertex coloured, instanced per chunk) ---- */
@@ -1320,7 +1359,8 @@ let musicOn = store.get('bullrun_music') !== '0';
 const SONGS = [
   { bpm: 112, root: 45, chords: [[0, 'm'], [-4, 'M'], [3, 'M'], [-2, 'M']] },   // Bull Market: A minor, bright
   { bpm: 100, root: 40, chords: [[0, 'm'], [-2, 'M'], [-4, 'M'], [-2, 'M']] },   // Halving Canyon: E minor, slower and wider
-  { bpm: 118, root: 38, chords: [[0, 'm'], [-4, 'M'], [-7, 'M'], [-5, 'm']] }    // Bear Market: D minor, darker and faster
+  { bpm: 118, root: 38, chords: [[0, 'm'], [-4, 'M'], [-7, 'M'], [-5, 'm']] },   // Bear Market: D minor, darker and faster
+  { bpm: 152, root: 40, rock: true, riff: [0, 0, 3, 5, 0, 0, -2, -4] }             // Liquidation Chase: rock in E, distorted guitar
 ];
 const MUS = { bus: null, filt: null, next: 0, step: 0, bar: 0, song: 0, timer: 0, level: 0 };
 const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
@@ -1330,6 +1370,14 @@ function musicInit(){
   MUS.bus = AC.createGain(); MUS.bus.gain.value = 0;
   MUS.filt = AC.createBiquadFilter(); MUS.filt.type = 'lowpass'; MUS.filt.frequency.value = 9000;
   MUS.bus.connect(MUS.filt); MUS.filt.connect(master);
+  // guitar amp for the chase song: drive -> distortion -> cabinet
+  const ws = AC.createWaveShaper(), n = 1024, curve = new Float32Array(n);
+  for (let i = 0; i < n; i++) { const x = i * 2 / n - 1; curve[i] = (3 + 40) * x * 20 * Math.PI / 180 / (Math.PI + 40 * Math.abs(x)); }
+  ws.curve = curve; ws.oversample = '4x';
+  const cab = AC.createBiquadFilter(); cab.type = 'lowpass'; cab.frequency.value = 3600; cab.Q.value = .8;
+  const mid = AC.createBiquadFilter(); mid.type = 'peaking'; mid.frequency.value = 900; mid.gain.value = 4;
+  MUS.amp = AC.createGain(); MUS.amp.gain.value = 1;
+  MUS.amp.connect(ws); ws.connect(mid); mid.connect(cab); cab.connect(MUS.bus);
   MUS.next = AC.currentTime + .1;
   MUS.timer = setInterval(musicTick, 50);
 }
@@ -1339,6 +1387,20 @@ function mNote(t, f, dur, type, vol, cutoff, att){
   fl.type = 'lowpass'; fl.frequency.setValueAtTime(cutoff, t); fl.Q.value = 2;
   g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + (att || .008)); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
   o.connect(fl); fl.connect(g); g.connect(MUS.bus); o.start(t); o.stop(t + dur + .05);
+}
+// one distorted guitar chord: two slightly detuned saws per note into the amp
+function mGuitar(t, notes, dur, vol, cut){
+  const g = AC.createGain(), fl = AC.createBiquadFilter();
+  fl.type = 'lowpass'; fl.frequency.setValueAtTime(cut, t); fl.Q.value = 1;
+  g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(vol, t + .006); g.gain.setTargetAtTime(vol * .6, t + .02, dur * .5); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  for (const n of notes) for (const det of [-8, 8]) { const o = AC.createOscillator(); o.type = 'sawtooth'; o.frequency.setValueAtTime(mtof(n) * Math.pow(2, det / 1200), t); o.connect(fl); o.start(t); o.stop(t + dur + .05); }
+  fl.connect(g); g.connect(MUS.amp);
+}
+function mCrash(t){
+  const s = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+  s.buffer = noiseBuf; f.type = 'highpass'; f.frequency.value = 5000;
+  g.gain.setValueAtTime(.12, t); g.gain.exponentialRampToValueAtTime(.0001, t + 1.1);
+  s.connect(f); f.connect(g); g.connect(MUS.bus); s.start(t); s.stop(t + 1.2);
 }
 function mDrum(t, kind){
   if (kind === 'k') {
@@ -1365,8 +1427,26 @@ function musicTick(){
   const full = state === 'race' || state === 'ending';
   while (MUS.next < AC.currentTime + .4) {
     const t = MUS.next, st = MUS.step % 16;
-    if (st === 0) { MUS.bar++; const want = curB; if (want !== MUS.song && MUS.bar % 4 === 1) MUS.song = want; }
-    const S = SONGS[MUS.song], sd = 60 / S.bpm / 4, ch = S.chords[Math.floor(MUS.bar / 2) % 4];
+    if (st === 0) { MUS.bar++; const want = mode === 'chase' && racing ? 3 : curB; if (want !== MUS.song && (MUS.bar % 4 === 1 || want === 3 || MUS.song === 3)) { MUS.song = want; if (want === 3) MUS.bar = 0; } }
+    const S = SONGS[MUS.song], sd = 60 / S.bpm / 4;
+    if (S.rock) {
+      // Liquidation Chase: palm-muted power-chord 8ths with open accents, bass on the root, rock drums
+      const r = S.root + S.riff[(MUS.bar * 2 + (st >= 8 ? 1 : 0)) % 8], acc = st === 0 || st === 6 || st === 8 || st === 14;
+      if (st % 2 === 0) {
+        if (acc) mGuitar(t, [r, r + 7, r + 12], sd * 3.2, full ? .055 : .035, 3200);
+        else mGuitar(t, [r, r + 7], sd * 1.3, full ? .04 : .026, 1500);
+      }
+      if (full) {
+        if (st % 2 === 0) mNote(t, mtof(r - 12), sd * 1.7, 'sawtooth', .09, 600);
+        if (st === 0 || st === 8 || st === 10 || (st === 3 && MUS.bar % 2)) mDrum(t, 'k');
+        if (st === 4 || st === 12) { mDrum(t, 's'); mDrum(t, 's'); }
+        if (st % 2 === 0) mDrum(t, 'h');
+        if (st === 0 && MUS.bar % 4 === 1) mCrash(t);
+        if (MUS.bar % 8 === 0 && st >= 12) mDrum(t, 's');   // fill into the next phrase
+      }
+      MUS.next += sd; MUS.step++; continue;
+    }
+    const ch = S.chords[Math.floor(MUS.bar / 2) % 4];
     const notes = chordNotes(S.root + ch[0], ch[1]);
     // pad: whole chord, every two bars
     if (st === 0 && MUS.bar % 2 === 0) for (const n of notes) for (const det of [-6, 6]) { const o = mNote; o(t, mtof(n + 12) * Math.pow(2, det / 1200), sd * 32, 'sawtooth', .022, 1400, .6); }

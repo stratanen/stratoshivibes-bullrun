@@ -1601,9 +1601,23 @@ function fireFly(){
   steamBurst(34);
   try { navigator.vibrate && navigator.vibrate([30, 30, 30]); } catch (e) {}
 }
+// soft, cloudy puff sprites (several overlapping gradients), drawn with low opacity so they read as vapour, not bubbles
+const STEAM = [0, 1, 2].map(seed => {
+  const c = document.createElement('canvas'); c.width = c.height = 128; const g = c.getContext('2d'), r = rngFrom(77 + seed);
+  for (let i = 0; i < 9; i++) {
+    const x = 64 + (r() - .5) * 46, y = 64 + (r() - .5) * 36, rad = 22 + r() * 30, gr = g.createRadialGradient(x, y, 0, x, y, rad);
+    gr.addColorStop(0, 'rgba(255,255,255,.55)'); gr.addColorStop(.5, 'rgba(240,248,255,.22)'); gr.addColorStop(1, 'rgba(230,240,255,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  }
+  return c;
+});
 function steamBurst(nP){
   const [x, y] = playerScreen(0), k = fx.width / 400;
-  for (let i = 0; i < nP; i++) emit(x + (Math.random() - .5) * 90 * k, y + Math.random() * 10 * k, (Math.random() - .5) * 520 * k, (Math.random() * 120 - 30) * k, .7 + Math.random() * .6, Math.random() < .7 ? '#f4fbff' : '#cfe6ff', (6 + Math.random() * 8) * k, 'dust');
+  const ks = Math.min(fx.width, fx.height) / 400;   // vapour scales with the short side, so landscape is not swamped
+  for (let i = 0; i < nP; i++) {
+    emit(x + (Math.random() - .5) * 80 * k, y + Math.random() * 14 * k, (Math.random() - .5) * 420 * k, (Math.random() * 160 - 20) * k, .9 + Math.random() * .8, '', (16 + Math.random() * 16) * ks, 'steam');
+    const q = parts[parts.length - 1]; if (q) { q.rot = Math.random() * TAU; q.spin = (Math.random() - .5) * 1.2; q.img = STEAM[(Math.random() * 3) | 0]; }
+  }
 }
 function updateFly(dt){
   if (flyT <= 0) { flyH = 0; return; }
@@ -1913,6 +1927,7 @@ function updateFx(dt, sp){
     p.x += p.vx * dt; p.y += p.vy * dt;
     if (p.type === 'spark' || p.type === 'tok') p.vy += 1400 * dt * fx.width / 400;
     if (p.type === 'dust') { p.size += 30 * dt; p.vx *= .96; }
+    if (p.type === 'steam') { p.size += 60 * dt * Math.min(fx.width, fx.height) / 400; p.vx *= .93; p.vy = p.vy * .93 - 30 * dt * fx.width / 400; p.rot += p.spin * dt; }
   }
   const inten = clamp((sp - .8) * 3, 0, 1) * .4 + nitroFx * .7;
   for (const s of streaks) {
@@ -2015,6 +2030,7 @@ function drawFx(){
     if (p.type === 'spark') { fctx.strokeStyle = p.col; fctx.globalAlpha = a; fctx.lineWidth = p.size; fctx.beginPath(); fctx.moveTo(p.x, p.y); fctx.lineTo(p.x - p.vx * .03, p.y - p.vy * .03); fctx.stroke(); }
     else if (p.type === 'txt') { fctx.globalAlpha = a; fctx.fillStyle = '#fff'; fctx.font = 'italic 900 ' + Math.round(24 * k) + 'px ' + DF; fctx.textAlign = 'center'; fctx.textBaseline = 'middle'; fctx.fillText('+1', p.x, p.y); }
     else if (p.type === 'tok') { fctx.globalAlpha = a; fctx.fillStyle = p.col; const s = p.size; fctx.beginPath(); fctx.moveTo(p.x, p.y - s); fctx.lineTo(p.x + s, p.y); fctx.lineTo(p.x, p.y + s); fctx.lineTo(p.x - s, p.y); fctx.closePath(); fctx.fill(); }
+    else if (p.type === 'steam') { fctx.globalAlpha = Math.min(1, (1 - a) * 6) * a * .62; const s2 = p.size * 2; fctx.save(); fctx.translate(p.x, p.y); fctx.rotate(p.rot); fctx.drawImage(p.img, -s2 / 2, -s2 / 2, s2, s2); fctx.restore(); }
     else { fctx.globalAlpha = a * .7; fctx.fillStyle = p.col; fctx.beginPath(); fctx.arc(p.x, p.y, p.size, 0, 7); fctx.fill(); }
   }
   fctx.globalAlpha = 1;

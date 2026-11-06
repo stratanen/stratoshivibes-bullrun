@@ -525,12 +525,12 @@ const T = {
 Object.assign(T.en, {
   chaseSub:'Outrun the liquidators', newMode:'New', flyGot:'+1 charge', collateral:'Collateral', liqComing:'LIQUIDATOR INCOMING', liqDown:'LIQUIDATOR DOWN', liqEscaped:'ESCAPED',
   liquidated:'LIQUIDATED', collHit:'COLLATERAL HIT', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Knocked out', liqEscapes:'Escaped',
-  r7:'Liquidation Chase: liquidators overtake you and cut in to brake. Dodge them, use nitro to get away, lead them into traffic. Press FLY to lift off over traffic and liquidators for 3 seconds (you start with one, pick up more on the road). Three hits and you are liquidated; every checkpoint gives back one collateral.'
+  r7:'Liquidation Chase: liquidators overtake you and cut in to brake. Dodge them, use nitro to get away, lead them into traffic. Press FLY to lift off over traffic and liquidators for about 4.5 seconds (you start with one, pick up more on the road). Three hits and you are liquidated; every checkpoint gives back one collateral.'
 });
 Object.assign(T.el, {
   chaseSub:'Ξέφυγε από τους liquidators', newMode:'Νέο', flyGot:'+1 φορτίο', collateral:'Collateral', liqComing:'ΕΡΧΕΤΑΙ LIQUIDATOR', liqDown:'LIQUIDATOR ΕΚΤΟΣ', liqEscaped:'ΞΕΦΥΓΕΣ',
   liquidated:'ΡΕΥΣΤΟΠΟΙΗΘΗΚΕΣ', collHit:'ΧΤΥΠΗΜΑ ΣΤΟ COLLATERAL', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Εκτός μάχης', liqEscapes:'Ξέφυγες',
-  r7:'Liquidation Chase: οι liquidators σε προσπερνούν και μπαίνουν μπροστά σου για να φρενάρουν. Απόφυγέ τους, ξέφυγε με nitro ή ρίξ\' τους στην κίνηση. Με το FLY σηκώνεσαι για 3 δευτερόλεπτα πάνω από την κίνηση και τους liquidators (ξεκινάς με ένα, μαζεύεις κι άλλα στον δρόμο). Τρία χτυπήματα και ρευστοποιείσαι· κάθε checkpoint σου δίνει πίσω ένα collateral.'
+  r7:'Liquidation Chase: οι liquidators σε προσπερνούν και μπαίνουν μπροστά σου για να φρενάρουν. Απόφυγέ τους, ξέφυγε με nitro ή ρίξ\' τους στην κίνηση. Με το FLY σηκώνεσαι για περίπου 4,5 δευτερόλεπτα πάνω από την κίνηση και τους liquidators (ξεκινάς με ένα, μαζεύεις κι άλλα στον δρόμο). Τρία χτυπήματα και ρευστοποιείσαι· κάθε checkpoint σου δίνει πίσω ένα collateral.'
 });
 Object.assign(T.en, {
   gpIntro:'Optional extras that only change how your car looks. Payment goes through Google Play.',
@@ -1570,7 +1570,7 @@ $('bN').addEventListener('pointerdown', e => { e.preventDefault(); fireNitro(); 
 $('bF').addEventListener('pointerdown', e => { e.preventDefault(); fireFly(); });
 function releaseAll(){ for (const k in touch) touch[k] = false; for (const k in keys) keys[k] = false; steerPtrs.clear(); steerCalc(); $('bG').classList.remove('on'); $('bB').classList.remove('on'); }
 /* ---- FLY (Liquidation Chase): lift off on jets of vapour, clear traffic and liquidators, land 3.2 s later ---- */
-const FLY_DUR = 3.2, FLY_H = 7, FLY_MAX = 2;
+const FLY_DUR = 4.6, FLY_H = 7, FLY_MAX = 2;
 let flyCharges = 0, flyT = 0, flyH = 0;
 function fireFly(){
   if (state !== 'race' || mode !== 'chase' || flyCharges <= 0 || flyT > 0) return;

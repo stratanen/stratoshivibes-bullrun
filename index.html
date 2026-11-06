@@ -1447,8 +1447,29 @@ function mDrum(t, kind){
   g.gain.setValueAtTime(v0, t); g.gain.exponentialRampToValueAtTime(.0001, t + d);
   s.connect(f); f.connect(g); g.connect(MUS.bus); s.start(t, Math.random() * .5); s.stop(t + d + .05);
 }
+// Liquidation Chase plays a recorded track ("Cold Nights" by nest-beatzofficial, Pixabay Content License), looped.
+// It loads the first time a chase starts; until then the built-in rock plays.
+const CHASE_TRACK = './music/chase.mp3';
+function loadChaseTrack(){
+  if (MUS.chaseLoad || !AC) return; MUS.chaseLoad = true;
+  fetch(CHASE_TRACK).then(r => r.ok ? r.arrayBuffer() : Promise.reject(r.status)).then(b => AC.decodeAudioData(b)).then(buf => { MUS.chaseBuf = buf; })
+    .catch(() => { MUS.chaseLoad = false; });
+}
+function chaseTrack(on){
+  if (on && !MUS.chaseSrc && MUS.chaseBuf) {
+    const src = AC.createBufferSource(), g = AC.createGain(), t = AC.currentTime;
+    src.buffer = MUS.chaseBuf; src.loop = true;
+    g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.62, t + .8);
+    src.connect(g); g.connect(MUS.bus); src.start(t); MUS.chaseSrc = src; MUS.chaseGain = g;
+  } else if (!on && MUS.chaseSrc) {
+    const t = AC.currentTime, src = MUS.chaseSrc;
+    MUS.chaseGain.gain.setTargetAtTime(.0001, t, .25); src.stop(t + 1.2); MUS.chaseSrc = null;
+  }
+}
 function musicTick(){
   if (!AC || !MUS.bus) return;
+  if (mode === 'chase') loadChaseTrack();
+  chaseTrack(mode === 'chase' && (state === 'race' || state === 'count' || state === 'ending' || state === 'paused') && musicOn && !muted);
   const racing = state === 'race' || state === 'count' || state === 'ending', on = musicOn && !muted && !document.hidden && state !== 'paused';
   const target = !on ? 0 : racing ? .34 : state === 'over' ? .2 : .24;
   if (Math.abs(target - MUS.level) > .001) { MUS.level = target; MUS.bus.gain.setTargetAtTime(target, AC.currentTime, .4); }
@@ -1460,6 +1481,7 @@ function musicTick(){
     const t = MUS.next, st = MUS.step % 16;
     if (st === 0) { MUS.bar++; const want = mode === 'chase' && racing ? 3 : curB; if (want !== MUS.song && (MUS.bar % 4 === 1 || want === 3 || MUS.song === 3)) { MUS.song = want; if (want === 3) MUS.bar = 0; } }
     const S = SONGS[MUS.song], sd = 60 / S.bpm / 4;
+    if (S.rock && MUS.chaseSrc) { MUS.next += sd; MUS.step++; continue; }   // the recorded track is playing
     if (S.rock) {
       // Liquidation Chase: big ringing power chords (no chugging), a lead guitar melody, bass on the beat, straight rock drums
       const bi = MUS.bar % 4, r = S.root + S.prog[bi];
@@ -2665,7 +2687,7 @@ applyLang();
 if (WAL.addr && ONLINE) checkHolder(false);
 if (tiltMode) tiltStart(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
-window.__bullrun = { get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
+window.__bullrun = { get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state, track: !!MUS.chaseSrc, buf: !!MUS.chaseBuf }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
   get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, get fly(){ return { charges: flyCharges, t: flyT, h: flyH }; }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },

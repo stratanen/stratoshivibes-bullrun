@@ -1805,10 +1805,9 @@ function updateChase(dt){
       flash(T[lang].collHit, '●'.repeat(collateral) + '○'.repeat(COLL_MAX - collateral), 'warm');
     }
   }
-  // siren while one is close behind
   let near = 1e9; for (const c of chasers) { const g = sP - c.s; if (g > -2 && g < near) near = g; }
   sirenT -= dt;
-  if (near < 200 && sirenT <= 0) { sirenT = .42; sirenHi = !sirenHi; tone(sirenHi ? 960 : 720, .38, 'sawtooth', .018 + .03 * (1 - near / 200)); }
+  // (no siren beeps: the red glow at the bottom of the screen and the distance in the HUD warn you instead)
 }
 function chaseWarnInfo(){
   let near = null; for (const c of chasers) { const g = sP - c.s; if (g > PLEN && (!near || g < near.g)) near = { g, side: Math.sign(c.d - d) }; }

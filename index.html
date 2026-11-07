@@ -448,7 +448,6 @@ html.play:not(.gpbill) #tShop{display:none!important}
   <div class="card">
     <div class="bar"><button class="back" type="button" data-home aria-label="Back"><svg aria-hidden="true"><use href="#i-back"/></svg></button><h2 data-t="settings"></h2></div>
     <div class="opts">
-      <div class="opt"><span class="lab" data-t="throttle"></span><div class="seg" id="segGas"><button type="button" data-v="manual" data-t="manual"></button><button type="button" data-v="auto" data-t="auto"></button></div></div>
       <div class="opt"><span class="lab" data-t="steering"></span><div class="seg" id="segSteer"><button type="button" data-v="btn" data-t="btnSteer"></button><button type="button" data-v="tilt" data-t="tiltSteer"></button></div></div>
       <div class="opt"><span class="lab" data-t="music"></span><div class="seg" id="segMus"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="sound"></span><div class="seg" id="segSnd"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
@@ -508,14 +507,14 @@ const DF = '"Saira","Arial Narrow",Arial,sans-serif';
 /* ================= text ================= */
 const T = {
   en: { tag:'Arcade racing on an endless crypto highway. Dodge traffic, grab tokens, go as far as you can.',
-    r1:'Steer with the left pad. Slide your thumb between the arrows.', r2:'Hold GAS to speed up, BRAKE to slow down.',
+    r1:'Steer with the left pad. Slide your thumb between the arrows.', r2:'The car accelerates by itself. Hold BRAKE to slow down.',
     r3:'Collect tokens. They are in-game points, not real crypto.', r4:'Pick up nitro, then tap NITRO for a burst of speed.',
     r5:'Checkpoints add time. Traffic and barriers cost speed.', throttle:'Throttle', manual:'Manual', auto:'Auto', sound:'Sound', on:'On', off:'Off', lang:'Language',
     start:'Start', best:'Best', tokensTotal:'tokens collected', time:'Time', over:'Time’s up', toks:'Tokens', top:'Top km/h', cps:'Checkpoints',
     again:'Race again', menu:'Menu', paused:'Paused', resume:'Resume', newBest:'New best', gas:'GAS', brake:'BRAKE',
     proto:'Prototype 3 · keyboard: arrows to drive, Space for nitro, P to pause', nitroGot:'Nitro +1', cp:'+{s} s' },
   el: { tag:'Arcade αγώνας σε έναν ατελείωτο crypto αυτοκινητόδρομο. Απόφυγε την κίνηση, μάζεψε tokens, φτάσε όσο πιο μακριά μπορείς.',
-    r1:'Στρίβεις με το αριστερό πλήκτρο. Σύρε τον αντίχειρα ανάμεσα στα βέλη.', r2:'Κράτα το ΓΚΑΖΙ για να επιταχύνεις, το ΦΡΕΝΟ για να κόψεις.',
+    r1:'Στρίβεις με το αριστερό πλήκτρο. Σύρε τον αντίχειρα ανάμεσα στα βέλη.', r2:'Το αυτοκίνητο επιταχύνει μόνο του. Κράτα το ΦΡΕΝΟ για να κόψεις ταχύτητα.',
     r3:'Μάζεψε tokens. Είναι πόντοι του παιχνιδιού, όχι πραγματικά crypto.', r4:'Πιάσε nitro και πάτα NITRO για ώθηση.',
     r5:'Τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα.', throttle:'Γκάζι', manual:'Χειροκίνητο', auto:'Αυτόματο', sound:'Ήχος', on:'Ναι', off:'Όχι', lang:'Γλώσσα',
     start:'Ξεκίνα', best:'Ρεκόρ', tokensTotal:'tokens συνολικά', time:'Χρόνος', over:'Τέλος χρόνου', toks:'Tokens', top:'Τελική km/h', cps:'Checkpoints',
@@ -615,7 +614,7 @@ Object.assign(T.el, {
   historyErr:'Δεν μπόρεσα να διαβάσω το ιστορικό τώρα.', genericErr:'Κάτι πήγε στραβά. Δεν χρεώθηκες, εκτός αν το πορτοφόλι δείχνει σταλμένη πληρωμή.', loading:'Φόρτωση'
 });
 let lang = store.get('bullrun_lang') || ((navigator.language || '').toLowerCase().startsWith('el') ? 'el' : 'en');
-let autoGas = store.get('bullrun_gas') === 'auto';
+let autoGas = true;   // the car always accelerates by itself; there is no manual throttle
 let muted = store.get('bullrun_mute') === '1';
 let best = +(store.get('bullrun_best') || 0) || 0;
 let totalTok = +(store.get('bullrun_tokens') || 0) || 0;
@@ -2127,7 +2126,7 @@ function setUI(){
   $('hProg').hidden = mode !== 'track';
   $('hTimeLab').textContent = mode === 'chase' ? T[lang].collateral : T[lang].time; $('bF').hidden = mode !== 'chase'; hc.fly = -1; $('hud').classList.toggle('chase', mode === 'chase');
   if (!racing) $('liqGlow').classList.remove('on'), hc.liqNear = false;
-  $('pad').hidden = !racing; $('pauseBtn').hidden = !racing; $('bG').hidden = autoGas;
+  $('pad').hidden = !racing; $('pauseBtn').hidden = !racing; $('bG').hidden = true;
   $('steer').hidden = tiltMode; $('tiltInd').hidden = !tiltMode;
   $('start').hidden = !(state === 'menu' && screen === 'home');
   $('tracks').hidden = !(state === 'menu' && screen === 'tracks');
@@ -2270,7 +2269,7 @@ function segSet(id, val){ for (const b of $(id).children) b.setAttribute('aria-p
 function applyLang(){
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach(el => { const t = T[lang][el.dataset.t]; if (typeof t === 'string') el.textContent = t; });
-  segSet('segLang', lang); segSet('segGas', autoGas ? 'auto' : 'manual'); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off'); segSet('segSteer', tiltMode ? 'tilt' : 'btn');
+  segSet('segLang', lang); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off'); segSet('segSteer', tiltMode ? 'tilt' : 'btn');
   renderHome(); if (screen === 'tracks') renderTracks(); if (state === 'garage') renderGarage();
 }
 const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -2576,7 +2575,6 @@ async function restore(){
 
 /* ================= wiring ================= */
 $('segLang').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; lang = b.dataset.v; store.set('bullrun_lang', lang); applyLang(); });
-$('segGas').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; autoGas = b.dataset.v === 'auto'; store.set('bullrun_gas', autoGas ? 'auto' : 'manual'); applyLang(); setUI(); });
 $('segSteer').addEventListener('click', async e => { const b = e.target.closest('button'); if (!b) return;
   if (b.dataset.v === 'tilt') { const ok = await tiltStart(true); if (!ok) { toast(T[lang].tiltOff); return; } tiltMode = true; store.set('bullrun_steer', 'tilt'); toast(T[lang].tiltOk, T[lang].tiltHint); tiltCheckLater(); }
   else { tiltMode = false; store.set('bullrun_steer', 'btn'); }

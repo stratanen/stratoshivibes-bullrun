@@ -294,6 +294,7 @@ h3.lab{margin:4px 0 0}
 .liqglow{position:fixed;left:0;right:0;bottom:0;height:34vh;pointer-events:none;z-index:3;opacity:0;transition:opacity .3s;
  background:radial-gradient(60% 100% at 30% 100%,rgba(255,35,64,.45),transparent 70%),radial-gradient(60% 100% at 70% 100%,rgba(255,174,42,.38),transparent 70%)}
 .liqglow.on{opacity:1;animation:liqp .42s steps(2) infinite}
+.twtint{position:fixed;inset:0;pointer-events:none;z-index:2;opacity:0;mix-blend-mode:overlay}
 @keyframes liqp{0%{filter:hue-rotate(0)}100%{filter:hue-rotate(-40deg)}}
 @media (prefers-reduced-motion:reduce){.liqglow.on{animation:none}}
 .hud.chase #hTime{letter-spacing:.12em;color:#ffd0d6}
@@ -383,6 +384,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
 <button class="pausebtn" id="pauseBtn" type="button" aria-label="Pause" hidden><svg viewBox="0 0 16 16"><rect x="3" y="2" width="3.6" height="12" rx="1"/><rect x="9.4" y="2" width="3.6" height="12" rx="1"/></svg></button>
 <div class="flash" id="flash"></div>
 <div class="liqglow" id="liqGlow" aria-hidden="true"></div>
+<div class="twtint" id="twTint" aria-hidden="true"></div>
 <div class="count" id="count"></div>
 
 <div class="pad" id="pad" hidden>
@@ -524,12 +526,12 @@ const T = {
 Object.assign(T.en, {
   chaseSub:'Outrun the liquidators', newMode:'New', flyGot:'+1 charge', collateral:'Collateral', liqComing:'LIQUIDATOR INCOMING', liqDown:'LIQUIDATOR DOWN', liqEscaped:'ESCAPED',
   liquidated:'LIQUIDATED', collHit:'COLLATERAL HIT', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Knocked out', liqEscapes:'Escaped',
-  r7:'Liquidation Chase: liquidators overtake you and cut in to brake. Dodge them, use nitro to get away, lead them into traffic. Press FLY to rocket over traffic and liquidators for about 4.5 seconds, faster than nitro (you start with one, pick up more on the road). Watch out for the corkscrew: once every 2 km the road rolls upside down. Three hits and you are liquidated; every checkpoint gives back one collateral.'
+  r7:'Liquidation Chase: liquidators overtake you and cut in to brake. Dodge them, use nitro to get away, lead them into traffic. Press FLY to rocket over traffic and liquidators for about 4.5 seconds, faster than nitro (you start with one, pick up more on the road). Three hits and you are liquidated; every checkpoint gives back one collateral.'
 });
 Object.assign(T.el, {
   chaseSub:'Ξέφυγε από τους liquidators', newMode:'Νέο', flyGot:'+1 φορτίο', collateral:'Collateral', liqComing:'ΕΡΧΕΤΑΙ LIQUIDATOR', liqDown:'LIQUIDATOR ΕΚΤΟΣ', liqEscaped:'ΞΕΦΥΓΕΣ',
   liquidated:'ΡΕΥΣΤΟΠΟΙΗΘΗΚΕΣ', collHit:'ΧΤΥΠΗΜΑ ΣΤΟ COLLATERAL', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Εκτός μάχης', liqEscapes:'Ξέφυγες',
-  r7:'Liquidation Chase: οι liquidators σε προσπερνούν και μπαίνουν μπροστά σου για να φρενάρουν. Απόφυγέ τους, ξέφυγε με nitro ή ρίξ\' τους στην κίνηση. Με το FLY σηκώνεσαι και τρέχεις πιο γρήγορα κι από το nitro για περίπου 4,5 δευτερόλεπτα πάνω από την κίνηση και τους liquidators (ξεκινάς με ένα, μαζεύεις κι άλλα στον δρόμο). Κάθε 2 km ο δρόμος γίνεται βίδα και οδηγείς ανάποδα. Τρία χτυπήματα και ρευστοποιείσαι· κάθε checkpoint σου δίνει πίσω ένα collateral.'
+  r7:'Liquidation Chase: οι liquidators σε προσπερνούν και μπαίνουν μπροστά σου για να φρενάρουν. Απόφυγέ τους, ξέφυγε με nitro ή ρίξ\' τους στην κίνηση. Με το FLY σηκώνεσαι και τρέχεις πιο γρήγορα κι από το nitro για περίπου 4,5 δευτερόλεπτα πάνω από την κίνηση και τους liquidators (ξεκινάς με ένα, μαζεύεις κι άλλα στον δρόμο). Τρία χτυπήματα και ρευστοποιείσαι· κάθε checkpoint σου δίνει πίσω ένα collateral.'
 });
 Object.assign(T.en, {
   gpIntro:'Optional extras that only change how your car looks. Payment goes through Google Play.',
@@ -549,7 +551,7 @@ Object.assign(T.en, {
   music:'Music', seekerPerks:'Seeker Perks', seekerSub:'For Seeker owners', perkPaint:'Genesis paint, only for Seeker owners', perkBonus:'Double daily bonus: +100 tokens', perkBadge:'Seeker badge next to your name in the ranking', perkOn:'Unlocked on this wallet', perkConnect:'Connect the wallet on your Seeker to unlock them.', perkNone:'No Seeker Genesis Token found in this wallet. Connect the wallet on your Seeker (Seed Vault).', perkChecking:'Checking for a Seeker Genesis Token…', perkHow:'Every Seeker holds a Seeker Genesis Token. Bull Run reads it from the blockchain; nothing is signed or paid. The ranking badge appears after you join the ranking.', perkActive:'Seeker perks on', seekerPaint:'Seeker owners only · Seeker Genesis Token', getSeeker:'Unlock with your Seeker wallet', badgeT:'Seeker owner', perksShort:'3 perks', perkOnShort:'Active', steering:'Steering', btnSteer:'Buttons', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
   tag:'Arcade racing on crypto highways. Nine tracks, an endless run, and a garage to fill.',
   races:'Races', endless:'Endless run', garage:'Garage', lb:'Ranking', shop:'Shop', settings:'Settings', how:'How to play',
-  r5:'Endless run: checkpoints add time. Traffic and barriers cost speed.', r6:'Races: all nine tracks are open. Reach the finish line; faster times earn up to 3 stars.',
+  r5:'Endless run: checkpoints add time. Traffic and barriers cost speed. Every 2 km the road turns into a corkscrew and you drive upside down.', r6:'Races: all nine tracks are open. Reach the finish line; faster times earn up to 3 stars.',
   restart:'Restart', privacy:'Privacy', terms:'Terms', proto:'Bull Run 1.1',
   finish:'Finish', timeUp:'Out of time', next:'Next track', retry:'Retry', tracksBtn:'Tracks', bestTime:'Best time', rank:'Rank',
   locked:'Finish the previous track', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', starsWord:'stars',
@@ -583,7 +585,7 @@ Object.assign(T.el, {
   music:'Μουσική', seekerPerks:'Seeker Perks', seekerSub:'Για κατόχους Seeker', perkPaint:'Χρώμα Genesis, μόνο για κατόχους Seeker', perkBonus:'Διπλό ημερήσιο μπόνους: +100 tokens', perkBadge:'Σήμα Seeker δίπλα στο όνομά σου στην κατάταξη', perkOn:'Ενεργά σε αυτό το πορτοφόλι', perkConnect:'Σύνδεσε το πορτοφόλι του Seeker σου για να τα ξεκλειδώσεις.', perkNone:'Δεν βρέθηκε Seeker Genesis Token σε αυτό το πορτοφόλι. Σύνδεσε το πορτοφόλι του Seeker σου (Seed Vault).', perkChecking:'Ελέγχω για Seeker Genesis Token…', perkHow:'Κάθε Seeker έχει ένα Seeker Genesis Token. Το Bull Run το διαβάζει από το blockchain· δεν υπογράφεις και δεν πληρώνεις τίποτα. Το σήμα στην κατάταξη εμφανίζεται όταν μπεις στην κατάταξη.', perkActive:'Τα Seeker Perks είναι ενεργά', seekerPaint:'Μόνο για κατόχους Seeker · Seeker Genesis Token', getSeeker:'Ξεκλείδωμα με το πορτοφόλι του Seeker', badgeT:'Κάτοχος Seeker', perksShort:'3 προνόμια', perkOnShort:'Ενεργά', steering:'Στρίψιμο', btnSteer:'Κουμπιά', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
   tag:'Arcade αγώνες σε crypto αυτοκινητόδρομους. Εννιά πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.',
   races:'Αγώνες', endless:'Ατελείωτη διαδρομή', garage:'Γκαράζ', lb:'Κατάταξη', shop:'Shop', settings:'Ρυθμίσεις', how:'Πώς παίζεται',
-  r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα.', r6:'Αγώνες: και οι εννιά πίστες είναι ανοιχτές. Φτάσε στον τερματισμό· όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3).',
+  r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα. Κάθε 2 km ο δρόμος γίνεται βίδα και οδηγείς ανάποδα.', r6:'Αγώνες: και οι εννιά πίστες είναι ανοιχτές. Φτάσε στον τερματισμό· όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3).',
   restart:'Από την αρχή', privacy:'Απόρρητο', terms:'Όροι', proto:'Bull Run 1.1',
   finish:'Τερματισμός', timeUp:'Τέλος χρόνου', next:'Επόμενη πίστα', retry:'Ξανά', tracksBtn:'Πίστες', bestTime:'Ρεκόρ', rank:'Θέση',
   locked:'Τερμάτισε την προηγούμενη πίστα', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', starsWord:'αστέρια',
@@ -829,6 +831,7 @@ function redrawTextTextures(){ [...TEX.boardDay, ...TEX.boardNight, ...TEX.gate,
 const ENV_MATS = [];
 const envMat = m => { ENV_MATS.push(m); return m; };
 const MAT = {
+  twistNeon: new THREE.MeshBasicMaterial({ color: '#ffffff', toneMapped: false }),
   deck: new THREE.MeshStandardMaterial({ color: '#1d1b2a', roughness: .7, metalness: .3, side: THREE.DoubleSide }),
   road: BIOMES.map((b, i) => new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, map: TEX.road[i], roughness: .92, metalness: 0, envMapIntensity: .15, emissive: b.night ? 0xffffff : 0x000000, emissiveMap: b.night ? TEX.road[i] : null, emissiveIntensity: b.night ? .14 : 0 })),
   ground: new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }),
@@ -1063,22 +1066,22 @@ function trackAt(s, o){
   o.h = lerp(TS.h[i], TS.h[i + 1], t); o.k = lerp(TS.k[i], TS.k[i + 1], t); o.slope = (TS.y[i + 1] - TS.y[i]) / STEP; return o;
 }
 function worldAt(s, d, v){ trackAt(s, tA); v.set(tA.x - Math.cos(tA.h) * d, tA.y, tA.z + Math.sin(tA.h) * d); return v; }
-/* ---- corkscrew ("Βίδα", Liquidation Chase only): once per checkpoint stretch the road rises off the ground,
+/* ---- corkscrew ("Βίδα", in every mode): once per checkpoint stretch the road rises off the ground,
    rolls a full 360 degrees with a short upside-down hold in the middle, and comes back down ---- */
 const TW_OFF = 700, TW_RAMP = 160, TW_LEN = 440, TW_LIFT = 14, TW_TOTAL = TW_RAMP * 2 + TW_LEN;
 const twist = { roll: 0, lift: 0 };
 function twistAt(s){
   twist.roll = 0; twist.lift = 0;
-  if (mode !== 'chase' || s < TW_OFF) return twist;
+  if (s < TW_OFF) return twist;
   const m = Math.floor((s - TW_OFF) / CP_LEN), a = m * CP_LEN + TW_OFF, x = s - a;
-  if (x < 0 || x > TW_TOTAL) return twist;
+  if (x < 0 || x > TW_TOTAL || a + TW_TOTAL > finishS - 80) return twist;   // never runs into a finish line
   twist.lift = TW_LIFT * smooth(clamp(x / TW_RAMP, 0, 1)) * smooth(clamp((TW_TOTAL - x) / TW_RAMP, 0, 1));
   const t = clamp((x - TW_RAMP) / TW_LEN, 0, 1);
   twist.roll = (m % 2 ? -1 : 1) * Math.PI * (smooth(clamp(t / .4, 0, 1)) + smooth(clamp((t - .6) / .4, 0, 1)));
   return twist;
 }
 const inTwist = s => { twistAt(s); return twist.lift > .01; };
-const nearTwist = s => mode === 'chase' && s > TW_OFF - 30 && ((s - TW_OFF) % CP_LEN) < TW_TOTAL + 30;
+const nearTwist = s => s > TW_OFF - 30 && ((s - TW_OFF) % CP_LEN) < TW_TOTAL + 30 && Math.floor((s - TW_OFF + 30) / CP_LEN) * CP_LEN + TW_OFF + TW_TOTAL <= finishS - 80;
 // a point on the road surface (with the corkscrew applied) and the road's up direction there
 const ROAD_N = new THREE.Vector3();
 function roadAt(s, d, v, n){
@@ -1125,7 +1128,7 @@ function buildChunk(ci){
     const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.Float32BufferAttribute(deckP, 3)); dg.computeVertexNormals();
     grp.add(new THREE.Mesh(dg, MAT.deck)); chunk.dispose.push(dg);
     const ng = new THREE.BufferGeometry(); ng.setAttribute('position', new THREE.Float32BufferAttribute(neonP, 3));
-    grp.add(new THREE.Mesh(ng, MAT.neon[b])); chunk.dispose.push(ng);
+    grp.add(new THREE.Mesh(ng, MAT.twistNeon)); chunk.dispose.push(ng);
   }
   const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); rg.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); rg.setIndex(idx); rg.computeVertexNormals();
   const road = new THREE.Mesh(rg, MAT.road[b]); road.receiveShadow = true; grp.add(road); chunk.dispose.push(rg);
@@ -1979,7 +1982,7 @@ function updateFx(dt, sp){
 }
 
 /* ================= environment blending ================= */
-const cA = new THREE.Color(), cB2 = new THREE.Color();
+const cA = new THREE.Color(), cB2 = new THREE.Color(), twC = new THREE.Color(), twC2 = new THREE.Color(), twC3 = new THREE.Color();
 function lerpCol(target, a, b, t){ cA.set(a); cB2.set(b); target.copy(cA).lerp(cB2, t); }
 function applyEnv(t){
   const A = BIOMES[prevB], B = BIOMES[curB];
@@ -2008,6 +2011,19 @@ function render(dt){
   if (b !== curB) { prevB = curB; curB = b; blendT = 0; }
   if (blendT < 1) blendT = Math.min(1, blendT + dt / 2.2);
   applyEnv(smooth(blendT));
+  {
+    twistAt(sP + PLEN / 2); const tw = twist.lift > .01 ? Math.pow(Math.abs(Math.sin(twist.roll / 2)), .8) * clamp(twist.lift / TW_LIFT * 1.6, 0, 1) : 0;
+    const hue = (tNow * .22) % 1;
+    MAT.twistNeon.color.setHSL(hue, 1, .6).multiplyScalar(2.2);
+    if (tw > .001) {
+      twC.setHSL(hue, .85, .6); twC2.setHSL((hue + .33) % 1, .9, .55); twC3.setHSL((hue + .66) % 1, .8, .7);
+      skyU.top.value.lerp(twC2, tw * .75); skyU.mid.value.lerp(twC, tw * .75); skyU.hor.value.lerp(twC3, tw * .7);
+      scene.fog.color.lerp(twC3, tw * .6); hemi.color.lerp(twC, tw * .5); sunL.color.lerp(twC3, tw * .4);
+    }
+    // a colour wash over the whole picture, sweeping through the hues while you roll
+    const tt = $('twTint'), op = state === 'garage' ? 0 : tw * .55;
+    if (op > .005 || tt.style.opacity !== '0') { tt.style.opacity = op.toFixed(3); tt.style.background = 'linear-gradient(135deg,hsl(' + Math.round(hue * 360) + ',100%,55%),hsl(' + Math.round(((hue + .33) % 1) * 360) + ',100%,50%))'; }
+  }
   // player
   const sp = v / MAXV;
   trackAt(sP + PLEN / 2, tA);

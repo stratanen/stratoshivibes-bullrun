@@ -524,12 +524,12 @@ const T = {
 Object.assign(T.en, {
   chaseSub:'Outrun the liquidators', newMode:'New', flyGot:'+1 charge', collateral:'Collateral', liqComing:'LIQUIDATOR INCOMING', liqDown:'LIQUIDATOR DOWN', liqEscaped:'ESCAPED',
   liquidated:'LIQUIDATED', collHit:'COLLATERAL HIT', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Knocked out', liqEscapes:'Escaped',
-  r7:'Liquidation Chase: liquidators overtake you and cut in to brake. Dodge them, use nitro to get away, lead them into traffic. Press FLY to rocket over traffic and liquidators for about 4.5 seconds, faster than nitro (you start with one, pick up more on the road). Three hits and you are liquidated; every checkpoint gives back one collateral.'
+  r7:'Liquidation Chase: liquidators overtake you and cut in to brake. Dodge them, use nitro to get away, lead them into traffic. Press FLY to rocket over traffic and liquidators for about 4.5 seconds, faster than nitro (you start with one, pick up more on the road). Watch out for the corkscrew: once every 2 km the road rolls upside down. Three hits and you are liquidated; every checkpoint gives back one collateral.'
 });
 Object.assign(T.el, {
   chaseSub:'Ξέφυγε από τους liquidators', newMode:'Νέο', flyGot:'+1 φορτίο', collateral:'Collateral', liqComing:'ΕΡΧΕΤΑΙ LIQUIDATOR', liqDown:'LIQUIDATOR ΕΚΤΟΣ', liqEscaped:'ΞΕΦΥΓΕΣ',
   liquidated:'ΡΕΥΣΤΟΠΟΙΗΘΗΚΕΣ', collHit:'ΧΤΥΠΗΜΑ ΣΤΟ COLLATERAL', collBack:'+1 collateral', liqShort:'LIQ', liqKnocks:'Εκτός μάχης', liqEscapes:'Ξέφυγες',
-  r7:'Liquidation Chase: οι liquidators σε προσπερνούν και μπαίνουν μπροστά σου για να φρενάρουν. Απόφυγέ τους, ξέφυγε με nitro ή ρίξ\' τους στην κίνηση. Με το FLY σηκώνεσαι και τρέχεις πιο γρήγορα κι από το nitro για περίπου 4,5 δευτερόλεπτα πάνω από την κίνηση και τους liquidators (ξεκινάς με ένα, μαζεύεις κι άλλα στον δρόμο). Τρία χτυπήματα και ρευστοποιείσαι· κάθε checkpoint σου δίνει πίσω ένα collateral.'
+  r7:'Liquidation Chase: οι liquidators σε προσπερνούν και μπαίνουν μπροστά σου για να φρενάρουν. Απόφυγέ τους, ξέφυγε με nitro ή ρίξ\' τους στην κίνηση. Με το FLY σηκώνεσαι και τρέχεις πιο γρήγορα κι από το nitro για περίπου 4,5 δευτερόλεπτα πάνω από την κίνηση και τους liquidators (ξεκινάς με ένα, μαζεύεις κι άλλα στον δρόμο). Κάθε 2 km ο δρόμος γίνεται βίδα και οδηγείς ανάποδα. Τρία χτυπήματα και ρευστοποιείσαι· κάθε checkpoint σου δίνει πίσω ένα collateral.'
 });
 Object.assign(T.en, {
   gpIntro:'Optional extras that only change how your car looks. Payment goes through Google Play.',
@@ -829,7 +829,8 @@ function redrawTextTextures(){ [...TEX.boardDay, ...TEX.boardNight, ...TEX.gate,
 const ENV_MATS = [];
 const envMat = m => { ENV_MATS.push(m); return m; };
 const MAT = {
-  road: BIOMES.map((b, i) => new THREE.MeshStandardMaterial({ map: TEX.road[i], roughness: .92, metalness: 0, envMapIntensity: .15, emissive: b.night ? 0xffffff : 0x000000, emissiveMap: b.night ? TEX.road[i] : null, emissiveIntensity: b.night ? .14 : 0 })),
+  deck: new THREE.MeshStandardMaterial({ color: '#1d1b2a', roughness: .7, metalness: .3, side: THREE.DoubleSide }),
+  road: BIOMES.map((b, i) => new THREE.MeshStandardMaterial({ side: THREE.DoubleSide, map: TEX.road[i], roughness: .92, metalness: 0, envMapIntensity: .15, emissive: b.night ? 0xffffff : 0x000000, emissiveMap: b.night ? TEX.road[i] : null, emissiveIntensity: b.night ? .14 : 0 })),
   ground: new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }),
   props: new THREE.MeshLambertMaterial({ vertexColors: true, flatShading: true }),
   rail: BIOMES.map(b => envMat(new THREE.MeshStandardMaterial({ color: b.rail, metalness: .6, roughness: .35, side: THREE.DoubleSide, emissive: b.night ? b.rail : '#000', emissiveIntensity: b.night ? .9 : 0 }))),
@@ -1062,13 +1063,39 @@ function trackAt(s, o){
   o.h = lerp(TS.h[i], TS.h[i + 1], t); o.k = lerp(TS.k[i], TS.k[i + 1], t); o.slope = (TS.y[i + 1] - TS.y[i]) / STEP; return o;
 }
 function worldAt(s, d, v){ trackAt(s, tA); v.set(tA.x - Math.cos(tA.h) * d, tA.y, tA.z + Math.sin(tA.h) * d); return v; }
+/* ---- corkscrew ("Βίδα", Liquidation Chase only): once per checkpoint stretch the road rises off the ground,
+   rolls a full 360 degrees with a short upside-down hold in the middle, and comes back down ---- */
+const TW_OFF = 700, TW_RAMP = 160, TW_LEN = 440, TW_LIFT = 14, TW_TOTAL = TW_RAMP * 2 + TW_LEN;
+const twist = { roll: 0, lift: 0 };
+function twistAt(s){
+  twist.roll = 0; twist.lift = 0;
+  if (mode !== 'chase' || s < TW_OFF) return twist;
+  const m = Math.floor((s - TW_OFF) / CP_LEN), a = m * CP_LEN + TW_OFF, x = s - a;
+  if (x < 0 || x > TW_TOTAL) return twist;
+  twist.lift = TW_LIFT * smooth(clamp(x / TW_RAMP, 0, 1)) * smooth(clamp((TW_TOTAL - x) / TW_RAMP, 0, 1));
+  const t = clamp((x - TW_RAMP) / TW_LEN, 0, 1);
+  twist.roll = (m % 2 ? -1 : 1) * Math.PI * (smooth(clamp(t / .4, 0, 1)) + smooth(clamp((t - .6) / .4, 0, 1)));
+  return twist;
+}
+const inTwist = s => { twistAt(s); return twist.lift > .01; };
+const nearTwist = s => mode === 'chase' && s > TW_OFF - 30 && ((s - TW_OFF) % CP_LEN) < TW_TOTAL + 30;
+// a point on the road surface (with the corkscrew applied) and the road's up direction there
+const ROAD_N = new THREE.Vector3();
+function roadAt(s, d, v, n){
+  trackAt(s, tA); twistAt(s); tA.roll = twist.roll; tA.lift = twist.lift;
+  const cr = Math.cos(twist.roll), sr = Math.sin(twist.roll), rx = -Math.cos(tA.h), rz = Math.sin(tA.h);
+  v.set(tA.x + rx * cr * d, tA.y + twist.lift + sr * d, tA.z + rz * cr * d);
+  (n || ROAD_N).set(-rx * sr, cr, -rz * sr);
+  return v;
+}
 const biomeAt = s => mode === 'track' ? TR.b : Math.floor(Math.max(0, s) / CP_LEN) % 3;
 const groundDrop = a => a < 9.2 ? -.04 : -Math.min(2.2, (a - 9.2) * .045);
 
 /* ================= chunks ================= */
 const chunks = new Map();
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _v = new THREE.Vector3(), _s = new THREE.Vector3(), _e = new THREE.Euler(), UP = new THREE.Vector3(0, 1, 0);
-function placeMatrix(s, d, yaw, sc, yOff){ worldAt(s, d, _v); _v.y += groundDrop(Math.abs(d)) + (yOff || 0); _e.set(0, tA.h + yaw, 0); _q.setFromEuler(_e); _s.set(sc[0], sc[1], sc[2]); return _m.compose(_v, _q, _s).clone(); }
+let lastPropS = 0;
+function placeMatrix(s, d, yaw, sc, yOff){ lastPropS = Math.abs(d) < 30 ? s : -1e9; worldAt(s, d, _v); _v.y += groundDrop(Math.abs(d)) + (yOff || 0); _e.set(0, tA.h + yaw, 0); _q.setFromEuler(_e); _s.set(sc[0], sc[1], sc[2]); return _m.compose(_v, _q, _s).clone(); }
 function instanced(geo, mat, mats, shadow){ if (!mats.length) return null; const im = new THREE.InstancedMesh(geo, mat, mats.length); mats.forEach((m, i) => im.setMatrixAt(i, m)); im.instanceMatrix.needsUpdate = true; im.castShadow = !!shadow; im.computeBoundingSphere(); return im; }
 function pushTri(pos, colA, a, b, c, cl){
   const ux = b[0] - a[0], uy = b[1] - a[1], uz = b[2] - a[2], vx = c[0] - a[0], vy = c[1] - a[1], vz = c[2] - a[2];
@@ -1080,10 +1107,25 @@ function buildChunk(ci){
   const chunk = { ci, s0, b, grp, items: [], dispose: [] };
   // road ribbon
   const rows = CHUNK / STEP + 1, pos = new Float32Array(rows * 6), uv = new Float32Array(rows * 4), idx = [];
+  const deckP = [], neonP = [], RV = new THREE.Vector3(), RN = new THREE.Vector3(), RV2 = new THREE.Vector3();
+  const edge = (s, d, off, out) => { roadAt(s, d, out, RN); return out.addScaledVector(RN, off); };
   for (let j = 0; j < rows; j++) {
-    const s = s0 + j * STEP; trackAt(s, tA); const cx = Math.cos(tA.h), sx = Math.sin(tA.h);
-    for (let e = 0; e < 2; e++) { const d = e ? ROAD_HALF : -ROAD_HALF, k = j * 2 + e; pos[k * 3] = tA.x - cx * d; pos[k * 3 + 1] = tA.y; pos[k * 3 + 2] = tA.z + sx * d; uv[k * 2] = e ? 1 : 0; uv[k * 2 + 1] = s / 24; }
+    const s = s0 + j * STEP;
+    for (let e = 0; e < 2; e++) { const d = e ? ROAD_HALF : -ROAD_HALF, k = j * 2 + e; roadAt(s, d, RV); pos[k * 3] = RV.x; pos[k * 3 + 1] = RV.y; pos[k * 3 + 2] = RV.z; uv[k * 2] = e ? 1 : 0; uv[k * 2 + 1] = s / 24; }
     if (j < rows - 1) { const a = j * 2, bb = a + 1, c = a + 2, dd = a + 3; idx.push(a, bb, c, bb, dd, c); }
+    if (j < rows - 1 && (inTwist(s) || inTwist(s + STEP))) {
+      const s2 = s + STEP, q = (ss, d, off) => edge(ss, d, off, new THREE.Vector3()).toArray();
+      for (const [d1, d2, o1, o2] of [[-ROAD_HALF, ROAD_HALF, -.7, -.7], [-ROAD_HALF, -ROAD_HALF, 0, -.7], [ROAD_HALF, ROAD_HALF, 0, -.7]]) {   // deck underside and its two sides
+        const A = q(s, d1, o1), B2 = q(s, d2, o2), C2 = q(s2, d1, o1), D2 = q(s2, d2, o2); deckP.push(...A, ...B2, ...C2, ...B2, ...D2, ...C2);
+      }
+      for (const sg of [-1, 1]) { const A = q(s, sg * ROAD_HALF, .02), B2 = q(s, sg * (ROAD_HALF - .35), .02), C2 = q(s2, sg * ROAD_HALF, .02), D2 = q(s2, sg * (ROAD_HALF - .35), .02); neonP.push(...A, ...B2, ...C2, ...B2, ...D2, ...C2); }
+    }
+  }
+  if (deckP.length) {
+    const dg = new THREE.BufferGeometry(); dg.setAttribute('position', new THREE.Float32BufferAttribute(deckP, 3)); dg.computeVertexNormals();
+    grp.add(new THREE.Mesh(dg, MAT.deck)); chunk.dispose.push(dg);
+    const ng = new THREE.BufferGeometry(); ng.setAttribute('position', new THREE.Float32BufferAttribute(neonP, 3));
+    grp.add(new THREE.Mesh(ng, MAT.neon[b])); chunk.dispose.push(ng);
   }
   const rg = new THREE.BufferGeometry(); rg.setAttribute('position', new THREE.BufferAttribute(pos, 3)); rg.setAttribute('uv', new THREE.BufferAttribute(uv, 2)); rg.setIndex(idx); rg.computeVertexNormals();
   const road = new THREE.Mesh(rg, MAT.road[b]); road.receiveShadow = true; grp.add(road); chunk.dispose.push(rg);
@@ -1100,15 +1142,16 @@ function buildChunk(ci){
   // guard rails
   const rp = [];
   for (const sg of [-1, 1]) for (let j = 0; j < rows - 1; j++) {
+    if (nearTwist(s0 + j * STEP) || nearTwist(s0 + j * STEP + STEP)) continue;
     const p = (jj, yy) => { const s = s0 + jj * STEP; trackAt(s, tA); const d = sg * RAIL_D; return [tA.x - Math.cos(tA.h) * d, tA.y + yy, tA.z + Math.sin(tA.h) * d]; };
     const a = p(j, .5), bq = p(j, .86), cq = p(j + 1, .5), dq = p(j + 1, .86); rp.push(...a, ...bq, ...cq, ...bq, ...dq, ...cq);
   }
   const railG = new THREE.BufferGeometry(); railG.setAttribute('position', new THREE.Float32BufferAttribute(rp, 3)); railG.computeVertexNormals();
   grp.add(new THREE.Mesh(railG, MAT.rail[b])); chunk.dispose.push(railG);
-  const posts = []; for (let s = s0; s < s0 + CHUNK; s += 4) for (const sg of [-1, 1]) posts.push(placeMatrix(s, sg * (RAIL_D + .1), 0, [1, 1, 1], .04));
+  const posts = []; for (let s = s0; s < s0 + CHUNK; s += 4) if (!nearTwist(s)) for (const sg of [-1, 1]) posts.push(placeMatrix(s, sg * (RAIL_D + .1), 0, [1, 1, 1], .04));
   const pim = instanced(PROP.post, MAT.post, posts); if (pim) grp.add(pim);
   // props
-  const P = {}, add = (k, m) => (P[k] = P[k] || []).push(m);
+  const P = {}, add = (k, m) => { if (nearTwist(lastPropS)) return; (P[k] = P[k] || []).push(m); };   // nothing next to the corkscrew
   const nearGate = s => (s % CP_LEN) < 30 || (s % CP_LEN) > CP_LEN - 10;
   if (B.props === 'bull') {
     for (let s = s0 + r() * 8; s < s0 + CHUNK; s += 10 + r() * 6) { const sg = r() < .5 ? -1 : 1; add('palm' + ((r() * 3) | 0), placeMatrix(s, sg * (11.4 + r() * 10), r() * TAU, [1, 1, 1].map(v => v * (.85 + r() * .35)))); }
@@ -1131,7 +1174,7 @@ function buildChunk(ci){
     if (k === 'lamp' || k === 'lampN') { const h = instanced(lampHeadGeo, k === 'lampN' ? MAT.lampHeadNight : MAT.lampHead, P[k]); if (h) grp.add(h); }
   }
   // billboards
-  if (r() < (B.night ? .9 : .6)) {
+  if (r() < (B.night ? .9 : .6) && !nearTwist(s0 + CHUNK / 2) && !nearTwist(s0 + 40) && !nearTwist(s0 + CHUNK - 40)) {
     const s = s0 + 40 + r() * (CHUNK - 80), sg = r() < .5 ? -1 : 1, ti = (r() * 5) | 0, mat = MAT.board[ti + (B.night ? 5 : 0)];
     const bw = 9, bh = 4.5, base = worldAt(s, sg * 13.4, new THREE.Vector3()), yaw = tA.h + Math.PI + sg * .35;
     const panel = new THREE.Mesh(new THREE.PlaneGeometry(bw, bh), mat); panel.position.copy(base).add(new THREE.Vector3(0, 5.2 + bh / 2 + groundDrop(13.4), 0)); panel.rotation.y = yaw; grp.add(panel);
@@ -1955,9 +1998,10 @@ function applyEnv(t){
 /* ================= render ================= */
 let GCAM = null, CAMP = [7.8, 4.4, 18, -2.2], CAMP_L = [7.2, 3.4, 24, -.6];
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), tmpV = new THREE.Vector3();
+const carN = new THREE.Vector3();
 function placeCar(mesh, s, dd, len, yawExtra, rollExtra){
-  worldAt(s + len / 2, dd, tmpV); mesh.position.copy(tmpV);
-  mesh.rotation.set(-Math.atan(tA.slope), tA.h + (yawExtra || 0), rollExtra || 0, 'YXZ');
+  roadAt(s + len / 2, dd, tmpV, carN); mesh.position.copy(tmpV);
+  mesh.rotation.set(-Math.atan(tA.slope), tA.h + (yawExtra || 0), -tA.roll + (rollExtra || 0), 'YXZ');
 }
 function render(dt){
   const b = biomeAt(sP + 30);
@@ -1968,11 +2012,11 @@ function render(dt){
   const sp = v / MAXV;
   trackAt(sP + PLEN / 2, tA);
   const yaw = clamp(-steer * .14 - tA.k * 20 * sp, -.35, .35);
-  placeCar(player, sP, d, PLEN, yaw, steer * .03 * sp);
-  player.position.y += Math.sin(tNow * 23) * .006 * sp + (Math.abs(d) > CURB + .2 && v > 5 && !flyH ? (Math.random() - .5) * .04 : 0);
+  placeCar(player, sP, d, PLEN, yaw, steer * .03 * sp); const pN = carN.clone();
+  player.position.addScaledVector(pN, Math.sin(tNow * 23) * .006 * sp + (Math.abs(d) > CURB + .2 && v > 5 && !flyH ? (Math.random() - .5) * .04 : 0));
   flyShadow.visible = flyH > 0;
-  if (flyH > 0) { worldAt(sP + PLEN / 2, d, flyShadow.position); flyShadow.position.y += .06; flyShadow.rotation.y = tA.h; flyShadow.material.opacity = .55 * (1 - flyH / FLY_H * .45); const sc = 1 + flyH / FLY_H * .5; flyShadow.scale.set(sc, 1, sc); }
-  if (flyH > 0) { player.position.y += flyH + Math.sin(tNow * 5) * .12; player.rotateX(-.12 * clamp((FLY_DUR - flyT) / .6, 0, 1) * clamp(flyT / .8, 0, 1)); }
+  if (flyH > 0) { worldAt(sP + PLEN / 2, d, flyShadow.position); flyShadow.position.y += .06 + (twistAt(sP).lift > .01 && Math.abs(twist.roll) < .3 ? twist.lift : 0); flyShadow.rotation.y = tA.h; flyShadow.material.opacity = .55 * (1 - flyH / FLY_H * .45); const sc = 1 + flyH / FLY_H * .5; flyShadow.scale.set(sc, 1, sc); }
+  if (flyH > 0) { player.position.addScaledVector(pN, flyH + Math.sin(tNow * 5) * .12); player.rotateX(-.12 * clamp((FLY_DUR - flyT) / .6, 0, 1) * clamp(flyT / .8, 0, 1)); }
   under.material.opacity = flyH > 0 ? .9 : BIOMES[curB].night ? .7 : .28;
   const nf = nitroFx; flames.forEach(f => { f.visible = nf > .05; f.scale.set(.8 + Math.random() * .4, 1, nf * (.8 + Math.random() * .5)); });
   MAT.tail.emissiveIntensity = braking || hitT > .5 ? 2.6 : (BIOMES[curB].night ? 1.8 : 1.6);
@@ -1986,20 +2030,23 @@ function render(dt){
   let n = 0, nn = 0, nf2 = 0;
   for (const [, ch] of chunks) for (const it of ch.items) {
     if (it.taken || it.s < sP - 8 || it.s > sP + 800) continue;
-    worldAt(it.s, it.d, tmpV);
-    if (it.kind === 'tok' && n < 260) { tmpV.y += 1.15 + Math.sin(tNow * 3 + it.ph) * .12; _e.set(0, tA.h + tNow * 3.2 + it.ph, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1, 1, 1)); tokenIM.setMatrixAt(n++, _m); }
-    else if (it.kind === 'fly' && nf2 < 8) { tmpV.y += 1.6 + Math.sin(tNow * 3) * .2; _e.set(0, tA.h + tNow * 1.6, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1.3, 1.3, 1.3)); flyIM.setMatrixAt(nf2++, _m); }
-    else if (it.kind === 'nitro' && nn < 12) { tmpV.y += 1.3 + Math.sin(tNow * 4) * .15; _e.set(.35, tA.h + tNow * 2, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1.4, 1.4, 1.4)); nitroIM.setMatrixAt(nn++, _m); }
+    roadAt(it.s, it.d, tmpV, carN);
+    if (it.kind === 'tok' && n < 260) { tmpV.addScaledVector(carN, 1.15 + Math.sin(tNow * 3 + it.ph) * .12); _e.set(0, tA.h + tNow * 3.2 + it.ph, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1, 1, 1)); tokenIM.setMatrixAt(n++, _m); }
+    else if (it.kind === 'fly' && nf2 < 8) { tmpV.addScaledVector(carN, 1.6 + Math.sin(tNow * 3) * .2); _e.set(0, tA.h + tNow * 1.6, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1.3, 1.3, 1.3)); flyIM.setMatrixAt(nf2++, _m); }
+    else if (it.kind === 'nitro' && nn < 12) { tmpV.addScaledVector(carN, 1.3 + Math.sin(tNow * 4) * .15); _e.set(.35, tA.h + tNow * 2, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1.4, 1.4, 1.4)); nitroIM.setMatrixAt(nn++, _m); }
   }
   tokenIM.count = n; tokenIM.instanceMatrix.needsUpdate = true; nitroIM.count = nn; nitroIM.instanceMatrix.needsUpdate = true; flyIM.count = nf2; flyIM.instanceMatrix.needsUpdate = true;
   // camera: behind and above, following the road
   const lt = smooth(clamp((W / H - .75) / .9, 0, 1)), C = CAMP.map((x, i) => lerp(x, CAMP_L[i], lt));
   const back = C[0] + sp * .6, high = C[1];
-  worldAt(sP - back, dCam, camPos); camPos.y += high + flyH * (.4 + .3 * lt);
-  worldAt(sP + C[2], dCam * .8, camLook); camLook.y += C[3] + flyH * (.3 + .35 * lt);
+  const nA = new THREE.Vector3(), nB = new THREE.Vector3();
+  roadAt(sP - back, dCam, camPos, nA); camPos.addScaledVector(nA, high + flyH * (.4 + .3 * lt));
+  roadAt(sP + C[2], dCam * .8, camLook, nB); camLook.addScaledVector(nB, C[3] + flyH * (.3 + .35 * lt));
+  camera.up.copy(nA).add(nB).normalize();
   if (shake > 0) { const a = shake * .25; camPos.x += (Math.random() - .5) * a; camPos.y += (Math.random() - .5) * a; }
   camera.position.copy(camPos); camera.lookAt(camLook); camera.rotateZ(-lean);
   if (state === 'garage') {
+    camera.up.set(0, 1, 0);
     const a = GCAM ? GCAM[0] : tNow * .2 + 2.2, land = W > H, R2 = GCAM ? GCAM[1] : land ? 7.6 : 8.6;
     camera.position.set(player.position.x + Math.sin(a) * R2, player.position.y + (GCAM ? GCAM[2] : land ? 2.6 : 3.6), player.position.z + Math.cos(a) * R2);
     camera.lookAt(player.position.x, player.position.y + (GCAM ? GCAM[3] : land ? .5 : -1.7), player.position.z);
@@ -2703,7 +2750,7 @@ if (WAL.addr && ONLINE) checkHolder(false);
 if (tiltMode) tiltStart(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
 window.__bullrun = { get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state, track: !!MUS.chaseSrc, buf: !!MUS.chaseBuf }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
-  get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, get fly(){ return { charges: flyCharges, t: flyT, h: flyH, kmh: Math.round(v * 3.6) }; }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
+  get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, get fly(){ return { charges: flyCharges, t: flyT, h: flyH, kmh: Math.round(v * 3.6), s: sP }; }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },
   gcam(x){ GCAM = x; }, paint(id){ showPaint(id); }, cam(b, h, la, ly){ CAMP = [b, h, la, ly]; }, camL(b, h, la, ly){ CAMP_L = [b, h, la, ly]; } };

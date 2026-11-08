@@ -3,7 +3,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0820">
-<meta name="description" content="StratoshiVibes Bull Run: arcade racing on crypto highways. Nine tracks, an endless run and a garage. Free, no ads.">
+<meta name="description" content="StratoshiVibes Bull Run: arcade racing on crypto highways. Ten tracks, an endless run and a garage. Free, no ads.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*,*::before,*::after{box-sizing:inherit}</style>
@@ -451,6 +451,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
     <div class="bar"><button class="back" type="button" data-home aria-label="Back"><svg aria-hidden="true"><use href="#i-back"/></svg></button><h2 data-t="settings"></h2></div>
     <div class="opts">
       <div class="opt"><span class="lab" data-t="steering"></span><div class="seg" id="segSteer"><button type="button" data-v="btn" data-t="btnSteer"></button><button type="button" data-v="tilt" data-t="tiltSteer"></button></div></div>
+      <div class="opt"><span class="lab" data-t="twCam"></span><div class="seg" id="segTwCam"><button type="button" data-v="roll" data-t="twRoll"></button><button type="button" data-v="level" data-t="twLevel"></button></div></div>
       <div class="opt"><span class="lab" data-t="music"></span><div class="seg" id="segMus"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="sound"></span><div class="seg" id="segSnd"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="lang"></span><div class="seg" id="segLang"><button type="button" data-v="el">ΕΛ</button><button type="button" data-v="en">EN</button></div></div>
@@ -549,12 +550,12 @@ Object.assign(T.el, {
 });
 Object.assign(T.en, {
   music:'Music', seekerPerks:'Seeker Perks', seekerSub:'For Seeker owners', perkPaint:'Genesis paint, only for Seeker owners', perkBonus:'Double daily bonus: +100 tokens', perkBadge:'Seeker badge next to your name in the ranking', perkOn:'Unlocked on this wallet', perkConnect:'Connect the wallet on your Seeker to unlock them.', perkNone:'No Seeker Genesis Token found in this wallet. Connect the wallet on your Seeker (Seed Vault).', perkChecking:'Checking for a Seeker Genesis Token…', perkHow:'Every Seeker holds a Seeker Genesis Token. Bull Run reads it from the blockchain; nothing is signed or paid. The ranking badge appears after you join the ranking.', perkActive:'Seeker perks on', seekerPaint:'Seeker owners only · Seeker Genesis Token', getSeeker:'Unlock with your Seeker wallet', badgeT:'Seeker owner', perksShort:'3 perks', perkOnShort:'Active', steering:'Steering', btnSteer:'Buttons', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
-  tag:'Arcade racing on crypto highways. Nine tracks, an endless run, and a garage to fill.',
+  tag:'Arcade racing on crypto highways. Ten tracks, an endless run, and a garage to fill.',
   races:'Races', endless:'Endless run', garage:'Garage', lb:'Ranking', shop:'Shop', settings:'Settings', how:'How to play',
-  r5:'Endless run: checkpoints add time. Traffic and barriers cost speed. Every 2 km the road turns into a corkscrew and you drive upside down.', r6:'Races: all nine tracks are open. Reach the finish line; faster times earn up to 3 stars.',
+  r5:'Endless run: checkpoints add time. Traffic and barriers cost speed. Every 2 km the road turns into a corkscrew and you drive upside down.', r6:'Races: all ten tracks are open, including Corkscrew Run, a track of corkscrews. Reach the finish line; faster times earn up to 3 stars.',
   restart:'Restart', privacy:'Privacy', terms:'Terms', proto:'Bull Run 1.1',
   finish:'Finish', timeUp:'Out of time', next:'Next track', retry:'Retry', tracksBtn:'Tracks', bestTime:'Best time', rank:'Rank',
-  locked:'Finish the previous track', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', starsWord:'stars',
+  locked:'Finish the previous track', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', special:'SPECIAL', twCam:'Corkscrew camera', twRoll:'Rolls', twLevel:'Level', starsWord:'stars',
   noRun:'not raced yet', bankShort:'Tokens to spend', earned:'Tokens earned', bankWord:'tokens to spend',
   use:'Use this paint', inUse:'In use', unlockFor:'Unlock for {n} tokens', needMore:'Need {n} more tokens', getShop:'Get it in the Shop', getNft:'For StratoshiVibes Vol.1 Degens holders', connectNft:'Connect a wallet that holds a Degen',
   freePaint:'Starter paint', earnPaint:'Earned with tokens you collect', shopPaint:'Supporter Garage (Shop)', nftPaint:'Holder paint · Vol.1 Degens',
@@ -583,12 +584,12 @@ Object.assign(T.en, {
 });
 Object.assign(T.el, {
   music:'Μουσική', seekerPerks:'Seeker Perks', seekerSub:'Για κατόχους Seeker', perkPaint:'Χρώμα Genesis, μόνο για κατόχους Seeker', perkBonus:'Διπλό ημερήσιο μπόνους: +100 tokens', perkBadge:'Σήμα Seeker δίπλα στο όνομά σου στην κατάταξη', perkOn:'Ενεργά σε αυτό το πορτοφόλι', perkConnect:'Σύνδεσε το πορτοφόλι του Seeker σου για να τα ξεκλειδώσεις.', perkNone:'Δεν βρέθηκε Seeker Genesis Token σε αυτό το πορτοφόλι. Σύνδεσε το πορτοφόλι του Seeker σου (Seed Vault).', perkChecking:'Ελέγχω για Seeker Genesis Token…', perkHow:'Κάθε Seeker έχει ένα Seeker Genesis Token. Το Bull Run το διαβάζει από το blockchain· δεν υπογράφεις και δεν πληρώνεις τίποτα. Το σήμα στην κατάταξη εμφανίζεται όταν μπεις στην κατάταξη.', perkActive:'Τα Seeker Perks είναι ενεργά', seekerPaint:'Μόνο για κατόχους Seeker · Seeker Genesis Token', getSeeker:'Ξεκλείδωμα με το πορτοφόλι του Seeker', badgeT:'Κάτοχος Seeker', perksShort:'3 προνόμια', perkOnShort:'Ενεργά', steering:'Στρίψιμο', btnSteer:'Κουμπιά', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
-  tag:'Arcade αγώνες σε crypto αυτοκινητόδρομους. Εννιά πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.',
+  tag:'Arcade αγώνες σε crypto αυτοκινητόδρομους. Δέκα πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.',
   races:'Αγώνες', endless:'Ατελείωτη διαδρομή', garage:'Γκαράζ', lb:'Κατάταξη', shop:'Shop', settings:'Ρυθμίσεις', how:'Πώς παίζεται',
-  r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα. Κάθε 2 km ο δρόμος γίνεται βίδα και οδηγείς ανάποδα.', r6:'Αγώνες: και οι εννιά πίστες είναι ανοιχτές. Φτάσε στον τερματισμό· όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3).',
+  r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα. Κάθε 2 km ο δρόμος γίνεται βίδα και οδηγείς ανάποδα.', r6:'Αγώνες: και οι δέκα πίστες είναι ανοιχτές, μαζί με το Corkscrew Run, μια πίστα γεμάτη βίδες. Φτάσε στον τερματισμό· όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3).',
   restart:'Από την αρχή', privacy:'Απόρρητο', terms:'Όροι', proto:'Bull Run 1.1',
   finish:'Τερματισμός', timeUp:'Τέλος χρόνου', next:'Επόμενη πίστα', retry:'Ξανά', tracksBtn:'Πίστες', bestTime:'Ρεκόρ', rank:'Θέση',
-  locked:'Τερμάτισε την προηγούμενη πίστα', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', starsWord:'αστέρια',
+  locked:'Τερμάτισε την προηγούμενη πίστα', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', special:'ΕΙΔΙΚΗ', twCam:'Κάμερα στη βίδα', twRoll:'Γυρίζει', twLevel:'Σταθερή', starsWord:'αστέρια',
   noRun:'χωρίς χρόνο ακόμα', bankShort:'Tokens για ξόδεμα', earned:'Tokens που μάζεψες', bankWord:'tokens για ξόδεμα',
   use:'Βάψε με αυτό', inUse:'Σε χρήση', unlockFor:'Ξεκλείδωμα με {n} tokens', needMore:'Χρειάζεσαι {n} tokens ακόμα', getShop:'Στο Shop', getNft:'Για κατόχους StratoshiVibes Vol.1 Degens', connectNft:'Σύνδεσε πορτοφόλι με Degen',
   freePaint:'Βασικό χρώμα', earnPaint:'Ξεκλειδώνει με tokens που μαζεύεις', shopPaint:'Supporter Garage (Shop)', nftPaint:'Χρώμα κατόχων · Vol.1 Degens',
@@ -638,7 +639,10 @@ const TRACKS = [
   { id:'t6', b:1, len:4400, diff:5, seed:2306, el:'Κύκλος 4 Ετών', en:'Four-Year Cycle', par:68.16 },
   { id:'t7', b:2, len:3800, diff:6, seed:3107, el:'Λεωφόρος Αρκούδας', en:'Bear Avenue', par:59.17 },
   { id:'t8', b:2, len:4400, diff:7, seed:3208, el:'Βρόχος Ρευστοποίησης', en:'Liquidation Loop', par:68.16 },
-  { id:'t9', b:2, len:5000, diff:8, seed:3309, el:'Capitulation', en:'Capitulation', par:77.16 }
+  { id:'t9', b:2, len:5000, diff:8, seed:3309, el:'Capitulation', en:'Capitulation', par:77.16 },
+  // special: a whole track of corkscrews, one after another (start, length, full turns, direction)
+  { id:'t10', b:2, len:3400, diff:1, seed:4110, el:'Corkscrew Run', en:'Corkscrew Run', par:53.17, special:true, sparse:true,
+    twists: [[500, 400, 1, 1], [1000, 380, 1, -1], [1480, 640, 2, 1], [2220, 320, 1, -1], [2640, 420, 1, 1]] }
 ];
 /* daily track: a new road every UTC day, the same for everyone */
 const DAILY_LEN = 3600, DAILY_BONUS = 50, MONTHS = { el: ['Ιαν','Φεβ','Μαρ','Απρ','Μαΐ','Ιουν','Ιουλ','Αυγ','Σεπ','Οκτ','Νοε','Δεκ'], en: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] };
@@ -1070,18 +1074,25 @@ function worldAt(s, d, v){ trackAt(s, tA); v.set(tA.x - Math.cos(tA.h) * d, tA.y
    rolls a full 360 degrees with a short upside-down hold in the middle, and comes back down ---- */
 const TW_OFF = 700, TW_RAMP = 160, TW_LEN = 440, TW_LIFT = 14, TW_TOTAL = TW_RAMP * 2 + TW_LEN;
 const twist = { roll: 0, lift: 0 };
+const halfTurns = (t, n) => { let r = 0; for (let k = 0; k < 2 * n; k++) r += smooth(clamp((t * 2 * n - k) / .8, 0, 1)); return Math.PI * r; };
 function twistAt(s){
   twist.roll = 0; twist.lift = 0;
+  if (TR && TR.twists) {   // a track with its own corkscrews: the road stays up in the air for the whole run of them
+    const L = TR.twists, a0 = L[0][0], z = L[L.length - 1], a1 = z[0] + z[1];
+    twist.lift = TW_LIFT * smooth(clamp((s - (a0 - TW_RAMP)) / TW_RAMP, 0, 1)) * smooth(clamp((a1 + TW_RAMP - s) / TW_RAMP, 0, 1));
+    for (const [a, len, n, dir] of L) if (s >= a && s <= a + len) { twist.roll = dir * halfTurns((s - a) / len, n); break; }
+    return twist;
+  }
   if (s < TW_OFF) return twist;
   const m = Math.floor((s - TW_OFF) / CP_LEN), a = m * CP_LEN + TW_OFF, x = s - a;
   if (x < 0 || x > TW_TOTAL || a + TW_TOTAL > finishS - 80) return twist;   // never runs into a finish line
   twist.lift = TW_LIFT * smooth(clamp(x / TW_RAMP, 0, 1)) * smooth(clamp((TW_TOTAL - x) / TW_RAMP, 0, 1));
   const t = clamp((x - TW_RAMP) / TW_LEN, 0, 1);
-  twist.roll = (m % 2 ? -1 : 1) * Math.PI * (smooth(clamp(t / .4, 0, 1)) + smooth(clamp((t - .6) / .4, 0, 1)));
+  twist.roll = (m % 2 ? -1 : 1) * halfTurns(t, 1);
   return twist;
 }
 const inTwist = s => { twistAt(s); return twist.lift > .01; };
-const nearTwist = s => s > TW_OFF - 30 && ((s - TW_OFF) % CP_LEN) < TW_TOTAL + 30 && Math.floor((s - TW_OFF + 30) / CP_LEN) * CP_LEN + TW_OFF + TW_TOTAL <= finishS - 80;
+const nearTwist = s => (TR && TR.twists) ? (s > TR.twists[0][0] - TW_RAMP - 30 && s < TR.twists[TR.twists.length - 1][0] + TR.twists[TR.twists.length - 1][1] + TW_RAMP + 30) : s > TW_OFF - 30 && ((s - TW_OFF) % CP_LEN) < TW_TOTAL + 30 && Math.floor((s - TW_OFF + 30) / CP_LEN) * CP_LEN + TW_OFF + TW_TOTAL <= finishS - 80;
 // a point on the road surface (with the corkscrew applied) and the road's up direction there
 const ROAD_N = new THREE.Vector3();
 function roadAt(s, d, v, n){
@@ -1357,7 +1368,7 @@ function manageTraffic(dt){
       if (pair) { addCar(pair[0], spawnS); addCar(pair[1], spawnS + (RT() - .5) * 4); lastFree = pair[2]; }
       else { addCar((RT() * 4) | 0, spawnS); lastFree = []; }
     } else { addCar((RT() * 4) | 0, spawnS); lastFree = []; }
-    spawnS += Math.max(70, 90 + RT() * 60 - lvl * 3);
+    spawnS += Math.max(70, 90 + RT() * 60 - lvl * 3) + (mode === 'track' && TR.sparse ? 70 : 0);
   }
 }
 function emit(x, y, vx, vy, life, c, size, type){ if (parts.length > 260) parts.shift(); parts.push({ x, y, vx, vy, life, max: life, col: c, size, type: type || 'dot' }); }
@@ -1414,6 +1425,7 @@ function engineTick(throttle){
 // One song per market. Bass, pad, arpeggio and drums are scheduled a little ahead of time on the Web Audio clock.
 // Menu: pad and arpeggio only, quieter. Race: full band. Off with the Music switch, or with Sound off.
 let musicOn = store.get('bullrun_music') !== '0';
+let twCamLevel = store.get('bullrun_twcam') === 'level';   // corkscrew camera: rolls with the road, or stays level (calmer)
 const SONGS = [
   { bpm: 112, root: 45, chords: [[0, 'm'], [-4, 'M'], [3, 'M'], [-2, 'M']] },   // Bull Market: A minor, bright
   { bpm: 100, root: 40, chords: [[0, 'm'], [-2, 'M'], [-4, 'M'], [-2, 'M']] },   // Halving Canyon: E minor, slower and wider
@@ -1999,7 +2011,7 @@ function applyEnv(t){
 }
 
 /* ================= render ================= */
-let GCAM = null, CAMP = [7.8, 4.4, 18, -2.2], CAMP_L = [7.2, 3.4, 24, -.6];
+let GCAM = null, SHOTCAM = null, CAMP = [7.8, 4.4, 18, -2.2], CAMP_L = [7.2, 3.4, 24, -.6];
 const camPos = new THREE.Vector3(), camLook = new THREE.Vector3(), tmpV = new THREE.Vector3();
 const carN = new THREE.Vector3();
 function placeCar(mesh, s, dd, len, yawExtra, rollExtra){
@@ -2056,9 +2068,15 @@ function render(dt){
   const lt = smooth(clamp((W / H - .75) / .9, 0, 1)), C = CAMP.map((x, i) => lerp(x, CAMP_L[i], lt));
   const back = C[0] + sp * .6, high = C[1];
   const nA = new THREE.Vector3(), nB = new THREE.Vector3();
-  roadAt(sP - back, dCam, camPos, nA); camPos.addScaledVector(nA, high + flyH * (.4 + .3 * lt));
-  roadAt(sP + C[2], dCam * .8, camLook, nB); camLook.addScaledVector(nB, C[3] + flyH * (.3 + .35 * lt));
-  camera.up.copy(nA).add(nB).normalize();
+  if (twCamLevel) {   // calmer: the camera stays level above the road centre; the road and the car roll in front of it
+    roadAt(sP - back, 0, camPos); trackAt(sP - back, tA); camPos.x -= Math.cos(tA.h) * dCam; camPos.z += Math.sin(tA.h) * dCam; camPos.y += high + flyH * (.4 + .3 * lt) + twist.lift * .15;
+    roadAt(sP + C[2], 0, camLook); trackAt(sP + C[2], tA); camLook.x -= Math.cos(tA.h) * dCam * .8; camLook.z += Math.sin(tA.h) * dCam * .8; camLook.y += C[3] + flyH * (.3 + .35 * lt);
+    camera.up.set(0, 1, 0);
+  } else {
+    roadAt(sP - back, dCam, camPos, nA); camPos.addScaledVector(nA, high + flyH * (.4 + .3 * lt));
+    roadAt(sP + C[2], dCam * .8, camLook, nB); camLook.addScaledVector(nB, C[3] + flyH * (.3 + .35 * lt));
+    camera.up.copy(nA).add(nB).normalize();
+  }
   if (shake > 0) { const a = shake * .25; camPos.x += (Math.random() - .5) * a; camPos.y += (Math.random() - .5) * a; }
   camera.position.copy(camPos); camera.lookAt(camLook); camera.rotateZ(-lean);
   if (state === 'garage') {
@@ -2068,6 +2086,7 @@ function render(dt){
     camera.lookAt(player.position.x, player.position.y + (GCAM ? GCAM[3] : land ? .5 : -1.7), player.position.z);
     if (GCAM) camera.translateX(GCAM[4] || 0); else if (land) camera.translateX(2.4);
   }
+  if (SHOTCAM) SHOTCAM(camera, player, roadAt, sP, d);   // test hook for store art
   const aspect = W / H, hTarget = state === 'garage' ? 56 : 60 + sp * 6 + nitroFx * 10 + clamp((v - NITRO_V) / (FLY_V - NITRO_V), 0, 1) * 9;
   let vf = 2 * Math.atan(Math.tan(hTarget * Math.PI / 360) / aspect) * 180 / Math.PI;
   vf = clamp(vf, 50, 82 + nitroFx * 6 + clamp((v - NITRO_V) / (FLY_V - NITRO_V), 0, 1) * 6);
@@ -2299,7 +2318,7 @@ function openGarage(){
 }
 function renderHome(){
   const L = T[lang];
-  $('starSum').textContent = starTotal() + ' / 27 ★';
+  $('starSum').textContent = starTotal() + ' / ' + TRACKS.length * 3 + ' ★';
   $('endlessBest').textContent = best > 0 ? L.best + ' ' + best.toFixed(2) + ' km' : '';
   $('chaseBest').textContent = chaseBest > 0 ? L.best + ' ' + chaseBest.toFixed(2) + ' km' : L.newMode;
   const dt = dailyTrack(), D0 = dayState();
@@ -2311,13 +2330,13 @@ function renderHome(){
 }
 function renderTracks(){
   const L = T[lang], box = $('trackList'); box.innerHTML = '';
-  $('starSum2').textContent = starTotal() + ' / 27';
-  for (let m = 0; m < 3; m++) {
-    const sec = document.createElement('section'); sec.className = 'mkt';
-    sec.innerHTML = '<h3><i style="background:' + BIOMES[m].gate + '"></i>' + L['market' + m] + '</h3>';
+  $('starSum2').textContent = starTotal() + ' / ' + TRACKS.length * 3;
+  for (let m = 0; m < 4; m++) {
+    const sec = document.createElement('section'); sec.className = 'mkt' + (m === 3 ? ' special' : '');
+    sec.innerHTML = '<h3><i style="background:' + (m === 3 ? 'linear-gradient(90deg,#ff4fd8,#3fe0ff)' : BIOMES[m].gate) + '"></i>' + (m === 3 ? L.special : L['market' + m]) + '</h3>';
     const row = document.createElement('div'); row.className = 'trow';
     TRACKS.forEach((tr, i) => {
-      if (tr.b !== m) return;
+      if (m === 3 ? !tr.special : (tr.special || tr.b !== m)) return;
       const ok = unlocked(i), pr = PROG[tr.id], b = document.createElement('button');
       b.type = 'button'; b.className = 'trk'; b.disabled = !ok;
       b.innerHTML = '<span class="n">' + (i + 1) + '</span><b>' + esc(trName(tr)) + '</b><span class="sm">' + (tr.len / 1000).toFixed(1) + ' km · ' + (pr && pr.b ? fmtTime(pr.b) : ok ? L.noRun : L.locked) + '</span>' +
@@ -2332,7 +2351,7 @@ function segSet(id, val){ for (const b of $(id).children) b.setAttribute('aria-p
 function applyLang(){
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach(el => { const t = T[lang][el.dataset.t]; if (typeof t === 'string') el.textContent = t; });
-  segSet('segLang', lang); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off'); segSet('segSteer', tiltMode ? 'tilt' : 'btn');
+  segSet('segLang', lang); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off'); segSet('segTwCam', twCamLevel ? 'level' : 'roll'); segSet('segSteer', tiltMode ? 'tilt' : 'btn');
   renderHome(); if (screen === 'tracks') renderTracks(); if (state === 'garage') renderGarage();
 }
 const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -2642,6 +2661,7 @@ $('segSteer').addEventListener('click', async e => { const b = e.target.closest(
   if (b.dataset.v === 'tilt') { const ok = await tiltStart(true); if (!ok) { toast(T[lang].tiltOff); return; } tiltMode = true; store.set('bullrun_steer', 'tilt'); toast(T[lang].tiltOk, T[lang].tiltHint); tiltCheckLater(); }
   else { tiltMode = false; store.set('bullrun_steer', 'btn'); }
   applyLang(); setUI(); });
+$('segTwCam').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; twCamLevel = b.dataset.v === 'level'; store.set('bullrun_twcam', twCamLevel ? 'level' : 'roll'); applyLang(); });
 $('segMus').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; musicOn = b.dataset.v === 'on'; store.set('bullrun_music', musicOn ? '1' : '0'); audioStart(); applyLang(); });
 $('segSnd').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; muted = b.dataset.v === 'off'; store.set('bullrun_mute', muted ? '1' : '0'); if (!muted) audioStart(); else engineTick(false); applyLang(); });
 $('goTracks').addEventListener('click', () => { audioStart(); go('tracks'); });
@@ -2766,7 +2786,7 @@ if (WAL.addr && ONLINE) checkHolder(false);
 if (tiltMode) tiltStart(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
 window.__bullrun = { get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state, track: !!MUS.chaseSrc, buf: !!MUS.chaseBuf }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
-  get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, get fly(){ return { charges: flyCharges, t: flyT, h: flyH, kmh: Math.round(v * 3.6), s: sP }; }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
+  get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, set shotCam(f){ SHOTCAM = f; }, get fly(){ return { charges: flyCharges, t: flyT, h: flyH, kmh: Math.round(v * 3.6), s: sP }; }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },
   gcam(x){ GCAM = x; }, paint(id){ showPaint(id); }, cam(b, h, la, ly){ CAMP = [b, h, la, ly]; }, camL(b, h, la, ly){ CAMP_L = [b, h, la, ly]; } };

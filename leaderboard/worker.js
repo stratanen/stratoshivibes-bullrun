@@ -7,7 +7,7 @@ const ALLOWED_ORIGINS = ['https://blockspace.stratoshivibes.com', 'https://bullr
 // Bull Run boards. 'endless' = metres driven (higher is better). 't:t1'..'t:t9' = race time in ms (lower is better).
 // Times are stored as negative numbers so the same "highest first" ranking works for both.
 // The minimum times are the track length driven at nitro speed the whole way, so anything faster is impossible.
-const BULLRUN_TRACK_LEN = { t1: 2600, t2: 3200, t3: 3800, t4: 3200, t5: 3800, t6: 4400, t7: 3800, t8: 4400, t9: 5000 };
+const BULLRUN_TRACK_LEN = { t1: 2600, t2: 3200, t3: 3800, t4: 3200, t5: 3800, t6: 4400, t7: 3800, t8: 4400, t9: 5000, t10: 3400 };
 const BULLRUN_NITRO_MS = 93.8;          // metres per second at full nitro
 const BULLRUN_NITRO2_MS = 86.8;         // the same since November 2026 (66.7 m/s x 1.3)
 const BULLRUN_MAX_ENDLESS = 500000;     // 500 km in one endless run is treated as tampering
@@ -23,7 +23,7 @@ function bullrunCheck(board, value) {
   if (board === 'endless') return value <= BULLRUN_MAX_ENDLESS ? value : null;
   if (board === 'chase') return value <= BULLRUN_MAX_ENDLESS ? value : null;   // Liquidation Chase: metres, higher is better
   // 't:' boards = the first version (top speed 260 km/h). 't2:' boards = since November 2026 (top speed 240 km/h, four lanes).
-  const m = /^(t2?):(t[1-9])$/.exec(board || '');
+  const m = /^(t2?):(t(?:[1-9]|10))$/.exec(board || '');
   if (!m) return null;
   const minMs = Math.floor(BULLRUN_TRACK_LEN[m[2]] / (m[1] === 't2' ? BULLRUN_NITRO2_MS : BULLRUN_NITRO_MS) * 1000);
   return value >= minMs && value <= 30 * 60e3 ? -value : null;

@@ -451,7 +451,6 @@ html.play:not(.gpbill) #tShop{display:none!important}
     <div class="bar"><button class="back" type="button" data-home aria-label="Back"><svg aria-hidden="true"><use href="#i-back"/></svg></button><h2 data-t="settings"></h2></div>
     <div class="opts">
       <div class="opt"><span class="lab" data-t="steering"></span><div class="seg" id="segSteer"><button type="button" data-v="btn" data-t="btnSteer"></button><button type="button" data-v="tilt" data-t="tiltSteer"></button></div></div>
-      <div class="opt"><span class="lab" data-t="twCam"></span><div class="seg" id="segTwCam"><button type="button" data-v="roll" data-t="twRoll"></button><button type="button" data-v="level" data-t="twLevel"></button></div></div>
       <div class="opt"><span class="lab" data-t="music"></span><div class="seg" id="segMus"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="sound"></span><div class="seg" id="segSnd"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="lang"></span><div class="seg" id="segLang"><button type="button" data-v="el">ΕΛ</button><button type="button" data-v="en">EN</button></div></div>
@@ -1425,7 +1424,7 @@ function engineTick(throttle){
 // One song per market. Bass, pad, arpeggio and drums are scheduled a little ahead of time on the Web Audio clock.
 // Menu: pad and arpeggio only, quieter. Race: full band. Off with the Music switch, or with Sound off.
 let musicOn = store.get('bullrun_music') !== '0';
-let twCamLevel = store.get('bullrun_twcam') === 'level';   // corkscrew camera: rolls with the road, or stays level (calmer)
+
 const SONGS = [
   { bpm: 112, root: 45, chords: [[0, 'm'], [-4, 'M'], [3, 'M'], [-2, 'M']] },   // Bull Market: A minor, bright
   { bpm: 100, root: 40, chords: [[0, 'm'], [-2, 'M'], [-4, 'M'], [-2, 'M']] },   // Halving Canyon: E minor, slower and wider
@@ -2068,15 +2067,9 @@ function render(dt){
   const lt = smooth(clamp((W / H - .75) / .9, 0, 1)), C = CAMP.map((x, i) => lerp(x, CAMP_L[i], lt));
   const back = C[0] + sp * .6, high = C[1];
   const nA = new THREE.Vector3(), nB = new THREE.Vector3();
-  if (twCamLevel) {   // calmer: the camera stays level above the road centre; the road and the car roll in front of it
-    roadAt(sP - back, 0, camPos); trackAt(sP - back, tA); camPos.x -= Math.cos(tA.h) * dCam; camPos.z += Math.sin(tA.h) * dCam; camPos.y += high + flyH * (.4 + .3 * lt) + twist.lift * .15;
-    roadAt(sP + C[2], 0, camLook); trackAt(sP + C[2], tA); camLook.x -= Math.cos(tA.h) * dCam * .8; camLook.z += Math.sin(tA.h) * dCam * .8; camLook.y += C[3] + flyH * (.3 + .35 * lt);
-    camera.up.set(0, 1, 0);
-  } else {
-    roadAt(sP - back, dCam, camPos, nA); camPos.addScaledVector(nA, high + flyH * (.4 + .3 * lt));
-    roadAt(sP + C[2], dCam * .8, camLook, nB); camLook.addScaledVector(nB, C[3] + flyH * (.3 + .35 * lt));
-    camera.up.copy(nA).add(nB).normalize();
-  }
+  roadAt(sP - back, dCam, camPos, nA); camPos.addScaledVector(nA, high + flyH * (.4 + .3 * lt));
+  roadAt(sP + C[2], dCam * .8, camLook, nB); camLook.addScaledVector(nB, C[3] + flyH * (.3 + .35 * lt));
+  camera.up.copy(nA).add(nB).normalize();
   if (shake > 0) { const a = shake * .25; camPos.x += (Math.random() - .5) * a; camPos.y += (Math.random() - .5) * a; }
   camera.position.copy(camPos); camera.lookAt(camLook); camera.rotateZ(-lean);
   if (state === 'garage') {
@@ -2351,7 +2344,7 @@ function segSet(id, val){ for (const b of $(id).children) b.setAttribute('aria-p
 function applyLang(){
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach(el => { const t = T[lang][el.dataset.t]; if (typeof t === 'string') el.textContent = t; });
-  segSet('segLang', lang); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off'); segSet('segTwCam', twCamLevel ? 'level' : 'roll'); segSet('segSteer', tiltMode ? 'tilt' : 'btn');
+  segSet('segLang', lang); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off'); segSet('segSteer', tiltMode ? 'tilt' : 'btn');
   renderHome(); if (screen === 'tracks') renderTracks(); if (state === 'garage') renderGarage();
 }
 const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -2661,7 +2654,6 @@ $('segSteer').addEventListener('click', async e => { const b = e.target.closest(
   if (b.dataset.v === 'tilt') { const ok = await tiltStart(true); if (!ok) { toast(T[lang].tiltOff); return; } tiltMode = true; store.set('bullrun_steer', 'tilt'); toast(T[lang].tiltOk, T[lang].tiltHint); tiltCheckLater(); }
   else { tiltMode = false; store.set('bullrun_steer', 'btn'); }
   applyLang(); setUI(); });
-$('segTwCam').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; twCamLevel = b.dataset.v === 'level'; store.set('bullrun_twcam', twCamLevel ? 'level' : 'roll'); applyLang(); });
 $('segMus').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; musicOn = b.dataset.v === 'on'; store.set('bullrun_music', musicOn ? '1' : '0'); audioStart(); applyLang(); });
 $('segSnd').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; muted = b.dataset.v === 'off'; store.set('bullrun_mute', muted ? '1' : '0'); if (!muted) audioStart(); else engineTick(false); applyLang(); });
 $('goTracks').addEventListener('click', () => { audioStart(); go('tracks'); });

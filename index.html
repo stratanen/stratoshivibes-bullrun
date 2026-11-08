@@ -3,11 +3,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0b0820">
-<meta name="description" content="StratoshiVibes Bull Run: arcade racing on crypto highways. Ten tracks, an endless run and a garage. Free, no ads.">
+<meta name="description" content="Rollway: neon arcade racing with corkscrew roads. Ten tracks, an endless run, Liquidation Chase and a garage. Free, no ads.">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png">
 <style>:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}*,*::before,*::after{box-sizing:inherit}</style>
-<title>Bull Run</title>
+<title>Rollway</title>
 <style>
 @font-face{font-family:"Saira";font-style:italic;font-weight:600;font-display:swap;src:url(fonts/saira-latin-600-italic.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
 @font-face{font-family:"Saira";font-style:italic;font-weight:800;font-display:swap;src:url(fonts/saira-latin-800-italic.woff2) format("woff2");unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+2000-206F,U+2074,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD}
@@ -354,7 +354,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
 </style>
 
 </head><body>
-<canvas id="c" aria-label="Bull Run race"></canvas>
+<canvas id="c" aria-label="Rollway race"></canvas>
 <canvas id="fx" aria-hidden="true"></canvas>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><linearGradient id="tg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#a35cff"/><stop offset="1" stop-color="#14f0a0"/></linearGradient>
 <symbol id="i-tok" viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="url(#tg)"/><circle cx="12" cy="12" r="8.6" fill="#160f38"/><path d="M8.6 7.6h8.2l-1.4 1.8H7.2zM7.2 11.1h8.2l1.4 1.8H8.6zM8.6 14.6h8.2l-1.4 1.8H7.2z" fill="url(#tg)"/></symbol>
@@ -407,7 +407,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
 <div class="menu" id="start">
   <div class="card home">
     <div class="eyebrow">STRATOSHIVIBES</div>
-    <h1 class="title">BULL<br>RUN</h1>
+    <h1 class="title">ROLL<br>WAY</h1>
     <p class="tag" data-t="tag"></p>
     <div class="mainbtns">
       <button class="go" id="goTracks" type="button"><span data-t="races"></span><small id="starSum"></small></button>
@@ -548,21 +548,21 @@ Object.assign(T.el, {
   gpUnavail:'Οι αγορές δεν είναι διαθέσιμες αυτή τη στιγμή. Δοκίμασε ξανά αργότερα.', gpRestored:'Οι αγορές σου ελέγχθηκαν στο Google Play.'
 });
 Object.assign(T.en, {
-  music:'Music', seekerPerks:'Seeker Perks', seekerSub:'For Seeker owners', perkPaint:'Genesis paint, only for Seeker owners', perkBonus:'Double daily bonus: +100 tokens', perkBadge:'Seeker badge next to your name in the ranking', perkOn:'Unlocked on this wallet', perkConnect:'Connect the wallet on your Seeker to unlock them.', perkNone:'No Seeker Genesis Token found in this wallet. Connect the wallet on your Seeker (Seed Vault).', perkChecking:'Checking for a Seeker Genesis Token…', perkHow:'Every Seeker holds a Seeker Genesis Token. Bull Run reads it from the blockchain; nothing is signed or paid. The ranking badge appears after you join the ranking.', perkActive:'Seeker perks on', seekerPaint:'Seeker owners only · Seeker Genesis Token', getSeeker:'Unlock with your Seeker wallet', badgeT:'Seeker owner', perksShort:'3 perks', perkOnShort:'Active', steering:'Steering', btnSteer:'Buttons', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
+  music:'Music', seekerPerks:'Seeker Perks', seekerSub:'For Seeker owners', perkPaint:'Genesis paint, only for Seeker owners', perkBonus:'Double daily bonus: +100 tokens', perkBadge:'Seeker badge next to your name in the ranking', perkOn:'Unlocked on this wallet', perkConnect:'Connect the wallet on your Seeker to unlock them.', perkNone:'No Seeker Genesis Token found in this wallet. Connect the wallet on your Seeker (Seed Vault).', perkChecking:'Checking for a Seeker Genesis Token…', perkHow:'Every Seeker holds a Seeker Genesis Token. Rollway reads it from the blockchain; nothing is signed or paid. The ranking badge appears after you join the ranking.', perkActive:'Seeker perks on', seekerPaint:'Seeker owners only · Seeker Genesis Token', getSeeker:'Unlock with your Seeker wallet', badgeT:'Seeker owner', perksShort:'3 perks', perkOnShort:'Active', steering:'Steering', btnSteer:'Buttons', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
   tag:'Arcade racing on crypto highways. Ten tracks, an endless run, and a garage to fill.',
   races:'Races', endless:'Endless run', garage:'Garage', lb:'Ranking', shop:'Shop', settings:'Settings', how:'How to play',
   r5:'Endless run: checkpoints add time. Traffic and barriers cost speed. Every 2 km the road turns into a corkscrew and you drive upside down.', r6:'Races: all ten tracks are open, including Corkscrew Run, a track of corkscrews. Reach the finish line; faster times earn up to 3 stars.',
-  restart:'Restart', privacy:'Privacy', terms:'Terms', proto:'Bull Run 1.1',
+  restart:'Restart', privacy:'Privacy', terms:'Terms', proto:'Rollway 1.2',
   finish:'Finish', timeUp:'Out of time', next:'Next track', retry:'Retry', tracksBtn:'Tracks', bestTime:'Best time', rank:'Rank',
   locked:'Finish the previous track', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', special:'SPECIAL', twCam:'Corkscrew camera', twRoll:'Rolls', twLevel:'Level', starsWord:'stars',
   noRun:'not raced yet', bankShort:'Tokens to spend', earned:'Tokens earned', bankWord:'tokens to spend',
   use:'Use this paint', inUse:'In use', unlockFor:'Unlock for {n} tokens', needMore:'Need {n} more tokens', getShop:'Get it in the Shop', getNft:'For StratoshiVibes Vol.1 Degens holders', connectNft:'Connect a wallet that holds a Degen',
   freePaint:'Starter paint', earnPaint:'Earned with tokens you collect', shopPaint:'Supporter Garage (Shop)', nftPaint:'Holder paint · Vol.1 Degens',
-  unlockedT:'Unlocked', appOnly:'Available in the app', appOnlyTxt:'Wallet, ranking and Shop work in the Bull Run app and on bullrun.stratoshivibes.com. This preview runs without them.',
+  unlockedT:'Unlocked', appOnly:'Available in the app', appOnlyTxt:'Wallet, ranking and Shop work in the Rollway app and on bullrun.stratoshivibes.com. This preview runs without them.',
   ok:'OK', close:'Close', back:'Back', notNow:'Not now',
-  wConnect:'Connect wallet', wOptional:'optional', wIntro:'Optional. Your wallet shares only your public address. Bull Run never asks for a transaction, except a Shop purchase you approve.',
+  wConnect:'Connect wallet', wOptional:'optional', wIntro:'Optional. Your wallet shares only your public address. Rollway never asks for a transaction, except a Shop purchase you approve.',
   wSeeker:'Seeker wallet', wSeekerSub:'Mobile Wallet Adapter', wBrowser:'Browser wallet', wNone:'No wallet found on this device.', wWaiting:'Waiting for the wallet…', wRetry:'Did not connect. Tap to try again.',
-  wSafe:'Bull Run cannot move your funds.', wYour:'Your wallet', wChecking:'Checking your Degens…', wErr:'Could not read your NFTs right now. Try again later.',
+  wSafe:'Rollway cannot move your funds.', wYour:'Your wallet', wChecking:'Checking your Degens…', wErr:'Could not read your NFTs right now. Try again later.',
   wHolder:n => 'You hold ' + n + ' Vol.1 Degen' + (n === 1 ? '' : 's') + '.', wHolderPerk:'The Degen paint is unlocked in the Garage.', wNoCards:'No Vol.1 Degens found in this wallet. You can still play everything.',
   wRefresh:'Check again', wDisconnect:'Disconnect', wDone:'Wallet disconnected', connectFirst:'Connect a wallet first', wCards:n => n + ' Degen' + (n === 1 ? '' : 's'),
   lbWeek:'This week', lbAll:'All time', lbLoading:'Loading…', lbEmpty:'No times yet. Be the first.', lbErr:'Ranking is not reachable right now.', lbYou:'You',
@@ -582,21 +582,21 @@ Object.assign(T.en, {
   historyErr:'Could not read the history right now.', genericErr:'Something went wrong. Nothing was charged unless your wallet shows a sent payment.', loading:'Loading'
 });
 Object.assign(T.el, {
-  music:'Μουσική', seekerPerks:'Seeker Perks', seekerSub:'Για κατόχους Seeker', perkPaint:'Χρώμα Genesis, μόνο για κατόχους Seeker', perkBonus:'Διπλό ημερήσιο μπόνους: +100 tokens', perkBadge:'Σήμα Seeker δίπλα στο όνομά σου στην κατάταξη', perkOn:'Ενεργά σε αυτό το πορτοφόλι', perkConnect:'Σύνδεσε το πορτοφόλι του Seeker σου για να τα ξεκλειδώσεις.', perkNone:'Δεν βρέθηκε Seeker Genesis Token σε αυτό το πορτοφόλι. Σύνδεσε το πορτοφόλι του Seeker σου (Seed Vault).', perkChecking:'Ελέγχω για Seeker Genesis Token…', perkHow:'Κάθε Seeker έχει ένα Seeker Genesis Token. Το Bull Run το διαβάζει από το blockchain· δεν υπογράφεις και δεν πληρώνεις τίποτα. Το σήμα στην κατάταξη εμφανίζεται όταν μπεις στην κατάταξη.', perkActive:'Τα Seeker Perks είναι ενεργά', seekerPaint:'Μόνο για κατόχους Seeker · Seeker Genesis Token', getSeeker:'Ξεκλείδωμα με το πορτοφόλι του Seeker', badgeT:'Κάτοχος Seeker', perksShort:'3 προνόμια', perkOnShort:'Ενεργά', steering:'Στρίψιμο', btnSteer:'Κουμπιά', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
+  music:'Μουσική', seekerPerks:'Seeker Perks', seekerSub:'Για κατόχους Seeker', perkPaint:'Χρώμα Genesis, μόνο για κατόχους Seeker', perkBonus:'Διπλό ημερήσιο μπόνους: +100 tokens', perkBadge:'Σήμα Seeker δίπλα στο όνομά σου στην κατάταξη', perkOn:'Ενεργά σε αυτό το πορτοφόλι', perkConnect:'Σύνδεσε το πορτοφόλι του Seeker σου για να τα ξεκλειδώσεις.', perkNone:'Δεν βρέθηκε Seeker Genesis Token σε αυτό το πορτοφόλι. Σύνδεσε το πορτοφόλι του Seeker σου (Seed Vault).', perkChecking:'Ελέγχω για Seeker Genesis Token…', perkHow:'Κάθε Seeker έχει ένα Seeker Genesis Token. Το Rollway το διαβάζει από το blockchain· δεν υπογράφεις και δεν πληρώνεις τίποτα. Το σήμα στην κατάταξη εμφανίζεται όταν μπεις στην κατάταξη.', perkActive:'Τα Seeker Perks είναι ενεργά', seekerPaint:'Μόνο για κατόχους Seeker · Seeker Genesis Token', getSeeker:'Ξεκλείδωμα με το πορτοφόλι του Seeker', badgeT:'Κάτοχος Seeker', perksShort:'3 προνόμια', perkOnShort:'Ενεργά', steering:'Στρίψιμο', btnSteer:'Κουμπιά', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
   tag:'Arcade αγώνες σε crypto αυτοκινητόδρομους. Δέκα πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.',
   races:'Αγώνες', endless:'Ατελείωτη διαδρομή', garage:'Γκαράζ', lb:'Κατάταξη', shop:'Shop', settings:'Ρυθμίσεις', how:'Πώς παίζεται',
   r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα. Κάθε 2 km ο δρόμος γίνεται βίδα και οδηγείς ανάποδα.', r6:'Αγώνες: και οι δέκα πίστες είναι ανοιχτές, μαζί με το Corkscrew Run, μια πίστα γεμάτη βίδες. Φτάσε στον τερματισμό· όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3).',
-  restart:'Από την αρχή', privacy:'Απόρρητο', terms:'Όροι', proto:'Bull Run 1.1',
+  restart:'Από την αρχή', privacy:'Απόρρητο', terms:'Όροι', proto:'Rollway 1.2',
   finish:'Τερματισμός', timeUp:'Τέλος χρόνου', next:'Επόμενη πίστα', retry:'Ξανά', tracksBtn:'Πίστες', bestTime:'Ρεκόρ', rank:'Θέση',
   locked:'Τερμάτισε την προηγούμενη πίστα', market0:'BULL MARKET', market1:'HALVING CANYON', market2:'BEAR MARKET', special:'ΕΙΔΙΚΗ', twCam:'Κάμερα στη βίδα', twRoll:'Γυρίζει', twLevel:'Σταθερή', starsWord:'αστέρια',
   noRun:'χωρίς χρόνο ακόμα', bankShort:'Tokens για ξόδεμα', earned:'Tokens που μάζεψες', bankWord:'tokens για ξόδεμα',
   use:'Βάψε με αυτό', inUse:'Σε χρήση', unlockFor:'Ξεκλείδωμα με {n} tokens', needMore:'Χρειάζεσαι {n} tokens ακόμα', getShop:'Στο Shop', getNft:'Για κατόχους StratoshiVibes Vol.1 Degens', connectNft:'Σύνδεσε πορτοφόλι με Degen',
   freePaint:'Βασικό χρώμα', earnPaint:'Ξεκλειδώνει με tokens που μαζεύεις', shopPaint:'Supporter Garage (Shop)', nftPaint:'Χρώμα κατόχων · Vol.1 Degens',
-  unlockedT:'Ξεκλειδώθηκε', appOnly:'Διαθέσιμο στην εφαρμογή', appOnlyTxt:'Πορτοφόλι, κατάταξη και Shop δουλεύουν στην εφαρμογή Bull Run και στο bullrun.stratoshivibes.com. Αυτή η δοκιμαστική έκδοση τρέχει χωρίς αυτά.',
+  unlockedT:'Ξεκλειδώθηκε', appOnly:'Διαθέσιμο στην εφαρμογή', appOnlyTxt:'Πορτοφόλι, κατάταξη και Shop δουλεύουν στην εφαρμογή Rollway και στο bullrun.stratoshivibes.com. Αυτή η δοκιμαστική έκδοση τρέχει χωρίς αυτά.',
   ok:'Εντάξει', close:'Κλείσιμο', back:'Πίσω', notNow:'Όχι τώρα',
-  wConnect:'Σύνδεση πορτοφολιού', wOptional:'προαιρετικό', wIntro:'Προαιρετικό. Το πορτοφόλι δίνει μόνο τη δημόσια διεύθυνσή σου. Το Bull Run δεν ζητάει ποτέ συναλλαγή, εκτός από αγορά στο Shop που εγκρίνεις εσύ.',
+  wConnect:'Σύνδεση πορτοφολιού', wOptional:'προαιρετικό', wIntro:'Προαιρετικό. Το πορτοφόλι δίνει μόνο τη δημόσια διεύθυνσή σου. Το Rollway δεν ζητάει ποτέ συναλλαγή, εκτός από αγορά στο Shop που εγκρίνεις εσύ.',
   wSeeker:'Πορτοφόλι Seeker', wSeekerSub:'Mobile Wallet Adapter', wBrowser:'Πορτοφόλι browser', wNone:'Δεν βρέθηκε πορτοφόλι σε αυτή τη συσκευή.', wWaiting:'Περιμένω το πορτοφόλι…', wRetry:'Δεν συνδέθηκε. Πάτα για νέα προσπάθεια.',
-  wSafe:'Το Bull Run δεν μπορεί να μετακινήσει τα χρήματά σου.', wYour:'Το πορτοφόλι σου', wChecking:'Ελέγχω τα Degens σου…', wErr:'Δεν μπόρεσα να διαβάσω τα NFT σου τώρα. Δοκίμασε αργότερα.',
+  wSafe:'Το Rollway δεν μπορεί να μετακινήσει τα χρήματά σου.', wYour:'Το πορτοφόλι σου', wChecking:'Ελέγχω τα Degens σου…', wErr:'Δεν μπόρεσα να διαβάσω τα NFT σου τώρα. Δοκίμασε αργότερα.',
   wHolder:n => 'Έχεις ' + n + ' Vol.1 Degen' + (n === 1 ? '' : 's') + '.', wHolderPerk:'Το χρώμα Degen ξεκλείδωσε στο Γκαράζ.', wNoCards:'Δεν βρέθηκαν Vol.1 Degens σε αυτό το πορτοφόλι. Μπορείς να παίξεις τα πάντα κανονικά.',
   wRefresh:'Έλεγχος ξανά', wDisconnect:'Αποσύνδεση', wDone:'Το πορτοφόλι αποσυνδέθηκε', connectFirst:'Σύνδεσε πρώτα πορτοφόλι', wCards:n => n + ' Degen' + (n === 1 ? '' : 's'),
   lbWeek:'Εβδομάδα', lbAll:'Όλων των εποχών', lbLoading:'Φόρτωση…', lbEmpty:'Κανένας χρόνος ακόμα. Γίνε ο πρώτος.', lbErr:'Η κατάταξη δεν απαντάει αυτή τη στιγμή.', lbYou:'Εσύ',
@@ -710,8 +710,8 @@ function noWebGL(){
   const p = document.createElement('p');
   p.style.cssText = 'margin:0 0 10px';
   p.textContent = el
-    ? 'Το Bull Run χρειάζεται γραφικά 3D (WebGL), που είναι κλειστά σε αυτόν τον browser.'
-    : 'Bull Run needs 3D graphics (WebGL), which are turned off in this browser.';
+    ? 'Το Rollway χρειάζεται γραφικά 3D (WebGL), που είναι κλειστά σε αυτόν τον browser.'
+    : 'Rollway needs 3D graphics (WebGL), which are turned off in this browser.';
   const p2 = document.createElement('p');
   p2.style.cssText = 'margin:0;color:#b9b2d6;font-size:14px';
   p2.textContent = el
@@ -789,7 +789,7 @@ function tokenFace(){
     bar(cy - 50, 1); bar(cy - 11, -1); bar(cy + 28, 1);
   });
 }
-const BOARD_TEXTS = ['GM', 'DYOR', 'HODL', 'BULL RUN', 'STRATOSHIVIBES'];
+const BOARD_TEXTS = ['GM', 'DYOR', 'HODL', 'ROLLWAY', 'STRATOSHIVIBES'];
 function boardTex(text, night, i){
   return canvasTex(512, 256, (g, w, h) => {
     g.fillStyle = night ? '#ff4fd8' : '#f6f3ff'; rrect(g, 0, 0, w, h, 18); g.fill();
@@ -820,7 +820,7 @@ function windowTex(){
 }
 const TEX = { road: BIOMES.map(roadTex), token: tokenFace(), plate: plateTex(), win: windowTex(),
   boardDay: BOARD_TEXTS.map((t, i) => boardTex(t, false, i)), boardNight: BOARD_TEXTS.map((t, i) => boardTex(t, true, i)),
-  gate: BIOMES.map(b => bannerTex('CHECKPOINT', b.name, b.gate)), start: bannerTex('BULL RUN', 'STRATOSHIVIBES', '#ff4fd8') };
+  gate: BIOMES.map(b => bannerTex('CHECKPOINT', b.name, b.gate)), start: bannerTex('ROLLWAY', 'STRATOSHIVIBES', '#ff4fd8') };
 TEX.win.wrapS = TEX.win.wrapT = THREE.RepeatWrapping;
 const finishMats = {};
 function finishMat(){
@@ -2873,7 +2873,7 @@ window.SVRate = function (o) {
     else if (m === 'menu' && played >= o.after) { ls.set('sv_rate_play', String(played)); setTimeout(show, 600); shown = true; }
   }, 1000);
 };
-SVRate({ name: 'Bull Run', pkg: 'com.stratoshivibes.bullrun', after: 480, lang: () => lang,
+SVRate({ name: 'Rollway', pkg: 'com.stratoshivibes.bullrun', after: 480, lang: () => lang,
   mode: () => (state === 'race' || state === 'count' || state === 'ending') ? 'play' : (state === 'menu' && screen === 'home') ? 'menu' : 'other' });
 
 </script>

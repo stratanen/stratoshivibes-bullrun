@@ -1,6 +1,6 @@
 name: Build Google Play bundle (AAB)
 
-# Google Play edition of Bull Run, built as a Trusted Web Activity (Bubblewrap) with Google Play Billing.
+# Google Play edition of Rollway (formerly Bull Run), built as a Trusted Web Activity (Bubblewrap) with Google Play Billing.
 # The app opens https://bullrun.stratoshivibes.com/?edition=play: no wallet, no Seeker Perks;
 # the Shop sells the Supporter Garage through Google Play Billing (checked by pay.stratoshivibes.com,
 # the Worker kept in the Blockspace repo under play-billing/).
@@ -73,7 +73,7 @@ jobs:
           HOST="$HOST" KS="$RUNNER_TEMP/release.keystore" node -e '
             const h = process.env.HOST, c = "#0b0820";
             const m = {
-              packageId: "com.stratoshivibes.bullrace", host: h, name: "Bull Run", launcherName: "Bull Run",
+              packageId: "com.stratoshivibes.bullrace", host: h, name: "Rollway", launcherName: "Rollway",
               display: "standalone", orientation: "any",
               themeColor: c, themeColorDark: c, navigationColor: c, navigationColorDark: c,
               navigationDividerColor: c, navigationDividerColorDark: c, backgroundColor: c,

@@ -1,4 +1,4 @@
-// StratoshiVibes leaderboard (Blockspace and Bull Run), a Cloudflare Worker with a D1 database bound as DB.
+// StratoshiVibes leaderboard (Blockspace and Rollway, formerly Bull Run; its internal game id stays 'bullrun'), a Cloudflare Worker with a D1 database bound as DB.
 // Players sign in once by signing a plain message with their wallet (no transaction, no fees).
 // The worker checks the ed25519 signature, then accepts end-of-game scores from that address.
 
@@ -256,7 +256,7 @@ async function standing(env, addr, period) {
 }
 
 function signInMessage(addr, nonce, game) {
-  return (game === 'bullrun' ? 'StratoshiVibes Bull Run ranking sign-in\n\n' : 'StratoshiVibes Blockspace leaderboard sign-in\n\n') +
+  return (game === 'bullrun' ? 'StratoshiVibes Rollway ranking sign-in\n\n' : 'StratoshiVibes Blockspace leaderboard sign-in\n\n') +
     'This is a sign-in, not a transaction. It costs nothing and cannot move any funds.\n\n' +
     'Address: ' + addr + '\nNonce: ' + nonce;
 }

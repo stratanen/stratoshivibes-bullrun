@@ -328,6 +328,9 @@ h3.lab{margin:4px 0 0}
   .steer svg{width:30px;height:30px;padding:16px}
   .ped{height:84px}.ped.gas{height:100px}
 }
+/* drag steering: no arrows, a ring under the thumb */
+.steer.drag span svg,.steer.drag::after{display:none}
+.dragdot{position:fixed;left:0;top:0;width:54px;height:54px;border-radius:50%;border:2px solid rgba(63,230,255,.85);background:rgba(63,230,255,.18);pointer-events:none;z-index:3}
 .tiltind{position:fixed;left:max(24px, env(safe-area-inset-left, 0px) + 8px);bottom:calc(env(safe-area-inset-bottom, 0px) + 34px);width:150px;height:10px;border-radius:5px;background:var(--glass);border:1px solid var(--line);pointer-events:none}
 .tiltind::after{content:"";position:absolute;left:50%;top:-4px;width:1px;height:16px;background:var(--line)}
 .tiltind i{position:absolute;left:calc(50% - 9px);top:-5px;width:18px;height:18px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);transform:translateX(0);will-change:transform}
@@ -396,6 +399,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
     <span id="sR"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 4 8 8-8 8"/></svg></span>
   </div>
   <div class="tiltind" id="tiltInd" hidden aria-hidden="true"><i id="tiltDot"></i></div>
+  <div class="dragdot" id="dragDot" hidden aria-hidden="true"></div>
   <div class="rcol">
     <button class="nitro fly" id="bF" type="button" hidden><b>FLY</b><span class="pips" id="fpips"><u></u><u></u></span></button>
     <button class="nitro" id="bN" type="button"><b>NITRO</b><span class="pips" id="pips"><u></u><u></u><u></u></span></button>
@@ -453,7 +457,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
   <div class="card">
     <div class="bar"><button class="back" type="button" data-home aria-label="Back"><svg aria-hidden="true"><use href="#i-back"/></svg></button><h2 data-t="settings"></h2></div>
     <div class="opts">
-      <div class="opt"><span class="lab" data-t="steering"></span><div class="seg" id="segSteer"><button type="button" data-v="btn" data-t="btnSteer"></button><button type="button" data-v="tilt" data-t="tiltSteer"></button></div></div>
+      <div class="opt wrap"><span class="lab" data-t="steering"></span><div class="seg" id="segSteer"><button type="button" data-v="btn" data-t="btnSteer"></button><button type="button" data-v="drag" data-t="dragSteer"></button><button type="button" data-v="tilt" data-t="tiltSteer"></button></div></div>
       <div class="opt wrap"><span class="lab" data-t="gfx"></span><div class="seg" id="segGfx"><button type="button" data-v="auto" data-t="gfxAuto"></button><button type="button" data-v="low" data-t="gfxLow"></button><button type="button" data-v="mid" data-t="gfxMid"></button><button type="button" data-v="high" data-t="gfxHigh"></button></div></div>
       <div class="opt"><span class="lab" data-t="music"></span><div class="seg" id="segMus"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="sound"></span><div class="seg" id="segSnd"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
@@ -552,7 +556,7 @@ Object.assign(T.el, {
   gpUnavail:'Οι αγορές δεν είναι διαθέσιμες αυτή τη στιγμή. Δοκίμασε ξανά αργότερα.', gpRestored:'Οι αγορές σου ελέγχθηκαν στο Google Play.'
 });
 Object.assign(T.en, {
-  music:'Music', seekerPerks:'Seeker Perks', seekerSub:'For Seeker owners', perkPaint:'Genesis paint, only for Seeker owners', perkBonus:'Double daily bonus: +100 tokens', perkBadge:'Seeker badge next to your name in the ranking', perkOn:'Unlocked on this wallet', perkConnect:'Connect the wallet on your Seeker to unlock them.', perkNone:'No Seeker Genesis Token found in this wallet. Connect the wallet on your Seeker (Seed Vault).', perkChecking:'Checking for a Seeker Genesis Token…', perkHow:'Every Seeker holds a Seeker Genesis Token. Rollway reads it from the blockchain; nothing is signed or paid. The ranking badge appears after you join the ranking.', perkActive:'Seeker perks on', seekerPaint:'Seeker owners only · Seeker Genesis Token', getSeeker:'Unlock with your Seeker wallet', badgeT:'Seeker owner', perksShort:'3 perks', perkOnShort:'Active', gfx:'Graphics', gfxAuto:'Auto', gfxLow:'Low', gfxMid:'Medium', gfxHigh:'High', steering:'Steering', btnSteer:'Buttons', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
+  music:'Music', seekerPerks:'Seeker Perks', seekerSub:'For Seeker owners', perkPaint:'Genesis paint, only for Seeker owners', perkBonus:'Double daily bonus: +100 tokens', perkBadge:'Seeker badge next to your name in the ranking', perkOn:'Unlocked on this wallet', perkConnect:'Connect the wallet on your Seeker to unlock them.', perkNone:'No Seeker Genesis Token found in this wallet. Connect the wallet on your Seeker (Seed Vault).', perkChecking:'Checking for a Seeker Genesis Token…', perkHow:'Every Seeker holds a Seeker Genesis Token. Rollway reads it from the blockchain; nothing is signed or paid. The ranking badge appears after you join the ranking.', perkActive:'Seeker perks on', seekerPaint:'Seeker owners only · Seeker Genesis Token', getSeeker:'Unlock with your Seeker wallet', badgeT:'Seeker owner', perksShort:'3 perks', perkOnShort:'Active', gfx:'Graphics', gfxAuto:'Auto', gfxLow:'Low', gfxMid:'Medium', gfxHigh:'High', steering:'Steering', btnSteer:'Buttons', dragSteer:'Drag', dragOk:'Drag steering on', dragHint:'Slide your thumb left and right on the left side of the screen. The car follows it.', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
   tag:'Arcade racing on crypto highways. Ten tracks, an endless run, and a garage to fill.',
   races:'Races', endless:'Endless run', garage:'Garage', lb:'Ranking', shop:'Shop', settings:'Settings', how:'How to play',
   r5:'Endless run: checkpoints add time. Traffic and barriers cost speed. Every 2 km the road turns into a corkscrew and you drive upside down.', r6:'Races: all ten tracks are open, including Corkscrew Run, a track of corkscrews. Reach the finish line; faster times earn up to 3 stars.',
@@ -586,7 +590,7 @@ Object.assign(T.en, {
   historyErr:'Could not read the history right now.', genericErr:'Something went wrong. Nothing was charged unless your wallet shows a sent payment.', loading:'Loading'
 });
 Object.assign(T.el, {
-  music:'Μουσική', seekerPerks:'Seeker Perks', seekerSub:'Για κατόχους Seeker', perkPaint:'Χρώμα Genesis, μόνο για κατόχους Seeker', perkBonus:'Διπλό ημερήσιο μπόνους: +100 tokens', perkBadge:'Σήμα Seeker δίπλα στο όνομά σου στην κατάταξη', perkOn:'Ενεργά σε αυτό το πορτοφόλι', perkConnect:'Σύνδεσε το πορτοφόλι του Seeker σου για να τα ξεκλειδώσεις.', perkNone:'Δεν βρέθηκε Seeker Genesis Token σε αυτό το πορτοφόλι. Σύνδεσε το πορτοφόλι του Seeker σου (Seed Vault).', perkChecking:'Ελέγχω για Seeker Genesis Token…', perkHow:'Κάθε Seeker έχει ένα Seeker Genesis Token. Το Rollway το διαβάζει από το blockchain· δεν υπογράφεις και δεν πληρώνεις τίποτα. Το σήμα στην κατάταξη εμφανίζεται όταν μπεις στην κατάταξη.', perkActive:'Τα Seeker Perks είναι ενεργά', seekerPaint:'Μόνο για κατόχους Seeker · Seeker Genesis Token', getSeeker:'Ξεκλείδωμα με το πορτοφόλι του Seeker', badgeT:'Κάτοχος Seeker', perksShort:'3 προνόμια', perkOnShort:'Ενεργά', gfx:'Γραφικά', gfxAuto:'Αυτόματα', gfxLow:'Χαμηλά', gfxMid:'Μεσαία', gfxHigh:'Υψηλά', steering:'Στρίψιμο', btnSteer:'Κουμπιά', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
+  music:'Μουσική', seekerPerks:'Seeker Perks', seekerSub:'Για κατόχους Seeker', perkPaint:'Χρώμα Genesis, μόνο για κατόχους Seeker', perkBonus:'Διπλό ημερήσιο μπόνους: +100 tokens', perkBadge:'Σήμα Seeker δίπλα στο όνομά σου στην κατάταξη', perkOn:'Ενεργά σε αυτό το πορτοφόλι', perkConnect:'Σύνδεσε το πορτοφόλι του Seeker σου για να τα ξεκλειδώσεις.', perkNone:'Δεν βρέθηκε Seeker Genesis Token σε αυτό το πορτοφόλι. Σύνδεσε το πορτοφόλι του Seeker σου (Seed Vault).', perkChecking:'Ελέγχω για Seeker Genesis Token…', perkHow:'Κάθε Seeker έχει ένα Seeker Genesis Token. Το Rollway το διαβάζει από το blockchain· δεν υπογράφεις και δεν πληρώνεις τίποτα. Το σήμα στην κατάταξη εμφανίζεται όταν μπεις στην κατάταξη.', perkActive:'Τα Seeker Perks είναι ενεργά', seekerPaint:'Μόνο για κατόχους Seeker · Seeker Genesis Token', getSeeker:'Ξεκλείδωμα με το πορτοφόλι του Seeker', badgeT:'Κάτοχος Seeker', perksShort:'3 προνόμια', perkOnShort:'Ενεργά', gfx:'Γραφικά', gfxAuto:'Αυτόματα', gfxLow:'Χαμηλά', gfxMid:'Μεσαία', gfxHigh:'Υψηλά', steering:'Στρίψιμο', btnSteer:'Κουμπιά', dragSteer:'Σύρσιμο', dragOk:'Στρίψιμο με σύρσιμο', dragHint:'Σύρε τον αντίχειρα αριστερά και δεξιά στην αριστερή πλευρά της οθόνης. Το αυτοκίνητο τον ακολουθεί.', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
   tag:'Arcade αγώνες σε crypto αυτοκινητόδρομους. Δέκα πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.',
   races:'Αγώνες', endless:'Ατελείωτη διαδρομή', garage:'Γκαράζ', lb:'Κατάταξη', shop:'Shop', settings:'Ρυθμίσεις', how:'Πώς παίζεται',
   r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα. Κάθε 2 km ο δρόμος γίνεται βίδα και οδηγείς ανάποδα.', r6:'Αγώνες: και οι δέκα πίστες είναι ανοιχτές, μαζί με το Corkscrew Run, μια πίστα γεμάτη βίδες. Φτάσε στον τερματισμό· όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3).',
@@ -882,20 +886,25 @@ const MAT = {
   tail: new THREE.MeshStandardMaterial({ color: '#ff2a44', emissive: '#ff1030', emissiveIntensity: 1 }),
   head: new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#fff4dc', emissiveIntensity: 1.6 }),
   plate: new THREE.MeshBasicMaterial({ map: TEX.plate }),
-  tokenRim: new THREE.MeshStandardMaterial({ color: '#7f5cff', emissive: '#6a3cff', emissiveIntensity: 1.2, metalness: .6, roughness: .3 }),
-  tokenFace: new THREE.MeshStandardMaterial({ map: TEX.token, emissive: '#ffffff', emissiveMap: TEX.token, emissiveIntensity: .9, roughness: .4 }),
+  tokenRim: new THREE.MeshStandardMaterial({ color: '#7f5cff', emissive: '#6a3cff', emissiveIntensity: 1.7, metalness: .6, roughness: .3 }),
+  tokenFace: new THREE.MeshStandardMaterial({ map: TEX.token, emissive: '#ffffff', emissiveMap: TEX.token, emissiveIntensity: 1.15, roughness: .4 }),
   nitro: new THREE.MeshStandardMaterial({ color: '#2fb8ff', emissive: '#1a9cff', emissiveIntensity: 1.6, metalness: .5, roughness: .3 }),
   nitroCap: new THREE.MeshStandardMaterial({ color: '#e8eeff', metalness: .8, roughness: .25 }),
   fly: new THREE.MeshStandardMaterial({ color: '#ffffff', emissive: '#b9f3ff', emissiveIntensity: 1.8, metalness: .2, roughness: .3 }),
   glow: null
 };
 // Cars cut through the haze sooner than the scenery, so traffic far ahead is easier to see.
-function carFog(m){
+// `most` is how much of the haze they take at the far end: car bodies 70 %, tail lights and pickups much less,
+// so the red lights and the tokens show from a long way off.
+function carFog(m, most){
+  const k = (most == null ? .7 : most).toFixed(2);
   m.onBeforeCompile = sh => { sh.fragmentShader = sh.fragmentShader.replace('#include <fog_fragment>',
-    '#ifdef USE_FOG\n float fogFactor = smoothstep(fogNear * 1.8, fogFar * .95, vFogDepth);\n gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, fogFactor);\n#endif'); };
-  m.customProgramCacheKey = () => 'carFog'; return m;
+    '#ifdef USE_FOG\n float fogFactor = smoothstep(fogNear * 2.4, fogFar * .95, vFogDepth) * ' + k + ';\n gl_FragColor.rgb = mix(gl_FragColor.rgb, fogColor, fogFactor);\n#endif'); };
+  m.customProgramCacheKey = () => 'carFog' + k; return m;
 }
-for (const k of ['glass', 'dark', 'chrome', 'tail', 'head', 'trim', 'rim']) carFog(MAT[k]);
+for (const k of ['glass', 'dark', 'chrome', 'head', 'trim', 'rim']) carFog(MAT[k]);
+carFog(MAT.tail, .2);
+for (const k of ['tokenRim', 'tokenFace', 'nitro', 'nitroCap', 'fly']) carFog(MAT[k], .3);
 const bodyMats = new Map();
 function bodyMat(hex){ if (!bodyMats.has(hex)) bodyMats.set(hex, carFog(envMat(new THREE.MeshPhysicalMaterial({ color: hex, metalness: .25, roughness: .38, clearcoat: GFX.coat ? .7 : 0, clearcoatRoughness: .16 })))); return bodyMats.get(hex); }
 
@@ -1379,7 +1388,8 @@ function manageTraffic(dt){
     // keep the new row clear of rows spawned earlier (they have moved on since, so check where they are now)
     let near = null; for (const c of cars) if (Math.abs(c.s - spawnS) < 66 && (!near || c.s > near.s)) near = c;
     if (near) { spawnS = near.s + 70; continue; }
-    const dbl = RT() < .05 + lvl * .02;
+    const inTw = nearTwist(sP + (spawnS - sP) * 1.9);   // roughly where you will catch this row up
+    const dbl = RT() < .05 + lvl * .02 && !inTw;
     if (dbl) {
       let pair = null;
       for (let k = 0; k < 8 && !pair; k++) {
@@ -1389,7 +1399,7 @@ function manageTraffic(dt){
       if (pair) { addCar(pair[0], spawnS); addCar(pair[1], spawnS + (RT() - .5) * 4); lastFree = pair[2]; }
       else { addCar((RT() * 4) | 0, spawnS); lastFree = []; }
     } else { addCar((RT() * 4) | 0, spawnS); lastFree = []; }
-    spawnS += Math.max(70, 90 + RT() * 60 - lvl * 3) + (mode === 'track' && TR.sparse ? 70 : 0);
+    spawnS += Math.max(70, 90 + RT() * 60 - lvl * 3) + (mode === 'track' && TR.sparse ? 70 : 0) + (inTw ? 50 : 0);
   }
 }
 function emit(x, y, vx, vy, life, c, size, type){ if (parts.length > 260) parts.shift(); parts.push({ x, y, vx, vy, life, max: life, col: c, size, type: type || 'dot' }); }
@@ -1596,7 +1606,7 @@ function musicTick(){
 /* ================= tilt steering (device motion) ================= */
 // Gravity along the screen's left-right axis gives the tilt angle, whatever way the phone is held.
 // The angle at the start of each race is taken as straight ahead. 2.5° dead zone, full lock at 20°.
-let tiltMode = store.get('bullrun_steer') === 'tilt';
+let tiltMode = store.get('bullrun_steer') === 'tilt', dragMode = store.get('bullrun_steer') === 'drag';
 const TILT = { ok: false, seen: false, raw: 0, zero: 0, zeroN: 0, zeroSum: 0, val: 0, listening: false, last: 0 };
 function onMotion(e){
   const g = e.accelerationIncludingGravity; if (!g || g.x == null) return;
@@ -1651,14 +1661,24 @@ addEventListener('keyup', e => {
   else if (k === 'ArrowDown' || k === 's' || k === 'S') keys.brake = false;
 });
 const steerEl = $('steer'), steerPtrs = new Map();
+const DRAG = { id: null, x0: 0, x: 0, d0: 0 };
+// metres of road per pixel of finger travel: about 45 % of a phone's width sweeps the whole road
+const dragScale = () => 2 * X_MAX / (Math.min(W, 520) * .45);
+function dragDot(){ const el = $('dragDot'), on = dragMode && DRAG.id != null; el.hidden = !on; if (on) el.style.transform = 'translate(' + (DRAG.x - 27) + 'px,' + (DRAG.y - 27) + 'px)'; }
 function steerCalc(){
+  if (dragMode) {
+    if (DRAG.id != null && !steerPtrs.has(DRAG.id)) DRAG.id = null;
+    if (DRAG.id == null && steerPtrs.size) { const [id, p] = steerPtrs.entries().next().value; DRAG.id = id; DRAG.x0 = DRAG.x = p; DRAG.d0 = d; }
+    if (DRAG.id != null) DRAG.x = steerPtrs.get(DRAG.id);
+    touch.left = touch.right = false; $('sL').classList.remove('on'); $('sR').classList.remove('on'); dragDot(); return;
+  }
   let l = false, r = false; const rc = steerEl.getBoundingClientRect(), mid = rc.left + rc.width / 2;
   for (const x of steerPtrs.values()) { if (x < mid) l = true; else r = true; }
   touch.left = l && !r; touch.right = r && !l;
   $('sL').classList.toggle('on', touch.left); $('sR').classList.toggle('on', touch.right);
 }
-steerEl.addEventListener('pointerdown', e => { e.preventDefault(); try { steerEl.setPointerCapture(e.pointerId); } catch (_) {} steerPtrs.set(e.pointerId, e.clientX); steerCalc(); audioStart(); });
-steerEl.addEventListener('pointermove', e => { if (steerPtrs.has(e.pointerId)) { steerPtrs.set(e.pointerId, e.clientX); steerCalc(); } });
+steerEl.addEventListener('pointerdown', e => { e.preventDefault(); try { steerEl.setPointerCapture(e.pointerId); } catch (_) {} steerPtrs.set(e.pointerId, e.clientX); if (DRAG.id == null) DRAG.y = e.clientY; steerCalc(); audioStart(); });
+steerEl.addEventListener('pointermove', e => { if (steerPtrs.has(e.pointerId)) { steerPtrs.set(e.pointerId, e.clientX); if (e.pointerId === DRAG.id) DRAG.y = e.clientY; steerCalc(); } });
 ['pointerup', 'pointercancel', 'lostpointercapture'].forEach(t => steerEl.addEventListener(t, e => { steerPtrs.delete(e.pointerId); steerCalc(); }));
 function holdBtn(el, key){
   const ids = new Set(), upd = () => { touch[key] = ids.size > 0; el.classList.toggle('on', ids.size > 0); };
@@ -1923,8 +1943,12 @@ function update(dt){
     updateFx(dt, 0); updateChunks(sP); return;
   }
   trackAt(sP + PLEN / 2, tA); const k = tA.k;
-  const btnT = (inR ? 1 : 0) - (inL ? 1 : 0);
-  const target = tiltMode && TILT.seen && state === 'race' && !bot && btnT === 0 ? TILT.val : btnT;
+  const btnT = (inR ? 1 : 0) - (inL ? 1 : 0), human = state === 'race' && !bot;
+  twistAt(sP + PLEN / 2); const tw = clamp(twist.lift / TW_LIFT, 0, 1);   // 0 on the road, 1 inside a corkscrew
+  // drag steering: the car goes to where the finger is, so holding the finger still holds the line through a bend
+  let dragT = 0;
+  if (dragMode && DRAG.id != null && human) { const e = clamp(DRAG.d0 + (DRAG.x - DRAG.x0) * dragScale(), -X_MAX, X_MAX) - d; dragT = Math.abs(e) < .06 ? 0 : clamp(e * 1.8, -1, 1); }
+  const target = btnT !== 0 ? btnT : dragT !== 0 ? dragT : tiltMode && TILT.seen && human ? TILT.val : 0;
   const rate = target === 0 ? 12 : (steer !== 0 && Math.sign(target) !== Math.sign(steer) ? 18 : 11);
   steer += clamp(target - steer, -rate * dt, rate * dt);
   if (nitroTime > 0) nitroTime -= dt;
@@ -1939,12 +1963,12 @@ function update(dt){
   if (offroad && !air && v > MAXV * .6) v = Math.max(MAXV * .6, v - MAXV * 1.2 * dt);
   v = clamp(v, 0, FLY_V);
   const sp = Math.min(1, v / MAXV);
-  d += steer * dt * 8.6 * (.45 + .55 * sp);
-  d += k * v * v * .034 * dt;
+  d += steer * dt * 10.4 * (.55 + .45 * sp) * (1 - .25 * tw);   // a touch calmer inside a corkscrew
+  d += k * v * v * .026 * dt * (1 - tw);                        // bends push the car outwards; corkscrews do not
   if (Math.abs(d) > X_MAX) {
     d = Math.sign(d) * X_MAX;
     if (v > MAXV * .2 && state === 'race') {
-      v -= v * 1.3 * dt; shake = Math.max(shake, .12);
+      v -= v * 1.3 * dt * (1 - .7 * tw); shake = Math.max(shake, .12);
       const [x, y] = playerScreen(.5), kk = fx.width / 400;
       for (let i = 0; i < 2; i++) emit(x + Math.sign(d) * 70 * kk, y, -Math.sign(d) * Math.random() * 300 * kk, (Math.random() * 300 + 100) * kk, .3, '#ffd27a', 2 * kk, 'spark');
       scrapeT -= dt; if (scrapeT <= 0) { scrapeT = .12; noise(.12, 2600, .07); }
@@ -2068,7 +2092,7 @@ function render(dt){
   if (flyH > 0) { player.position.addScaledVector(pN, flyH + Math.sin(tNow * 5) * .12); player.rotateX(-.12 * clamp((FLY_DUR - flyT) / .6, 0, 1) * clamp(flyT / .8, 0, 1)); }
   under.material.opacity = flyH > 0 ? .9 : BIOMES[curB].night ? .7 : .28;
   const nf = nitroFx; flames.forEach(f => { f.visible = nf > .05; f.scale.set(.8 + Math.random() * .4, 1, nf * (.8 + Math.random() * .5)); });
-  MAT.tail.emissiveIntensity = braking || hitT > .5 ? 2.6 : (BIOMES[curB].night ? 1.8 : 1.6);
+  MAT.tail.emissiveIntensity = braking || hitT > .5 ? 3 : (BIOMES[curB].night ? 2.2 : 2);
   if (chasers.length) {
     const ph = Math.floor(tNow * 7) % 2;
     for (const c of chasers) { placeCar(c.mesh, c.s, c.d, LIQ_LEN, 0, 0); const [l1, l2] = c.mesh.userData.lights; l1.material = ph ? LIQ_LIGHT_R : LIQ_LIGHT_OFF; l2.material = ph ? LIQ_LIGHT_OFF : LIQ_LIGHT_A; }
@@ -2079,10 +2103,10 @@ function render(dt){
   let n = 0, nn = 0, nf2 = 0;
   for (const [, ch] of chunks) for (const it of ch.items) {
     if (it.taken || it.s < sP - 8 || it.s > sP + 800) continue;
-    roadAt(it.s, it.d, tmpV, carN);
-    if (it.kind === 'tok' && n < 260) { tmpV.addScaledVector(carN, 1.15 + Math.sin(tNow * 3 + it.ph) * .12); _e.set(0, tA.h + tNow * 3.2 + it.ph, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1, 1, 1)); tokenIM.setMatrixAt(n++, _m); }
-    else if (it.kind === 'fly' && nf2 < 8) { tmpV.addScaledVector(carN, 1.6 + Math.sin(tNow * 3) * .2); _e.set(0, tA.h + tNow * 1.6, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1.3, 1.3, 1.3)); flyIM.setMatrixAt(nf2++, _m); }
-    else if (it.kind === 'nitro' && nn < 12) { tmpV.addScaledVector(carN, 1.3 + Math.sin(tNow * 4) * .15); _e.set(.35, tA.h + tNow * 2, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1.4, 1.4, 1.4)); nitroIM.setMatrixAt(nn++, _m); }
+    roadAt(it.s, it.d, tmpV, carN); const fs = 1 + clamp((it.s - sP - 50) / 350, 0, 1);   // up to twice the size far away, so they read from a distance
+    if (it.kind === 'tok' && n < 260) { tmpV.addScaledVector(carN, 1.15 * fs + Math.sin(tNow * 3 + it.ph) * .12); _e.set(0, tA.h + tNow * 3.2 + it.ph, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(fs, fs, fs)); tokenIM.setMatrixAt(n++, _m); }
+    else if (it.kind === 'fly' && nf2 < 8) { tmpV.addScaledVector(carN, 1.6 + Math.sin(tNow * 3) * .2); _e.set(0, tA.h + tNow * 1.6, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1.3 * fs, 1.3 * fs, 1.3 * fs)); flyIM.setMatrixAt(nf2++, _m); }
+    else if (it.kind === 'nitro' && nn < 12) { tmpV.addScaledVector(carN, 1.3 + Math.sin(tNow * 4) * .15); _e.set(.35, tA.h + tNow * 2, 0); _q.setFromEuler(_e); _m.compose(tmpV, _q, _s.set(1.4 * fs, 1.4 * fs, 1.4 * fs)); nitroIM.setMatrixAt(nn++, _m); }
   }
   tokenIM.count = n; tokenIM.instanceMatrix.needsUpdate = true; nitroIM.count = nn; nitroIM.instanceMatrix.needsUpdate = true; flyIM.count = nf2; flyIM.instanceMatrix.needsUpdate = true;
   // camera: behind and above, following the road
@@ -2224,7 +2248,7 @@ function setUI(){
   $('hTimeLab').textContent = mode === 'chase' ? T[lang].collateral : T[lang].time; $('bF').hidden = mode !== 'chase'; hc.fly = -1; $('hud').classList.toggle('chase', mode === 'chase');
   if (!racing) $('liqGlow').classList.remove('on'), hc.liqNear = false;
   $('pad').hidden = !racing; $('pauseBtn').hidden = !racing; $('bG').hidden = true;
-  $('steer').hidden = tiltMode; $('tiltInd').hidden = !tiltMode;
+  $('steer').hidden = tiltMode; $('tiltInd').hidden = !tiltMode; $('steer').classList.toggle('drag', dragMode); if (!racing) { DRAG.id = null; steerPtrs.clear(); dragDot(); }
   $('start').hidden = !(state === 'menu' && screen === 'home');
   $('tracks').hidden = !(state === 'menu' && screen === 'tracks');
   $('settings').hidden = !(state === 'menu' && screen === 'settings');
@@ -2366,7 +2390,7 @@ function segSet(id, val){ for (const b of $(id).children) b.setAttribute('aria-p
 function applyLang(){
   document.documentElement.lang = lang;
   document.querySelectorAll('[data-t]').forEach(el => { const t = T[lang][el.dataset.t]; if (typeof t === 'string') el.textContent = t; });
-  segSet('segLang', lang); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off'); segSet('segSteer', tiltMode ? 'tilt' : 'btn'); segSet('segGfx', gfxMode);
+  segSet('segLang', lang); segSet('segSnd', muted ? 'off' : 'on'); segSet('segMus', musicOn ? 'on' : 'off'); segSet('segSteer', tiltMode ? 'tilt' : dragMode ? 'drag' : 'btn'); segSet('segGfx', gfxMode);
   renderHome(); if (screen === 'tracks') renderTracks(); if (state === 'garage') renderGarage();
 }
 const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -2673,8 +2697,9 @@ async function restore(){
 /* ================= wiring ================= */
 $('segLang').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; lang = b.dataset.v; store.set('bullrun_lang', lang); applyLang(); });
 $('segSteer').addEventListener('click', async e => { const b = e.target.closest('button'); if (!b) return;
-  if (b.dataset.v === 'tilt') { const ok = await tiltStart(true); if (!ok) { toast(T[lang].tiltOff); return; } tiltMode = true; store.set('bullrun_steer', 'tilt'); toast(T[lang].tiltOk, T[lang].tiltHint); tiltCheckLater(); }
-  else { tiltMode = false; store.set('bullrun_steer', 'btn'); }
+  if (b.dataset.v === 'tilt') { const ok = await tiltStart(true); if (!ok) { toast(T[lang].tiltOff); return; } tiltMode = true; dragMode = false; store.set('bullrun_steer', 'tilt'); toast(T[lang].tiltOk, T[lang].tiltHint); tiltCheckLater(); }
+  else if (b.dataset.v === 'drag') { tiltMode = false; dragMode = true; store.set('bullrun_steer', 'drag'); toast(T[lang].dragOk, T[lang].dragHint); }
+  else { tiltMode = false; dragMode = false; store.set('bullrun_steer', 'btn'); }
   applyLang(); setUI(); });
 $('segMus').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; musicOn = b.dataset.v === 'on'; store.set('bullrun_music', musicOn ? '1' : '0'); audioStart(); applyLang(); });
 $('segSnd').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; muted = b.dataset.v === 'off'; store.set('bullrun_mute', muted ? '1' : '0'); if (!muted) audioStart(); else engineTick(false); applyLang(); });
@@ -2811,7 +2836,7 @@ applyLang();
 if (WAL.addr && ONLINE) checkHolder(false);
 if (tiltMode) tiltStart(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
-window.__bullrun = { get gfx(){ return { mode: gfxMode, level: gfxLevel, ceil: gfxCeil, dpr: DPR }; }, set gfx(l){ gfxMode = 'test'; setGfx(l); }, get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state, track: !!MUS.chaseSrc, buf: !!MUS.chaseBuf }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
+window.__bullrun = { get drag(){ return { on: dragMode, id: DRAG.id, d, steer }; }, get gfx(){ return { mode: gfxMode, level: gfxLevel, ceil: gfxCeil, dpr: DPR }; }, set gfx(l){ gfxMode = 'test'; setGfx(l); }, get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state, track: !!MUS.chaseSrc, buf: !!MUS.chaseBuf }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
   get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, set shotCam(f){ SHOTCAM = f; }, get fly(){ return { charges: flyCharges, t: flyT, h: flyH, kmh: Math.round(v * 3.6), s: sP }; }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },

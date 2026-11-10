@@ -328,8 +328,10 @@ h3.lab{margin:4px 0 0}
   .steer svg{width:30px;height:30px;padding:16px}
   .ped{height:84px}.ped.gas{height:100px}
 }
-/* drag steering: no arrows, a ring under the thumb */
+/* drag steering: no arrows, a ring under the thumb. The whole screen takes the drag; the buttons sit on top of it. */
 .steer.drag span svg,.steer.drag::after{display:none}
+.steer.drag{inset:0;width:auto;height:auto;z-index:0}
+.pad .rcol{position:relative;z-index:1}
 .dragdot{position:fixed;left:0;top:0;width:54px;height:54px;border-radius:50%;border:2px solid rgba(63,230,255,.85);background:rgba(63,230,255,.18);pointer-events:none;z-index:3}
 .tiltind{position:fixed;left:max(24px, env(safe-area-inset-left, 0px) + 8px);bottom:calc(env(safe-area-inset-bottom, 0px) + 34px);width:150px;height:10px;border-radius:5px;background:var(--glass);border:1px solid var(--line);pointer-events:none}
 .tiltind::after{content:"";position:absolute;left:50%;top:-4px;width:1px;height:16px;background:var(--line)}
@@ -556,7 +558,7 @@ Object.assign(T.el, {
   gpUnavail:'Οι αγορές δεν είναι διαθέσιμες αυτή τη στιγμή. Δοκίμασε ξανά αργότερα.', gpRestored:'Οι αγορές σου ελέγχθηκαν στο Google Play.'
 });
 Object.assign(T.en, {
-  music:'Music', seekerPerks:'Seeker Perks', seekerSub:'For Seeker owners', perkPaint:'Genesis paint, only for Seeker owners', perkBonus:'Double daily bonus: +100 tokens', perkBadge:'Seeker badge next to your name in the ranking', perkOn:'Unlocked on this wallet', perkConnect:'Connect the wallet on your Seeker to unlock them.', perkNone:'No Seeker Genesis Token found in this wallet. Connect the wallet on your Seeker (Seed Vault).', perkChecking:'Checking for a Seeker Genesis Token…', perkHow:'Every Seeker holds a Seeker Genesis Token. Rollway reads it from the blockchain; nothing is signed or paid. The ranking badge appears after you join the ranking.', perkActive:'Seeker perks on', seekerPaint:'Seeker owners only · Seeker Genesis Token', getSeeker:'Unlock with your Seeker wallet', badgeT:'Seeker owner', perksShort:'3 perks', perkOnShort:'Active', gfx:'Graphics', gfxAuto:'Auto', gfxLow:'Low', gfxMid:'Medium', gfxHigh:'High', steering:'Steering', btnSteer:'Buttons', dragSteer:'Drag', dragOk:'Drag steering on', dragHint:'Slide your thumb left and right on the left side of the screen. The car follows it.', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
+  music:'Music', seekerPerks:'Seeker Perks', seekerSub:'For Seeker owners', perkPaint:'Genesis paint, only for Seeker owners', perkBonus:'Double daily bonus: +100 tokens', perkBadge:'Seeker badge next to your name in the ranking', perkOn:'Unlocked on this wallet', perkConnect:'Connect the wallet on your Seeker to unlock them.', perkNone:'No Seeker Genesis Token found in this wallet. Connect the wallet on your Seeker (Seed Vault).', perkChecking:'Checking for a Seeker Genesis Token…', perkHow:'Every Seeker holds a Seeker Genesis Token. Rollway reads it from the blockchain; nothing is signed or paid. The ranking badge appears after you join the ranking.', perkActive:'Seeker perks on', seekerPaint:'Seeker owners only · Seeker Genesis Token', getSeeker:'Unlock with your Seeker wallet', badgeT:'Seeker owner', perksShort:'3 perks', perkOnShort:'Active', gfx:'Graphics', gfxAuto:'Auto', gfxLow:'Low', gfxMid:'Medium', gfxHigh:'High', steering:'Steering', btnSteer:'Buttons', dragSteer:'Drag', dragOk:'Drag steering on', dragHint:'Slide your finger left and right anywhere on the screen. The car follows it.', tiltSteer:'Tilt', tiltOff:'Tilt steering is not available on this device. Using buttons.', tiltHint:'Tilt the phone left and right like a wheel', tiltOk:'Tilt steering on', daily:'Daily track', dailyShort:'Daily', bestToday:'Best today', dailyBonus:'tokens · first finish today', dailyNew:'A new daily track every day at 00:00 UTC.', dailyLbNote:'today’s board',
   tag:'Arcade racing on crypto highways. Ten tracks, an endless run, and a garage to fill.',
   races:'Races', endless:'Endless run', garage:'Garage', lb:'Ranking', shop:'Shop', settings:'Settings', how:'How to play',
   r5:'Endless run: checkpoints add time. Traffic and barriers cost speed. Every 2 km the road turns into a corkscrew and you drive upside down.', r6:'Races: all ten tracks are open, including Corkscrew Run, a track of corkscrews. Reach the finish line; faster times earn up to 3 stars.',
@@ -590,7 +592,7 @@ Object.assign(T.en, {
   historyErr:'Could not read the history right now.', genericErr:'Something went wrong. Nothing was charged unless your wallet shows a sent payment.', loading:'Loading'
 });
 Object.assign(T.el, {
-  music:'Μουσική', seekerPerks:'Seeker Perks', seekerSub:'Για κατόχους Seeker', perkPaint:'Χρώμα Genesis, μόνο για κατόχους Seeker', perkBonus:'Διπλό ημερήσιο μπόνους: +100 tokens', perkBadge:'Σήμα Seeker δίπλα στο όνομά σου στην κατάταξη', perkOn:'Ενεργά σε αυτό το πορτοφόλι', perkConnect:'Σύνδεσε το πορτοφόλι του Seeker σου για να τα ξεκλειδώσεις.', perkNone:'Δεν βρέθηκε Seeker Genesis Token σε αυτό το πορτοφόλι. Σύνδεσε το πορτοφόλι του Seeker σου (Seed Vault).', perkChecking:'Ελέγχω για Seeker Genesis Token…', perkHow:'Κάθε Seeker έχει ένα Seeker Genesis Token. Το Rollway το διαβάζει από το blockchain· δεν υπογράφεις και δεν πληρώνεις τίποτα. Το σήμα στην κατάταξη εμφανίζεται όταν μπεις στην κατάταξη.', perkActive:'Τα Seeker Perks είναι ενεργά', seekerPaint:'Μόνο για κατόχους Seeker · Seeker Genesis Token', getSeeker:'Ξεκλείδωμα με το πορτοφόλι του Seeker', badgeT:'Κάτοχος Seeker', perksShort:'3 προνόμια', perkOnShort:'Ενεργά', gfx:'Γραφικά', gfxAuto:'Αυτόματα', gfxLow:'Χαμηλά', gfxMid:'Μεσαία', gfxHigh:'Υψηλά', steering:'Στρίψιμο', btnSteer:'Κουμπιά', dragSteer:'Σύρσιμο', dragOk:'Στρίψιμο με σύρσιμο', dragHint:'Σύρε τον αντίχειρα αριστερά και δεξιά στην αριστερή πλευρά της οθόνης. Το αυτοκίνητο τον ακολουθεί.', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
+  music:'Μουσική', seekerPerks:'Seeker Perks', seekerSub:'Για κατόχους Seeker', perkPaint:'Χρώμα Genesis, μόνο για κατόχους Seeker', perkBonus:'Διπλό ημερήσιο μπόνους: +100 tokens', perkBadge:'Σήμα Seeker δίπλα στο όνομά σου στην κατάταξη', perkOn:'Ενεργά σε αυτό το πορτοφόλι', perkConnect:'Σύνδεσε το πορτοφόλι του Seeker σου για να τα ξεκλειδώσεις.', perkNone:'Δεν βρέθηκε Seeker Genesis Token σε αυτό το πορτοφόλι. Σύνδεσε το πορτοφόλι του Seeker σου (Seed Vault).', perkChecking:'Ελέγχω για Seeker Genesis Token…', perkHow:'Κάθε Seeker έχει ένα Seeker Genesis Token. Το Rollway το διαβάζει από το blockchain· δεν υπογράφεις και δεν πληρώνεις τίποτα. Το σήμα στην κατάταξη εμφανίζεται όταν μπεις στην κατάταξη.', perkActive:'Τα Seeker Perks είναι ενεργά', seekerPaint:'Μόνο για κατόχους Seeker · Seeker Genesis Token', getSeeker:'Ξεκλείδωμα με το πορτοφόλι του Seeker', badgeT:'Κάτοχος Seeker', perksShort:'3 προνόμια', perkOnShort:'Ενεργά', gfx:'Γραφικά', gfxAuto:'Αυτόματα', gfxLow:'Χαμηλά', gfxMid:'Μεσαία', gfxHigh:'Υψηλά', steering:'Στρίψιμο', btnSteer:'Κουμπιά', dragSteer:'Σύρσιμο', dragOk:'Στρίψιμο με σύρσιμο', dragHint:'Σύρε το δάχτυλο αριστερά και δεξιά οπουδήποτε στην οθόνη. Το αυτοκίνητο το ακολουθεί.', tiltSteer:'Κλίση', tiltOff:'Η κλίση δεν είναι διαθέσιμη σε αυτή τη συσκευή. Χρησιμοποιώ τα κουμπιά.', tiltHint:'Γείρε το κινητό αριστερά-δεξιά σαν τιμόνι', tiltOk:'Στρίψιμο με κλίση', daily:'Ημερήσια πίστα', dailyShort:'Ημερήσια', bestToday:'Σήμερα', dailyBonus:'tokens · πρώτος τερματισμός σήμερα', dailyNew:'Νέα ημερήσια πίστα κάθε μέρα στις 00:00 UTC (02:00 ώρα Ελλάδας).', dailyLbNote:'πίνακας της ημέρας',
   tag:'Arcade αγώνες σε crypto αυτοκινητόδρομους. Δέκα πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.',
   races:'Αγώνες', endless:'Ατελείωτη διαδρομή', garage:'Γκαράζ', lb:'Κατάταξη', shop:'Shop', settings:'Ρυθμίσεις', how:'Πώς παίζεται',
   r5:'Ατελείωτη διαδρομή: τα checkpoints δίνουν χρόνο. Η κίνηση και οι μπαριέρες κόβουν ταχύτητα. Κάθε 2 km ο δρόμος γίνεται βίδα και οδηγείς ανάποδα.', r6:'Αγώνες: και οι δέκα πίστες είναι ανοιχτές, μαζί με το Corkscrew Run, μια πίστα γεμάτη βίδες. Φτάσε στον τερματισμό· όσο πιο γρήγορα, τόσα περισσότερα αστέρια (έως 3).',
@@ -1662,8 +1664,8 @@ addEventListener('keyup', e => {
 });
 const steerEl = $('steer'), steerPtrs = new Map();
 const DRAG = { id: null, x0: 0, x: 0, d0: 0 };
-// metres of road per pixel of finger travel: about 45 % of a phone's width sweeps the whole road
-const dragScale = () => 2 * X_MAX / (Math.min(W, 520) * .45);
+// metres of road per pixel of finger travel: about a third of a phone's width sweeps the whole road
+const dragScale = () => 2 * X_MAX / (Math.min(W, 520) * .34);
 function dragDot(){ const el = $('dragDot'), on = dragMode && DRAG.id != null; el.hidden = !on; if (on) el.style.transform = 'translate(' + (DRAG.x - 27) + 'px,' + (DRAG.y - 27) + 'px)'; }
 function steerCalc(){
   if (dragMode) {
@@ -1947,9 +1949,10 @@ function update(dt){
   twistAt(sP + PLEN / 2); const tw = clamp(twist.lift / TW_LIFT, 0, 1);   // 0 on the road, 1 inside a corkscrew
   // drag steering: the car goes to where the finger is, so holding the finger still holds the line through a bend
   let dragT = 0;
-  if (dragMode && DRAG.id != null && human) { const e = clamp(DRAG.d0 + (DRAG.x - DRAG.x0) * dragScale(), -X_MAX, X_MAX) - d; dragT = Math.abs(e) < .06 ? 0 : clamp(e * 1.8, -1, 1); }
+  if (dragMode && DRAG.id != null && human) { const e = clamp(DRAG.d0 + (DRAG.x - DRAG.x0) * dragScale(), -X_MAX, X_MAX) - d; dragT = Math.abs(e) < .05 ? 0 : clamp(e * 2.6, -1, 1); }
   const target = btnT !== 0 ? btnT : dragT !== 0 ? dragT : tiltMode && TILT.seen && human ? TILT.val : 0;
-  const rate = target === 0 ? 12 : (steer !== 0 && Math.sign(target) !== Math.sign(steer) ? 18 : 11);
+  const byDrag = btnT === 0 && DRAG.id != null && dragMode && human;   // under the thumb the car answers at once and moves twice as fast, so it keeps up with the finger
+  const rate = byDrag ? 30 : target === 0 ? 12 : (steer !== 0 && Math.sign(target) !== Math.sign(steer) ? 18 : 11);
   steer += clamp(target - steer, -rate * dt, rate * dt);
   if (nitroTime > 0) nitroTime -= dt;
   // FLY: a rocket boost in the air, faster than nitro (about 420 km/h), easing back after touchdown
@@ -1963,7 +1966,7 @@ function update(dt){
   if (offroad && !air && v > MAXV * .6) v = Math.max(MAXV * .6, v - MAXV * 1.2 * dt);
   v = clamp(v, 0, FLY_V);
   const sp = Math.min(1, v / MAXV);
-  d += steer * dt * 10.4 * (.55 + .45 * sp) * (1 - .25 * tw);   // a touch calmer inside a corkscrew
+  d += steer * dt * 10.4 * (byDrag ? 2 : 1) * (.55 + .45 * sp) * (1 - .25 * tw);   // a touch calmer inside a corkscrew
   d += k * v * v * .026 * dt * (1 - tw);                        // bends push the car outwards; corkscrews do not
   if (Math.abs(d) > X_MAX) {
     d = Math.sign(d) * X_MAX;

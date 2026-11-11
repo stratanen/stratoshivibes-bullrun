@@ -86,6 +86,13 @@ a{color:var(--accent)}
   </div>
 
   <div class="card">
+    <h2>Πού φτάνουν οι παίκτες</h2>
+    <div class="sub">Τελευταίες 30 ημέρες. Πόσοι παίκτες έπαιξαν σε κάθε εικόνα (Blockspace) ή πίστα (Rollway). Εκεί που ο αριθμός πέφτει απότομα, τα παρατάνε.</div>
+    <div class="tabs" id="pt"></div>
+    <div id="ptab" style="overflow:auto"></div>
+  </div>
+
+  <div class="card">
     <h2>Από πού παίζουν</h2>
     <div class="sub">Τελευταίες 30 ημέρες. «Εφαρμογή» είναι το APK από το dApp Store, οι υπόλοιποι παίζουν από browser.</div>
     <div id="stab" style="overflow:auto;margin-top:8px"></div>
@@ -96,7 +103,7 @@ a{color:var(--accent)}
 </div>
 <script>
 (function(){
-const G=[['bullrun','Bull Run','--s1'],['blockspace','Blockspace','--s2'],['arcade','Arcade','--s3']];
+const G=[['bullrun','Rollway','--s1'],['blockspace','Blockspace','--s2'],['arcade','Arcade','--s3']];
 const MODE={menu:'Μενού',garage:'Γκαράζ',track:'Πίστες',endless:'Ατελείωτη διαδρομή',chase:'Liquidation Chase',daily:'Καθημερινή πίστα',play:'Παιχνίδι',
  'blockspace:daily':'Ημερήσια πρόκληση','blockspace:play':'Κανονικό παιχνίδι',lobby:'Αρχική',mahjong:'Mahjong','mahjong-daily':'Mahjong ημερήσιο',battlegrounds:'Battlegrounds',poker:'Rugpull Poker',rug:'Escape the Rug','rug-daily':'Escape ημερήσιο'};
 const SRC={app:'Εφαρμογή (Seeker / Android)','app-seeker':'Εφαρμογή στο Seeker',android:'Browser σε Android','android-seeker':'Browser στο Seeker',ios:'Browser σε iPhone',desktop:'Υπολογιστής',other:'Άλλο'};
@@ -125,12 +132,25 @@ $('out').onclick=e=>{e.preventDefault();try{localStorage.removeItem('sv_stats_ke
 
 function days(){const out=[];const [y,m,d]=D.today.split('-').map(Number);const t=Date.UTC(y,m-1,d);for(let i=29;i>=0;i--)out.push(new Date(t-i*864e5).toISOString().slice(0,10));return out}
 const by=(arr,g)=>arr.filter(r=>r.game===g);
+// "12 από 40 (30%)"; a dash while no new player has had the chance to come back yet
+const pc=(r,n)=>n>0?`${nf.format(r||0)} από ${nf.format(n)} (${Math.round(100*(r||0)/n)}%)`:'–';
+let pg='blockspace';
+const TRACK=['','Bull Boulevard','Green Candles','All-Time High','Halving Pass','Mempool Canyon','Four-Year Cycle','Bear Avenue','Liquidation Loop','Capitulation','Corkscrew Run'];
+function steps(){
+  const GS=G.filter(([g])=>g==='blockspace'||g==='bullrun');
+  $('pt').innerHTML=GS.map(([g,n])=>`<button data-g="${g}" aria-pressed="${g===pg}">${n}</button>`).join('');
+  $('pt').querySelectorAll('button').forEach(b=>b.onclick=()=>{pg=b.dataset.g;steps()});
+  const c=G.find(x=>x[0]===pg)[2],want=pg==='blockspace'?'play:p':'track:t';
+  const rows=by(D.steps||[],pg).filter(r=>r.mode.startsWith(want)&&/^\d+$/.test(r.mode.slice(want.length))).map(r=>({n:+r.mode.slice(want.length),players:r.players,secs:r.secs})).sort((a,b)=>a.n-b.n);
+  const first=rows.length?rows[0].players:0,mx=Math.max(1,...rows.map(r=>r.players));
+  $('ptab').innerHTML=rows.length?`<table><thead><tr><th>${pg==='blockspace'?'Εικόνα':'Πίστα'}</th><th>Παίκτες</th><th>Σε σχέση με την πρώτη</th><th>Χρόνος ανά παίκτη</th><th class="barc" style="width:30%"></th></tr></thead><tbody>${rows.map(r=>`<tr><td>${pg==='blockspace'?r.n+'η εικόνα':r.n+'. '+esc(TRACK[r.n]||'')}</td><td>${nf.format(r.players)}</td><td>${first?Math.round(100*r.players/first)+'%':'–'}</td><td>${mins(Math.round(r.secs/r.players))}</td><td class="barc"><div class="bar"><i style="width:${Math.max(2,100*r.players/mx)}%;background:var(${c})"></i></div></td></tr>`).join('')}</tbody></table>`:'<p class="sub">Δεν υπάρχουν ακόμα στοιχεία. Γεμίζει όσο οι παίκτες ανοίγουν τη νέα έκδοση των παιχνιδιών.</p>';
+}
 function render(){
   $('upd').textContent='Ενημέρωση: '+new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'});
   // per-game cards
   $('games').innerHTML=G.map(([g,name,c])=>{
     const td=D.daily.find(r=>r.game===g&&r.day===D.today)||{};
-    const wk=D.week.find(r=>r.game===g)||{},tot=D.total.find(r=>r.game===g)||{},bk=D.back.find(r=>r.game===g)||{};
+    const wk=D.week.find(r=>r.game===g)||{},tot=D.total.find(r=>r.game===g)||{},bk=D.back.find(r=>r.game===g)||{},kp=(D.keep||[]).find(r=>r.game===g)||{};
     const avg=wk.players?Math.round(wk.secs/wk.players):0;
     return `<div class="card game"><h2><i class="sw" style="background:var(${c})"></i>${name}</h2>
       <div class="hero">${nf.format(td.players||0)}<small>παίκτες σήμερα</small></div>
@@ -139,9 +159,11 @@ function render(){
       <span>Παίκτες, 7 ημέρες</span><b>${nf.format(wk.players||0)}</b>
       <span>Χρόνος ανά παίκτη, 7 ημέρες</span><b>${mins(avg)}</b>
       <span>Ξαναήρθαν (2+ μέρες), 30 ημέρες</span><b>${nf.format(bk.players||0)}</b>
+      <span>Γύρισαν την επόμενη μέρα</span><b>${pc(kp.r1,kp.n1)}</b>
+      <span>Γύρισαν την 7η μέρα</span><b>${pc(kp.r7,kp.n7)}</b>
       <span>Όλοι οι παίκτες${tot.since?' από '+tot.since.split('-').reverse().join('/'):''}</span><b>${nf.format(tot.players||0)}</b>
       <span>Συνολικός χρόνος</span><b>${mins(tot.secs)}</b></div></div>`}).join('');
-  chart();modes();srcs();
+  chart();modes();steps();srcs();
 }
 function chart(){
   const ds=days(),W=Math.max(300,Math.round($('ch').clientWidth||960)),H=W<600?220:260,L=32,R=14,T=12,B=28,iw=W-L-R,ih=H-T-B;

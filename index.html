@@ -847,6 +847,30 @@ const readJSON = k => { try { return JSON.parse(store.get(k) || 'null'); } catch
 if (/[?&]edition=play\b/.test(location.search)) store.set('bullrun_edition', 'play');
 const PLAY = store.get('bullrun_edition') === 'play';
 if (PLAY) document.documentElement.classList.add('play');
+T.en.tokUnit = T.el.tokUnit = 'tokens';
+/* Google Play edition wording: the pickups are called coins and the text does not mention crypto.
+   Track, world and mode names stay as they are. */
+if (PLAY) {
+  const W = {
+    en: ['coins', 'Coins', 'Arcade racing on neon highways. Ten tracks, an endless run, and a garage to fill.', 'Collect coins. They are in-game points.',
+      'coins collected', 'coins · first finish today', 'Coins to spend', 'Coins earned', 'Unlock for {n} coins', 'Need {n} more coins', 'Earned with coins you collect'],
+    el: ['νομίσματα', 'Νομίσματα', 'Arcade αγώνες σε neon αυτοκινητόδρομους. Δέκα πίστες, ατελείωτη διαδρομή και ένα γκαράζ να γεμίσεις.', 'Μάζεψε νομίσματα. Είναι πόντοι του παιχνιδιού.',
+      'νομίσματα συνολικά', 'νομίσματα · πρώτος τερματισμός σήμερα', 'Νομίσματα για ξόδεμα', 'Νομίσματα που μάζεψες', 'Ξεκλείδωμα με {n} νομίσματα', 'Χρειάζεσαι {n} νομίσματα ακόμα', 'Ξεκλειδώνει με νομίσματα που μαζεύεις'],
+    es: ['monedas', 'Monedas', 'Carreras arcade por autopistas de neón. Diez pistas, una carrera infinita y un garaje por llenar.', 'Recoge monedas. Son puntos del juego.',
+      'monedas recogidas', 'monedas · primera llegada de hoy', 'Monedas para gastar', 'Monedas ganadas', 'Desbloquear por {n} monedas', 'Faltan {n} monedas', 'Se gana con las monedas que recoges'],
+    pt: ['moedas', 'Moedas', 'Corrida arcade em rodovias neon. Dez pistas, uma corrida infinita e uma garagem para encher.', 'Colete moedas. São pontos do jogo.',
+      'moedas coletadas', 'moedas · primeira chegada de hoje', 'Moedas para gastar', 'Moedas ganhas', 'Desbloquear por {n} moedas', 'Faltam {n} moedas', 'Ganha com as moedas que você coleta'],
+    de: ['Münzen', 'Münzen', 'Arcade-Rennen auf Neon-Highways. Zehn Strecken, eine Endlosfahrt und eine Garage zum Füllen.', 'Sammle Münzen. Sie sind Punkte im Spiel.',
+      'Münzen gesammelt', 'Münzen · erste Zielankunft heute', 'Münzen zum Ausgeben', 'Verdiente Münzen', 'Für {n} Münzen freischalten', 'Es fehlen {n} Münzen', 'Mit gesammelten Münzen verdient'],
+    fr: ['pièces', 'Pièces', 'Course arcade sur des autoroutes néon. Dix pistes, une course sans fin et un garage à remplir.', 'Ramassez des pièces. Ce sont des points de jeu.',
+      'pièces ramassées', 'pièces · première arrivée du jour', 'Pièces à dépenser', 'Pièces gagnées', 'Débloquer pour {n} pièces', 'Il manque {n} pièces', 'Gagnée avec les pièces ramassées'],
+    tr: ['jeton', 'Jeton', 'Neon otoyollarda arcade yarış. On parkur, sonsuz sürüş ve doldurulacak bir garaj.', 'Jeton topla. Bunlar oyun içi puandır.',
+      'jeton toplandı', 'jeton · bugünün ilk bitirişi', 'Harcanacak jeton', 'Kazanılan jeton', '{n} jetona aç', '{n} jeton daha gerekli', 'Topladığın jetonlarla kazanılır']
+  };
+  const K = ['tokUnit', 'toks', 'tag', 'r3', 'tokensTotal', 'dailyBonus', 'bankShort', 'earned', 'bankWord', 'unlockFor', 'needMore', 'earnPaint'];
+  // 'bankWord' is 'bankShort' with a small first letter, except in German, where nouns keep their capital
+  for (const l in W) { const w = W[l]; K.forEach((k, i) => { T[l][k] = k === 'bankWord' ? (l === 'de' ? w[6] : w[6].charAt(0).toLocaleLowerCase() + w[6].slice(1)) : w[i < 8 ? i : i - 1]; }); }
+}
 let PROG = readJSON('bullrun_prog') || {};
 const saveProg = () => store.set('bullrun_prog', JSON.stringify(PROG));
 if (!store.get('bullrun_v2')) { for (const k in PROG) if (PROG[k]) delete PROG[k].b; saveProg(); store.set('bullrun_v2', '1'); }
@@ -2037,8 +2061,8 @@ function chaserGone(c, why){
   c.mesh.visible = false; chasers.splice(chasers.indexOf(c), 1);
   if (why === 'down') {
     knocks++; tokens += 25;
-    flash(T[lang].liqDown, '+25 tokens'); tone(220, .3, 'sawtooth', .08, 60); noise(.4, 500, .4, 'lowpass');
-  } else if (why === 'escaped') { escapes++; tokens += 10; flash(T[lang].liqEscaped, '+10 tokens'); tone(880, .15, 'triangle', .08); tone(1320, .2, 'triangle', .07, 0, .1); }
+    flash(T[lang].liqDown, '+25 ' + T[lang].tokUnit); tone(220, .3, 'sawtooth', .08, 60); noise(.4, 500, .4, 'lowpass');
+  } else if (why === 'escaped') { escapes++; tokens += 10; flash(T[lang].liqEscaped, '+10 ' + T[lang].tokUnit); tone(880, .15, 'triangle', .08); tone(1320, .2, 'triangle', .07, 0, .1); }
 }
 function updateChase(dt){
   if (ramT > 0) ramT -= dt;
@@ -2538,7 +2562,7 @@ function renderHome(){
   $('chaseBest').textContent = chaseBest > 0 ? L.best + ' ' + chaseBest.toFixed(2) + ' km' : L.newMode;
   const dt = dailyTrack(), D0 = dayState();
   $('dailyName').textContent = trName(dt).split(' · ')[1] + ' · ' + L['market' + dt.b];
-  $('dailyInfo').textContent = D0.best ? fmtTime(D0.best) : D0.bonus ? '' : '+' + dailyBonus() + ' tokens';
+  $('dailyInfo').textContent = D0.best ? fmtTime(D0.best) : D0.bonus ? '' : '+' + dailyBonus() + ' ' + T[lang].tokUnit;
   renderPerkCard();
   $('meta').textContent = bank + ' ' + L.bankWord;
   paintWalletBtn();

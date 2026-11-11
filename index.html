@@ -130,6 +130,9 @@ button{font:inherit;color:inherit}
 .opts{display:grid;grid-template-columns:1fr;gap:8px}
 .opt{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .opt.wrap{flex-wrap:wrap;row-gap:8px}
+/* the Shop shows up after the first finished track, not before the first race */
+html.newbie #tShop{display:none!important}
+.go.share{width:100%;margin-top:10px}
 .seg.wrapseg{flex-wrap:wrap;border-radius:18px}
 .seg.wrapseg button{padding:7px 10px}
 /* light graphics: no blur behind the on-screen buttons, it is costly on weak phones */
@@ -244,6 +247,9 @@ html.lite *{backdrop-filter:none!important;-webkit-backdrop-filter:none!importan
 @keyframes spin{to{transform:rotate(360deg)}}
 .toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom, 0px) + 24px);transform:translateX(-50%);z-index:9;max-width:calc(100% - 32px);padding:11px 16px;border-radius:14px;background:rgba(16,12,42,.95);border:1px solid var(--line);font:700 13.5px var(--fb);text-align:center}
 .toast small{display:block;font-weight:600;color:var(--dim)}
+/* first-race hint: higher up, clear of the buttons, and on screen longer */
+.toast.hint{bottom:auto;top:calc(env(safe-area-inset-top, 0px) + 150px);width:calc(100% - 32px);max-width:420px;box-sizing:border-box;white-space:normal;text-align:center;font-size:15px}
+.toast.hint small{margin-top:6px;font-size:13px}
 .stars{display:flex;gap:6px}
 .stars svg{width:44px;height:44px;fill:rgba(255,255,255,.14)}
 .stars svg.on{fill:var(--gold);filter:drop-shadow(0 0 10px rgba(255,194,74,.7));animation:starpop .45s ease-out both}
@@ -797,6 +803,16 @@ T.tr = moreLang({
   gpInvalid:'Google satın almayı onaylamadı. Senden ücret alındıysa otomatik olarak iade edilecek.',
   gpUnavail:'Satın alımlar şu anda kullanılamıyor. Daha sonra tekrar dene.', gpRestored:'Satın alımların Google Play ile kontrol edildi.'
 });
+/* share and rating texts, all seven languages */
+{ const X = {
+  en: ['Share', (v, n) => 'I finished ' + n + ' in ' + v + ' on Rollway. Can you beat it?', k => 'I drove ' + k + ' km on Rollway. Can you go further?', 'Image saved'],
+  el: ['Κοινοποίηση', (v, n) => 'Τερμάτισα την πίστα ' + n + ' σε ' + v + ' στο Rollway. Με περνάς;', k => 'Έκανα ' + k + ' km στο Rollway. Πας πιο μακριά;', 'Η εικόνα αποθηκεύτηκε'],
+  es: ['Compartir', (v, n) => 'Terminé ' + n + ' en ' + v + ' en Rollway. ¿Me superas?', k => 'Recorrí ' + k + ' km en Rollway. ¿Llegas más lejos?', 'Imagen guardada'],
+  pt: ['Compartilhar', (v, n) => 'Terminei ' + n + ' em ' + v + ' no Rollway. Consegue me passar?', k => 'Dirigi ' + k + ' km no Rollway. Você vai mais longe?', 'Imagem salva'],
+  de: ['Teilen', (v, n) => 'Ich habe ' + n + ' in ' + v + ' in Rollway geschafft. Schaffst du es schneller?', k => 'Ich bin ' + k + ' km in Rollway gefahren. Kommst du weiter?', 'Bild gespeichert'],
+  fr: ['Partager', (v, n) => 'J\'ai terminé ' + n + ' en ' + v + ' sur Rollway. Tu fais mieux ?', k => 'J\'ai roulé ' + k + ' km sur Rollway. Tu vas plus loin ?', 'Image enregistrée'],
+  tr: ['Paylaş', (v, n) => 'Rollway\'de ' + n + ' parkurunu ' + v + ' sürede bitirdim. Geçebilir misin?', k => 'Rollway\'de ' + k + ' km sürdüm. Daha uzağa gidebilir misin?', 'Resim kaydedildi'] };
+  for (const l in X) { T[l].share = X[l][0]; T[l].shareTime = X[l][1]; T[l].shareKm = X[l][2]; T[l].shareSaved = X[l][3]; } }
 let lang = store.get('bullrun_lang');
 if (!LANGS.includes(lang)) { const nav = (navigator.language || 'en').toLowerCase().slice(0, 2); lang = LANGS.includes(nav) ? nav : 'en'; }
 let autoGas = true;   // the car always accelerates by itself; there is no manual throttle
@@ -834,6 +850,11 @@ function dailyTrack(){
   return { id: 'daily', key, b: n % 3, len: DAILY_LEN, diff: 1 + (n % 7), seed: (Math.imul(n, 2654435761) >>> 0) || 7,
     el: 'Ημερήσια · ' + ds('el'), en: 'Daily · ' + ds('en'), par: DAILY_LEN / 61 };
 }
+const dayKey = off => new Date((Math.floor(Date.now() / 864e5) + off) * 864e5).toISOString().slice(0, 10);
+function streakNow(){ const S = readJSON('bullrun_streak') || {}; return S.last === dayKey(0) || S.last === dayKey(-1) ? S.n | 0 : 0; }
+function streakBump(){ const S = readJSON('bullrun_streak') || {}; if (S.last === dayKey(0)) return S.n | 0;
+  const n = S.last === dayKey(-1) ? (S.n | 0) + 1 : 1; store.set('bullrun_streak', JSON.stringify({ last: dayKey(0), n })); return n; }
+const streakBonus = n => Math.min(Math.max(n - 1, 0), 5) * 10;   // +10 tokens for every extra day in a row, up to +50
 function dayState(){ const k = dailyTrack().key; let D = readJSON('bullrun_daily') || {}; if (D.key !== k) D = { key: k, best: null, bonus: false }; return D; }
 const saveDay = D => store.set('bullrun_daily', JSON.stringify(D));
 const isDaily = () => mode === 'track' && TR && TR.id === 'daily';
@@ -2469,10 +2490,47 @@ function startRace(opt){
 function endRace(won, tFinish){
   result = { won, t: won ? Math.max(1, tFinish) : null };
   state = 'ending'; endT = won ? 2.2 : 1.8; nitroTime = 0; setUI();
-  if (mode === 'track' && won) { flash(T[lang].finish.toUpperCase(), fmtTime(result.t)); tone(660, .2, 'triangle', .12); tone(880, .2, 'triangle', .12, 0, .12); tone(1320, .5, 'triangle', .12, 0, .24); flashT = .5; }
+  if (mode === 'track' && won) { flash(T[lang].finish.toUpperCase(), fmtTime(result.t)); tone(660, .2, 'triangle', .12); tone(880, .2, 'triangle', .12, 0, .12); tone(1320, .5, 'triangle', .12, 0, .24); flashT = .5; try { navigator.vibrate && navigator.vibrate([40, 40, 40, 40, 120]); } catch (e) {} }
   else if (mode === 'chase') { flash(T[lang].liquidated, dist.toFixed(2) + ' km', 'warm'); noise(.8, 200, .5, 'lowpass'); }
   else flash((mode === 'track' ? T[lang].timeUp : T[lang].over).toUpperCase(), '', 'warm');
 }
+/* share card: the last frame of the race with the result on top, made on the device */
+const SHARE_URL = () => PLAY ? 'https://play.google.com/store/apps/details?id=com.stratoshivibes.bullrace' : 'https://bullrun.stratoshivibes.com';
+const CAN_SHARE = typeof navigator.share === 'function', NO_FILES = !CAN_SHARE && /; wv\)/.test(navigator.userAgent);   // the dApp Store app cannot share or save a file
+function shareCard(big, small, stars){
+  const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H; const x = c.getContext('2d');
+  const g = x.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#2a1250'); g.addColorStop(.55, '#b0306a'); g.addColorStop(1, '#ff8a3c'); x.fillStyle = g; x.fillRect(0, 0, W, H);
+  try { render(0); const k = Math.max(W / canvas.width, H / canvas.height), w = canvas.width * k, h = canvas.height * k; x.drawImage(canvas, (W - w) / 2, (H - h) / 2, w, h); } catch (e) {}
+  const sh = x.createLinearGradient(0, 0, 0, H); sh.addColorStop(0, 'rgba(12,6,32,.82)'); sh.addColorStop(.3, 'rgba(12,6,32,.1)'); sh.addColorStop(.62, 'rgba(12,6,32,.15)'); sh.addColorStop(1, 'rgba(12,6,32,.92)'); x.fillStyle = sh; x.fillRect(0, 0, W, H);
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  const tg = x.createLinearGradient(0, 60, 0, 220); tg.addColorStop(0, '#fff3c4'); tg.addColorStop(1, '#ff7a3c'); x.fillStyle = tg; x.font = 'italic 900 150px Saira, Arial, sans-serif'; x.fillText('ROLLWAY', W / 2, 150);
+  x.fillStyle = '#fff'; x.font = 'italic 900 190px Saira, Arial, sans-serif'; x.fillText(big, W / 2, 1010);
+  let fs = 58; x.font = '800 ' + fs + 'px Commissioner, system-ui, sans-serif'; while (x.measureText(small).width > W - 120 && fs > 34) { fs -= 4; x.font = '800 ' + fs + 'px Commissioner, system-ui, sans-serif'; }
+  x.fillStyle = '#ffe9c9'; x.fillText(small, W / 2, 1150);
+  if (stars) { x.font = '72px system-ui, sans-serif'; x.fillStyle = '#ffc24a'; x.fillText('★'.repeat(stars) + '☆'.repeat(3 - stars), W / 2, 870); }
+  x.fillStyle = 'rgba(255,255,255,.7)'; x.font = '600 32px Commissioner, system-ui, sans-serif'; x.fillText(PLAY ? 'Google Play' : 'bullrun.stratoshivibes.com', W / 2, 1270);
+  return new Promise(r => c.toBlob(r, 'image/png'));
+}
+async function doShare(big, small, stars, text){
+  let blob = null; try { blob = await shareCard(big, small, stars); } catch (e) {}
+  const file = blob && typeof File === 'function' ? new File([blob], 'rollway.png', { type: 'image/png' }) : null;
+  try {
+    if (file && CAN_SHARE && navigator.canShare && navigator.canShare({ files: [file] })) return await navigator.share({ files: [file], text: text + ' ' + SHARE_URL() });
+    if (CAN_SHARE) return await navigator.share({ text, url: SHARE_URL() });
+    if (blob) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'rollway.png'; document.body.appendChild(a); a.click(); a.remove(); toast(T[lang].shareSaved); }
+  } catch (e) {}   // the player closed the share sheet
+}
+function addShare(){
+  if (NO_FILES) return;
+  const box = $('overCard').querySelector('.or'); if (!box) return;
+  const timed = mode === 'track' && result.won, km = dist.toFixed(2);
+  if (mode === 'track' && !result.won) return;   // nothing to show off after running out of time
+  const b = document.createElement('button'); b.type = 'button'; b.className = 'go alt share'; b.textContent = T[lang].share;
+  const st = timed && !isDaily() ? lastStars : 0;
+  b.onclick = () => timed ? doShare(fmtTime(result.t), trName(TR), st, T[lang].shareTime(fmtTime(result.t), trName(TR))) : doShare(km + ' km', mode === 'chase' ? 'Liquidation Chase' : T[lang].endless, 0, T[lang].shareKm(km));
+  box.appendChild(b);
+}
+let lastStars = 0;
 const starSvg = (on) => '<svg class="' + (on ? 'on' : '') + '" aria-hidden="true"><use href="#i-star"/></svg>';
 function finish(){
   state = 'over';
@@ -2483,7 +2541,7 @@ function finish(){
     const D0 = dayState(); let isBest = false, bonus = 0;
     if (result.won) {
       isBest = D0.best == null || result.t < D0.best; if (isBest) D0.best = result.t;
-      if (!D0.bonus) { D0.bonus = true; bonus = dailyBonus(); bank += bonus; saveBank(); }
+      if (!D0.bonus) { D0.bonus = true; bonus = dailyBonus() + streakBonus(streakBump()); bank += bonus; saveBank(); }
       saveDay(D0); lbSubmit('d:' + TR.key, Math.round(result.t * 1000));
     }
     oc.innerHTML = '<div class="ol"><div class="eyebrow">' + (result.won ? L.finish : L.timeUp).toUpperCase() + ' · ' + esc(trName(TR)) + '</div>' +
@@ -2502,6 +2560,7 @@ function finish(){
     if (result.won) {
       stars = result.t <= st[2] ? 3 : result.t <= st[1] ? 2 : result.t <= st[0] ? 1 : 0;
       isBest = prev.b == null || result.t < prev.b;
+      lastStars = stars; if (stars >= 2) store.set('bullrun_good', '1');
       PROG[TR.id] = { s: Math.max(prev.s, stars), b: isBest ? result.t : prev.b }; saveProg();
       lbSubmit('t2:' + TR.id, Math.round(result.t * 1000));
     }
@@ -2543,6 +2602,7 @@ function finish(){
     $('oAgain').onclick = () => startRace({ endless: true });
     $('oMenu').onclick = () => toMenu();
   }
+  addShare();
   releaseAll(); setUI(); engineTick(false);
 }
 function pause(){ if (state !== 'race' && state !== 'count') return; prevState = state; state = 'paused'; releaseAll(); setUI(); engineTick(false); }
@@ -2562,7 +2622,9 @@ function renderHome(){
   $('chaseBest').textContent = chaseBest > 0 ? L.best + ' ' + chaseBest.toFixed(2) + ' km' : L.newMode;
   const dt = dailyTrack(), D0 = dayState();
   $('dailyName').textContent = trName(dt).split(' · ')[1] + ' · ' + L['market' + dt.b];
-  $('dailyInfo').textContent = D0.best ? fmtTime(D0.best) : D0.bonus ? '' : '+' + dailyBonus() + ' ' + T[lang].tokUnit;
+  const sk = streakNow(), fire = sk > 1 ? '🔥 ' + sk + ' · ' : '';
+  $('dailyInfo').textContent = fire + (D0.best ? fmtTime(D0.best) : D0.bonus ? '' : '+' + (dailyBonus() + streakBonus(sk + 1)) + ' ' + T[lang].tokUnit);
+  document.documentElement.classList.toggle('newbie', starTotal() === 0 && !D0.best && !(SH.own && SH.own.garage));
   renderPerkCard();
   $('meta').textContent = bank + ' ' + L.bankWord;
   paintWalletBtn();
@@ -2595,7 +2657,7 @@ function applyLang(){
 }
 const esc = x => String(x).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 let toastT = 0;
-function toast(msg, sub){ const t = $('toast'); t.innerHTML = esc(msg) + (sub ? '<small>' + esc(sub) + '</small>' : ''); t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, 2600); }
+function toast(msg, sub){ const t = $('toast'); t.innerHTML = esc(msg) + (sub ? '<small>' + esc(sub) + '</small>' : ''); t.classList.toggle('hint', !!toast.hint); t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { t.hidden = true; }, toast.hint ? 8000 : 2600); toast.hint = false; }
 const D = () => $('dlgCard');
 function dlg(html){ D().innerHTML = html; $('dlg').hidden = false; const f = D().querySelector('button:not([disabled])'); if (f) f.focus({ preventScroll: true }); }
 function closeDlg(){ if (!shopBusy) $('dlg').hidden = true; }
@@ -3033,10 +3095,14 @@ function perfCheck(dt){
 applyGfx();
 toMenu();
 applyLang();
+if (!store.get('bullrun_first')) {
+  store.set('bullrun_first', '1');
+  if (starTotal() === 0 && !(best > 0) && !(totalTok > 0)) { startRace({ track: 0 }); setTimeout(() => { toast.hint = true; toast(T[lang].r1, T[lang].r2); }, 700); }
+}
 if (WAL.addr && ONLINE) checkHolder(false);
 if (tiltMode) tiltStart(false);
 if (document.fonts && document.fonts.load) Promise.all([document.fonts.load('italic 900 40px Saira'), document.fonts.load('italic 800 20px Saira')]).then(redrawTextTextures).catch(() => {});
-window.__bullrun = { get drag(){ return { on: dragMode, id: DRAG.id, d, steer }; }, get gfx(){ return { mode: gfxMode, level: gfxLevel, ceil: gfxCeil, dpr: DPR }; }, set gfx(l){ gfxMode = 'test'; setGfx(l); }, get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state, track: !!MUS.chaseSrc, buf: !!MUS.chaseBuf }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
+window.__bullrun = { end(won, t){ endRace(won, t); }, card: (a, b, c) => shareCard(a, b, c), get streak(){ return streakNow(); }, get drag(){ return { on: dragMode, id: DRAG.id, d, steer }; }, get gfx(){ return { mode: gfxMode, level: gfxLevel, ceil: gfxCeil, dpr: DPR }; }, set gfx(l){ gfxMode = 'test'; setGfx(l); }, get mus(){ return { step: MUS.step, song: MUS.song, level: MUS.level, ctx: AC && AC.state, track: !!MUS.chaseSrc, buf: !!MUS.chaseBuf }; }, get info(){ return renderer.info.render.calls + ' calls ' + renderer.info.render.triangles + ' tris'; }, get state(){ return state; }, get raceT(){ return raceT; }, get result(){ return result; },
   get cars(){ return cars.map(c => ({ s: c.s, lane: c.lane })); }, set shotCam(f){ SHOTCAM = f; }, get fly(){ return { charges: flyCharges, t: flyT, h: flyH, kmh: Math.round(v * 3.6), s: sP }; }, get chase(){ return { n: chasers.length, coll: collateral, knocks, escapes, list: chasers.map(c => ({ gap: +(sP - c.s).toFixed(1), lane: c.lane, phase: c.phase })) }; }, get hits(){ return hitsN; }, setPar(a){ TRACKS.forEach((t, i) => { if (a[i] != null) t.par = a[i]; }); }, get d(){ return d; }, get steerV(){ return steer; }, get tilt(){ return TILT; }, jump(x){ sP = x; }, start: startRace, garage: openGarage, go, set bot(x){ bot = x; }, set autoGas(x){ autoGas = x; }, setPar(arr){ arr.forEach((p, i) => TRACKS[i].par = p); },
   sim(sec){ for (let i = 0; i < sec * 60; i++) { if (state !== 'paused' && state !== 'over') update(1 / 60); } },
   simUntilOver(maxSec){ let i = 0; while (state !== 'over' && i < maxSec * 60) { update(1 / 60); if (state === 'ending') { endT = 0; update(1 / 60); } i++; } return result; },
@@ -3090,14 +3156,14 @@ requestAnimationFrame(frame);
 })();
 if (window.SVStats) SVStats.start('bullrun', () => {
   if (state === 'garage') return 'garage';
-  if (state === 'race' || state === 'count' || state === 'ending') return isDaily() ? 'daily' : mode === 'endless' ? 'endless' : mode === 'chase' ? 'chase' : 'track';
+  if (state === 'race' || state === 'count' || state === 'ending') return isDaily() ? 'daily' : mode === 'endless' ? 'endless' : mode === 'chase' ? 'chase' : 'track:' + (TR ? TR.id : 't');
   return 'menu';
 });
 
 // Rating request (StratoshiVibes). Shown once, only inside the dApp Store app, after enough real play,
 // and only while the player is on a menu (never in the middle of a game). "Not now" closes it for good.
 window.SVRate = function (o) {
-  const IN_APP = /; wv\)/.test(navigator.userAgent) || /^android-app:/.test(document.referrer || '');
+  const IN_APP = PLAY || /; wv\)/.test(navigator.userAgent) || /^android-app:/.test(document.referrer || '');
   const ls = { get(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }, set(k, v){ try { localStorage.setItem(k, v); } catch(e){} } };
   if (!IN_APP || ls.get('sv_rate')) return;
   let played = +(ls.get('sv_rate_play') || 0), shown = false;
@@ -3107,7 +3173,14 @@ window.SVRate = function (o) {
   };
   function show() {
     shown = true; ls.set('sv_rate', 'asked');
-    const t = T[o.lang() === 'el' ? 'el' : 'en'];
+    const N = o.name, ST = PLAY ? 'Google Play' : 'dApp Store';
+    Object.assign(T, {
+      es: { h: '¿Te gusta ' + N + '?', p: 'Una valoración rápida en ' + ST + ' ayuda mucho a un creador pequeño. Sé sincero, para bien o para mal: así sé qué mejorar.', go: 'Valorar en ' + ST, no: 'Ahora no' },
+      pt: { h: 'Gostando do ' + N + '?', p: 'Uma avaliação rápida no ' + ST + ' ajuda muito um criador pequeno. Seja sincero, para o bem ou para o mal: assim eu sei o que melhorar.', go: 'Avaliar no ' + ST, no: 'Agora não' },
+      de: { h: 'Gefällt dir ' + N + '?', p: 'Eine kurze Bewertung bei ' + ST + ' hilft einem kleinen Entwickler sehr. Sei bitte ehrlich, ob gut oder schlecht: So weiß ich, was ich verbessern soll.', go: 'Bei ' + ST + ' bewerten', no: 'Nicht jetzt' },
+      fr: { h: N + ' vous plaît ?', p: 'Une note rapide sur ' + ST + ' aide beaucoup un petit créateur. Soyez sincère, en bien ou en mal : cela me dit quoi améliorer.', go: 'Noter sur ' + ST, no: 'Pas maintenant' },
+      tr: { h: N + ' hoşuna gidiyor mu?', p: ST + ' üzerinde kısa bir değerlendirme küçük bir geliştiriciye çok yardımcı olur. Lütfen iyi ya da kötü, dürüst ol: neyi geliştirmem gerektiğini gösterir.', go: ST + ' üzerinde değerlendir', no: 'Şimdi değil' } });
+    const t0 = T[o.lang()] || T.en, t = {}; for (const k in t0) t[k] = PLAY ? t0[k].replace('dApp Store', 'Google Play') : t0[k];
     const w = document.createElement('div');
     w.setAttribute('translate', 'no'); w.className = 'notranslate';
     w.style.cssText = 'position:fixed;inset:0;z-index:2147483000;display:grid;place-items:center;padding:20px;background:rgba(4,6,20,.72);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)';
@@ -3119,7 +3192,7 @@ window.SVRate = function (o) {
       '<a style="all:initial;display:block;' + F + 'cursor:pointer;padding:13px 16px;border-radius:14px;background:linear-gradient(90deg,#22e4ff,#9b6bff,#ff4fd8);color:#0a0d22;font-size:16px;font-weight:800"></a>' +
       '<button type="button" style="all:initial;display:block;box-sizing:border-box;' + F + 'cursor:pointer;margin-top:10px;width:100%;padding:12px;border-radius:14px;border:1px solid rgba(34,228,255,.4);color:#cfe9ff;font-size:15px;font-weight:600"></button></div>';
     w.querySelector('h2').textContent = t.h; w.querySelector('p').textContent = t.p;
-    const a = w.querySelector('a'); a.textContent = t.go; a.href = 'solanadappstore://details?id=' + o.pkg;
+    const a = w.querySelector('a'); a.textContent = t.go; a.href = (PLAY ? 'market://details?id=' : 'solanadappstore://details?id=') + o.pkg;
     const b = w.querySelector('button'); b.textContent = t.no;
     a.addEventListener('click', () => { ls.set('sv_rate', 'opened'); setTimeout(() => w.remove(), 400); });
     b.addEventListener('click', () => w.remove());
@@ -3129,10 +3202,11 @@ window.SVRate = function (o) {
     if (shown || document.visibilityState !== 'visible') return;
     let m = 'menu'; try { m = o.mode(); } catch(e){}
     if (m === 'play') { played++; if (played % 5 === 0) ls.set('sv_rate_play', String(played)); }
-    else if (m === 'menu' && played >= o.after) { ls.set('sv_rate_play', String(played)); setTimeout(show, 600); shown = true; }
+    else if (m === 'menu' && played >= o.after && (!o.ready || o.ready())) { ls.set('sv_rate_play', String(played)); setTimeout(show, 600); shown = true; }
   }, 1000);
 };
-SVRate({ name: 'Rollway', pkg: 'com.stratoshivibes.bullrun', after: 480, lang: () => lang,
+// asked once, on the home screen, after enough play and at least one track finished with 2 or 3 stars
+SVRate({ name: 'Rollway', pkg: PLAY ? 'com.stratoshivibes.bullrace' : 'com.stratoshivibes.bullrun', after: PLAY ? 240 : 480, ready: () => store.get('bullrun_good') === '1', lang: () => lang,
   mode: () => (state === 'race' || state === 'count' || state === 'ending') ? 'play' : (state === 'menu' && screen === 'home') ? 'menu' : 'other' });
 
 </script>

@@ -130,6 +130,8 @@ button{font:inherit;color:inherit}
 .opts{display:grid;grid-template-columns:1fr;gap:8px}
 .opt{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .opt.wrap{flex-wrap:wrap;row-gap:8px}
+.seg.wrapseg{flex-wrap:wrap;border-radius:18px}
+.seg.wrapseg button{padding:7px 10px}
 /* light graphics: no blur behind the on-screen buttons, it is costly on weak phones */
 html.lite *{backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
 .seg{display:inline-flex;padding:3px;border-radius:999px;border:1px solid var(--line);background:rgba(255,255,255,.04)}
@@ -463,7 +465,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
       <div class="opt wrap"><span class="lab" data-t="gfx"></span><div class="seg" id="segGfx"><button type="button" data-v="auto" data-t="gfxAuto"></button><button type="button" data-v="low" data-t="gfxLow"></button><button type="button" data-v="mid" data-t="gfxMid"></button><button type="button" data-v="high" data-t="gfxHigh"></button></div></div>
       <div class="opt"><span class="lab" data-t="music"></span><div class="seg" id="segMus"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
       <div class="opt"><span class="lab" data-t="sound"></span><div class="seg" id="segSnd"><button type="button" data-v="on" data-t="on"></button><button type="button" data-v="off" data-t="off"></button></div></div>
-      <div class="opt"><span class="lab" data-t="lang"></span><div class="seg" id="segLang"><button type="button" data-v="el">ΕΛ</button><button type="button" data-v="en">EN</button></div></div>
+      <div class="opt wrap"><span class="lab" data-t="lang"></span><div class="seg wrapseg" id="segLang"><button type="button" data-v="el">ΕΛ</button><button type="button" data-v="en">EN</button><button type="button" data-v="es">ES</button><button type="button" data-v="pt">PT</button><button type="button" data-v="de">DE</button><button type="button" data-v="fr">FR</button><button type="button" data-v="tr">TR</button></div></div>
     </div>
     <h3 class="lab" data-t="how"></h3>
     <ul class="rules">
@@ -625,7 +627,178 @@ Object.assign(T.el, {
   readingHistory:'Διαβάζω το ιστορικό του πορτοφολιού…', restored:n => 'Επανήλθαν ' + n + ' αγορές.', allRestored:'Όλα έχουν ήδη επανέλθει.', noneFound:'Δεν βρέθηκαν αγορές για αυτό το πορτοφόλι.',
   historyErr:'Δεν μπόρεσα να διαβάσω το ιστορικό τώρα.', genericErr:'Κάτι πήγε στραβά. Δεν χρεώθηκες, εκτός αν το πορτοφόλι δείχνει σταλμένη πληρωμή.', loading:'Φόρτωση'
 });
-let lang = store.get('bullrun_lang') || ((navigator.language || '').toLowerCase().startsWith('el') ? 'el' : 'en');
+/* More languages: Spanish, Portuguese (Brazil), German, French, Turkish. They cover what a player sees in the
+   Google Play edition; anything not listed here (wallet, the crypto Shop, Seeker Perks) falls back to English. */
+const LANGS = ['el', 'en', 'es', 'pt', 'de', 'fr', 'tr'];
+const LOCALE = { en: 'en-US', el: 'el-GR', es: 'es-ES', pt: 'pt-BR', de: 'de-DE', fr: 'fr-FR', tr: 'tr-TR' };
+const moreLang = o => Object.assign(Object.create(T.en), o);
+T.es = moreLang({
+  tag:'Carreras arcade por autopistas crypto. Diez pistas, una carrera infinita y un garaje por llenar.',
+  r1:'Gira con el mando izquierdo. Desliza el pulgar entre las flechas.', r2:'El coche acelera solo. Mantén FRENO para reducir la velocidad.',
+  r3:'Recoge tokens. Son puntos del juego, no crypto real.', r4:'Recoge nitro y toca NITRO para un impulso de velocidad.',
+  r5:'Carrera infinita: los puntos de control añaden tiempo. El tráfico y las barreras te quitan velocidad. Cada 2 km la carretera se convierte en un tirabuzón y conduces boca abajo.',
+  r6:'Carreras: las diez pistas están abiertas, incluida Corkscrew Run, una pista de tirabuzones. Llega a la meta; los mejores tiempos dan hasta 3 estrellas.',
+  r7:'Liquidation Chase: los liquidadores te adelantan y se cruzan para frenarte. Esquívalos, usa el nitro para escapar, llévalos hacia el tráfico. Pulsa FLY para volar sobre el tráfico y los liquidadores durante unos 4,5 segundos, más rápido que el nitro (empiezas con uno y recoges más en la carretera). Tres golpes y quedas liquidado; cada punto de control te devuelve un colateral.',
+  throttle:'Acelerador', manual:'Manual', auto:'Auto', sound:'Sonido', on:'Sí', off:'No', lang:'Idioma', music:'Música',
+  start:'Empezar', best:'Récord', tokensTotal:'tokens recogidos', time:'Tiempo', over:'Se acabó el tiempo', toks:'Tokens', top:'Máx. km/h', cps:'Puntos de control',
+  again:'Correr otra vez', menu:'Menú', paused:'En pausa', resume:'Continuar', newBest:'Nuevo récord', gas:'GAS', brake:'FRENO', nitroGot:'Nitro +1', cp:'+{s} s',
+  chaseSub:'Escapa de los liquidadores', newMode:'Nuevo', flyGot:'+1 carga', collateral:'Colateral', liqComing:'LLEGA UN LIQUIDADOR', liqDown:'LIQUIDADOR FUERA', liqEscaped:'ESCAPASTE',
+  liquidated:'LIQUIDADO', collHit:'GOLPE AL COLATERAL', collBack:'+1 colateral', liqShort:'LIQ', liqKnocks:'Eliminados', liqEscapes:'Escapes',
+  gfx:'Gráficos', gfxAuto:'Auto', gfxLow:'Bajos', gfxMid:'Medios', gfxHigh:'Altos', steering:'Dirección', btnSteer:'Botones', dragSteer:'Arrastre', dragOk:'Dirección por arrastre activada', dragHint:'Desliza el dedo a izquierda y derecha en cualquier parte de la pantalla. El coche lo sigue.', tiltSteer:'Inclinación', tiltOff:'La dirección por inclinación no está disponible en este dispositivo. Se usan los botones.', tiltHint:'Inclina el móvil a izquierda y derecha como un volante', tiltOk:'Dirección por inclinación activada',
+  daily:'Pista diaria', dailyShort:'Diaria', bestToday:'Mejor de hoy', dailyBonus:'tokens · primera llegada de hoy', dailyNew:'Una pista diaria nueva cada día a las 00:00 UTC.', dailyLbNote:'tabla de hoy',
+  races:'Carreras', endless:'Carrera infinita', garage:'Garaje', lb:'Ranking', shop:'Tienda', settings:'Ajustes', how:'Cómo se juega',
+  restart:'Reiniciar', privacy:'Privacidad', terms:'Términos',
+  finish:'Meta', timeUp:'Sin tiempo', next:'Siguiente pista', retry:'Reintentar', tracksBtn:'Pistas', bestTime:'Mejor tiempo', rank:'Puesto',
+  locked:'Termina la pista anterior', special:'ESPECIAL', twCam:'Cámara en tirabuzón', twRoll:'Gira', twLevel:'Nivelada', starsWord:'estrellas',
+  noRun:'aún sin correr', bankShort:'Tokens para gastar', earned:'Tokens ganados', bankWord:'tokens para gastar',
+  use:'Usar esta pintura', inUse:'En uso', unlockFor:'Desbloquear por {n} tokens', needMore:'Faltan {n} tokens', getShop:'Consíguela en la Tienda',
+  freePaint:'Pintura inicial', earnPaint:'Se gana con los tokens que recoges', shopPaint:'Supporter Garage (Tienda)', unlockedT:'Desbloqueada',
+  ok:'OK', close:'Cerrar', back:'Atrás', notNow:'Ahora no',
+  lbWeek:'Esta semana', lbAll:'Histórico', lbLoading:'Cargando…', lbEmpty:'Aún no hay tiempos. Sé el primero.', lbErr:'El ranking no está disponible ahora mismo.', lbYou:'Tú',
+  lbMe:(r, s) => 'Tu puesto: #' + r + ' · ' + s, lbNoScore:'Aún no tienes resultado en esta tabla.', lbRank:r => 'Ranking: #' + r,
+  garageDesc:'Cuatro pinturas premium: Chrome, Gold Leaf, Candy y Neon Mint. Solo cambian el aspecto.',
+  owned:'Comprado', buy:'Comprar', restore:'Restaurar compras', thanks:'Gracias', garageThanks:'Las cuatro pinturas premium ya están en tu Garaje.', done:'Listo', tryAgain:'Reintentar',
+  restored:n => n === 1 ? 'Se restauró 1 artículo.' : 'Se restauraron ' + n + ' artículos.', allRestored:'Todo está ya restaurado.', loading:'Cargando',
+  gpIntro:'Extras opcionales que solo cambian el aspecto de tu coche. El pago se hace a través de Google Play.',
+  gpNote:'Los pagos usan tu cuenta de Google Play (tarjeta, PayPal y más). Las compras pertenecen a tu cuenta de Google, no a una wallet.',
+  gpOpening:'Abriendo Google Play…', gpChecking:'Confirmando tu compra…', gpCancelled:'Compra cancelada. No se cobró nada.',
+  gpInvalid:'Google no confirmó la compra. Si se te cobró, se reembolsará automáticamente.',
+  gpUnavail:'Las compras no están disponibles ahora mismo. Inténtalo más tarde.', gpRestored:'Tus compras se comprobaron con Google Play.'
+});
+T.pt = moreLang({
+  tag:'Corrida arcade em rodovias crypto. Dez pistas, uma corrida infinita e uma garagem para encher.',
+  r1:'Vire com o controle esquerdo. Deslize o polegar entre as setas.', r2:'O carro acelera sozinho. Segure FREIO para reduzir a velocidade.',
+  r3:'Colete tokens. São pontos do jogo, não crypto de verdade.', r4:'Pegue nitro e toque em NITRO para um impulso de velocidade.',
+  r5:'Corrida infinita: os checkpoints dão tempo. O trânsito e as barreiras tiram velocidade. A cada 2 km a estrada vira um parafuso e você dirige de cabeça para baixo.',
+  r6:'Corridas: as dez pistas estão abertas, incluindo a Corkscrew Run, uma pista de parafusos. Chegue à linha de chegada; tempos melhores valem até 3 estrelas.',
+  r7:'Liquidation Chase: os liquidadores ultrapassam você e fecham para frear. Desvie deles, use o nitro para fugir, leve-os para o trânsito. Toque em FLY para voar sobre o trânsito e os liquidadores por cerca de 4,5 segundos, mais rápido que o nitro (você começa com um e pega mais na estrada). Três batidas e você é liquidado; cada checkpoint devolve um colateral.',
+  throttle:'Acelerador', manual:'Manual', auto:'Auto', sound:'Som', on:'Sim', off:'Não', lang:'Idioma', music:'Música',
+  start:'Começar', best:'Recorde', tokensTotal:'tokens coletados', time:'Tempo', over:'O tempo acabou', toks:'Tokens', top:'Máx. km/h', cps:'Checkpoints',
+  again:'Correr de novo', menu:'Menu', paused:'Pausado', resume:'Continuar', newBest:'Novo recorde', gas:'GÁS', brake:'FREIO', nitroGot:'Nitro +1', cp:'+{s} s',
+  chaseSub:'Fuja dos liquidadores', newMode:'Novo', flyGot:'+1 carga', collateral:'Colateral', liqComing:'LIQUIDADOR CHEGANDO', liqDown:'LIQUIDADOR FORA', liqEscaped:'ESCAPOU',
+  liquidated:'LIQUIDADO', collHit:'GOLPE NO COLATERAL', collBack:'+1 colateral', liqShort:'LIQ', liqKnocks:'Derrubados', liqEscapes:'Fugas',
+  gfx:'Gráficos', gfxAuto:'Auto', gfxLow:'Baixos', gfxMid:'Médios', gfxHigh:'Altos', steering:'Direção', btnSteer:'Botões', dragSteer:'Arrastar', dragOk:'Direção por arrasto ativada', dragHint:'Deslize o dedo para a esquerda e para a direita em qualquer lugar da tela. O carro acompanha.', tiltSteer:'Inclinar', tiltOff:'A direção por inclinação não está disponível neste aparelho. Usando os botões.', tiltHint:'Incline o celular para a esquerda e para a direita como um volante', tiltOk:'Direção por inclinação ativada',
+  daily:'Pista diária', dailyShort:'Diária', bestToday:'Melhor de hoje', dailyBonus:'tokens · primeira chegada de hoje', dailyNew:'Uma pista diária nova todo dia às 00:00 UTC.', dailyLbNote:'ranking de hoje',
+  races:'Corridas', endless:'Corrida infinita', garage:'Garagem', lb:'Ranking', shop:'Loja', settings:'Ajustes', how:'Como jogar',
+  restart:'Reiniciar', privacy:'Privacidade', terms:'Termos',
+  finish:'Chegada', timeUp:'Sem tempo', next:'Próxima pista', retry:'Tentar de novo', tracksBtn:'Pistas', bestTime:'Melhor tempo', rank:'Posição',
+  locked:'Termine a pista anterior', special:'ESPECIAL', twCam:'Câmera no parafuso', twRoll:'Gira', twLevel:'Nivelada', starsWord:'estrelas',
+  noRun:'ainda sem corrida', bankShort:'Tokens para gastar', earned:'Tokens ganhos', bankWord:'tokens para gastar',
+  use:'Usar esta pintura', inUse:'Em uso', unlockFor:'Desbloquear por {n} tokens', needMore:'Faltam {n} tokens', getShop:'Pegue na Loja',
+  freePaint:'Pintura inicial', earnPaint:'Ganha com os tokens que você coleta', shopPaint:'Supporter Garage (Loja)', unlockedT:'Desbloqueada',
+  ok:'OK', close:'Fechar', back:'Voltar', notNow:'Agora não',
+  lbWeek:'Esta semana', lbAll:'Geral', lbLoading:'Carregando…', lbEmpty:'Ainda sem tempos. Seja o primeiro.', lbErr:'O ranking não está disponível agora.', lbYou:'Você',
+  lbMe:(r, s) => 'Sua posição: #' + r + ' · ' + s, lbNoScore:'Você ainda não tem resultado neste ranking.', lbRank:r => 'Ranking: #' + r,
+  garageDesc:'Quatro pinturas premium: Chrome, Gold Leaf, Candy e Neon Mint. Mudam só a aparência.',
+  owned:'Comprado', buy:'Comprar', restore:'Restaurar compras', thanks:'Obrigado', garageThanks:'As quatro pinturas premium estão na sua Garagem.', done:'Pronto', tryAgain:'Tentar de novo',
+  restored:n => n === 1 ? '1 item restaurado.' : n + ' itens restaurados.', allRestored:'Tudo já está restaurado.', loading:'Carregando',
+  gpIntro:'Extras opcionais que só mudam a aparência do seu carro. O pagamento é feito pelo Google Play.',
+  gpNote:'Os pagamentos usam sua conta do Google Play (cartão, PayPal e outros). As compras pertencem à sua conta do Google, não a uma carteira.',
+  gpOpening:'Abrindo o Google Play…', gpChecking:'Confirmando sua compra…', gpCancelled:'Compra cancelada. Nada foi cobrado.',
+  gpInvalid:'O Google não confirmou a compra. Se você foi cobrado, o valor será reembolsado automaticamente.',
+  gpUnavail:'As compras não estão disponíveis agora. Tente mais tarde.', gpRestored:'Suas compras foram verificadas com o Google Play.'
+});
+T.de = moreLang({
+  tag:'Arcade-Rennen auf Crypto-Highways. Zehn Strecken, eine Endlosfahrt und eine Garage zum Füllen.',
+  r1:'Lenke mit dem linken Pad. Schiebe den Daumen zwischen den Pfeilen hin und her.', r2:'Das Auto beschleunigt von selbst. Halte BREMSE, um langsamer zu werden.',
+  r3:'Sammle Tokens. Sie sind Punkte im Spiel, kein echtes Crypto.', r4:'Sammle Nitro ein und tippe auf NITRO für einen Geschwindigkeitsschub.',
+  r5:'Endlosfahrt: Checkpoints bringen Zeit. Verkehr und Barrieren kosten Tempo. Alle 2 km wird die Straße zum Korkenzieher und du fährst kopfüber.',
+  r6:'Rennen: Alle zehn Strecken sind offen, auch Corkscrew Run, eine Strecke voller Korkenzieher. Erreiche das Ziel; schnellere Zeiten bringen bis zu 3 Sterne.',
+  r7:'Liquidation Chase: Liquidatoren überholen dich und scheren zum Bremsen ein. Weiche ihnen aus, entkomme mit Nitro, locke sie in den Verkehr. Drücke FLY, um etwa 4,5 Sekunden lang über Verkehr und Liquidatoren zu fliegen, schneller als mit Nitro (du startest mit einem und sammelst unterwegs weitere). Drei Treffer und du bist liquidiert; jeder Checkpoint gibt ein Collateral zurück.',
+  throttle:'Gas', manual:'Manuell', auto:'Auto', sound:'Ton', on:'An', off:'Aus', lang:'Sprache', music:'Musik',
+  start:'Start', best:'Rekord', tokensTotal:'Tokens gesammelt', time:'Zeit', over:'Zeit abgelaufen', toks:'Tokens', top:'Max. km/h', cps:'Checkpoints',
+  again:'Noch ein Rennen', menu:'Menü', paused:'Pausiert', resume:'Weiter', newBest:'Neuer Rekord', gas:'GAS', brake:'BREMSE', nitroGot:'Nitro +1', cp:'+{s} s',
+  chaseSub:'Entkomme den Liquidatoren', newMode:'Neu', flyGot:'+1 Ladung', collateral:'Collateral', liqComing:'LIQUIDATOR IM ANFLUG', liqDown:'LIQUIDATOR ERLEDIGT', liqEscaped:'ENTKOMMEN',
+  liquidated:'LIQUIDIERT', collHit:'COLLATERAL GETROFFEN', collBack:'+1 Collateral', liqShort:'LIQ', liqKnocks:'Erledigt', liqEscapes:'Entkommen',
+  gfx:'Grafik', gfxAuto:'Auto', gfxLow:'Niedrig', gfxMid:'Mittel', gfxHigh:'Hoch', steering:'Lenkung', btnSteer:'Tasten', dragSteer:'Ziehen', dragOk:'Lenken durch Ziehen aktiv', dragHint:'Schiebe den Finger irgendwo auf dem Bildschirm nach links und rechts. Das Auto folgt ihm.', tiltSteer:'Neigen', tiltOff:'Lenken durch Neigen ist auf diesem Gerät nicht verfügbar. Es werden die Tasten verwendet.', tiltHint:'Neige das Handy wie ein Lenkrad nach links und rechts', tiltOk:'Lenken durch Neigen aktiv',
+  daily:'Tagesstrecke', dailyShort:'Täglich', bestToday:'Bestzeit heute', dailyBonus:'Tokens · erste Zielankunft heute', dailyNew:'Jeden Tag um 00:00 UTC eine neue Tagesstrecke.', dailyLbNote:'heutige Liste',
+  races:'Rennen', endless:'Endlosfahrt', garage:'Garage', lb:'Bestenliste', shop:'Shop', settings:'Optionen', how:'So wird gespielt',
+  restart:'Neustart', privacy:'Datenschutz', terms:'Nutzungsbedingungen',
+  finish:'Ziel', timeUp:'Zeit abgelaufen', next:'Nächste Strecke', retry:'Noch einmal', tracksBtn:'Strecken', bestTime:'Bestzeit', rank:'Rang',
+  locked:'Beende die vorherige Strecke', special:'SPEZIAL', twCam:'Korkenzieher-Kamera', twRoll:'Dreht mit', twLevel:'Waagerecht', starsWord:'Sterne',
+  noRun:'noch nicht gefahren', bankShort:'Tokens zum Ausgeben', earned:'Verdiente Tokens', bankWord:'Tokens zum Ausgeben',
+  use:'Diese Lackierung verwenden', inUse:'In Verwendung', unlockFor:'Für {n} Tokens freischalten', needMore:'Es fehlen {n} Tokens', getShop:'Im Shop erhältlich',
+  freePaint:'Startlackierung', earnPaint:'Mit gesammelten Tokens verdient', shopPaint:'Supporter Garage (Shop)', unlockedT:'Freigeschaltet',
+  ok:'OK', close:'Schließen', back:'Zurück', notNow:'Nicht jetzt',
+  lbWeek:'Diese Woche', lbAll:'Gesamt', lbLoading:'Lädt…', lbEmpty:'Noch keine Zeiten. Sei der Erste.', lbErr:'Die Bestenliste ist gerade nicht erreichbar.', lbYou:'Du',
+  lbMe:(r, s) => 'Dein Platz: #' + r + ' · ' + s, lbNoScore:'Du hast in dieser Liste noch kein Ergebnis.', lbRank:r => 'Bestenliste: #' + r,
+  garageDesc:'Vier Premium-Lackierungen: Chrome, Gold Leaf, Candy und Neon Mint. Nur fürs Aussehen.',
+  owned:'Gekauft', buy:'Kaufen', restore:'Käufe wiederherstellen', thanks:'Danke', garageThanks:'Die vier Premium-Lackierungen sind in deiner Garage.', done:'Fertig', tryAgain:'Noch einmal',
+  restored:n => n === 1 ? '1 Artikel wiederhergestellt.' : n + ' Artikel wiederhergestellt.', allRestored:'Alles ist bereits wiederhergestellt.', loading:'Lädt',
+  gpIntro:'Optionale Extras, die nur das Aussehen deines Autos ändern. Die Zahlung läuft über Google Play.',
+  gpNote:'Zahlungen laufen über dein Google-Play-Konto (Karte, PayPal und mehr). Käufe gehören zu deinem Google-Konto, nicht zu einer Wallet.',
+  gpOpening:'Google Play wird geöffnet…', gpChecking:'Dein Kauf wird bestätigt…', gpCancelled:'Kauf abgebrochen. Es wurde nichts berechnet.',
+  gpInvalid:'Google hat den Kauf nicht bestätigt. Falls dir etwas berechnet wurde, wird es automatisch erstattet.',
+  gpUnavail:'Käufe sind gerade nicht verfügbar. Versuche es später noch einmal.', gpRestored:'Deine Käufe wurden mit Google Play abgeglichen.'
+});
+T.fr = moreLang({
+  tag:'Course arcade sur des autoroutes crypto. Dix pistes, une course sans fin et un garage à remplir.',
+  r1:'Tournez avec le pavé de gauche. Faites glisser le pouce entre les flèches.', r2:'La voiture accélère toute seule. Maintenez FREIN pour ralentir.',
+  r3:'Ramassez des jetons. Ce sont des points de jeu, pas de la vraie crypto.', r4:'Ramassez de la nitro, puis touchez NITRO pour un coup d\'accélérateur.',
+  r5:'Course sans fin : les checkpoints ajoutent du temps. Le trafic et les barrières font perdre de la vitesse. Tous les 2 km, la route se transforme en vrille et vous roulez la tête en bas.',
+  r6:'Courses : les dix pistes sont ouvertes, y compris Corkscrew Run, une piste de vrilles. Franchissez l\'arrivée ; les meilleurs temps rapportent jusqu\'à 3 étoiles.',
+  r7:'Liquidation Chase : les liquidateurs vous doublent et se rabattent pour freiner. Évitez-les, utilisez la nitro pour vous échapper, entraînez-les dans le trafic. Appuyez sur FLY pour voler au-dessus du trafic et des liquidateurs pendant environ 4,5 secondes, plus vite que la nitro (vous commencez avec une charge et en ramassez d\'autres sur la route). Trois chocs et vous êtes liquidé ; chaque checkpoint rend un collatéral.',
+  throttle:'Accélérateur', manual:'Manuel', auto:'Auto', sound:'Son', on:'Oui', off:'Non', lang:'Langue', music:'Musique',
+  start:'Démarrer', best:'Record', tokensTotal:'jetons ramassés', time:'Temps', over:'Temps écoulé', toks:'Jetons', top:'Max km/h', cps:'Checkpoints',
+  again:'Recourir', menu:'Menu', paused:'En pause', resume:'Reprendre', newBest:'Nouveau record', gas:'GAZ', brake:'FREIN', nitroGot:'Nitro +1', cp:'+{s} s',
+  chaseSub:'Échappez aux liquidateurs', newMode:'Nouveau', flyGot:'+1 charge', collateral:'Collatéral', liqComing:'LIQUIDATEUR EN APPROCHE', liqDown:'LIQUIDATEUR ÉLIMINÉ', liqEscaped:'ÉCHAPPÉ',
+  liquidated:'LIQUIDÉ', collHit:'COLLATÉRAL TOUCHÉ', collBack:'+1 collatéral', liqShort:'LIQ', liqKnocks:'Éliminés', liqEscapes:'Échappés',
+  gfx:'Graphismes', gfxAuto:'Auto', gfxLow:'Bas', gfxMid:'Moyens', gfxHigh:'Élevés', steering:'Direction', btnSteer:'Boutons', dragSteer:'Glisser', dragOk:'Direction par glissement activée', dragHint:'Faites glisser le doigt à gauche et à droite n\'importe où sur l\'écran. La voiture le suit.', tiltSteer:'Incliner', tiltOff:'La direction par inclinaison n\'est pas disponible sur cet appareil. Les boutons sont utilisés.', tiltHint:'Inclinez le téléphone à gauche et à droite comme un volant', tiltOk:'Direction par inclinaison activée',
+  daily:'Piste du jour', dailyShort:'Du jour', bestToday:'Meilleur temps du jour', dailyBonus:'jetons · première arrivée du jour', dailyNew:'Une nouvelle piste du jour chaque jour à 00:00 UTC.', dailyLbNote:'classement du jour',
+  races:'Courses', endless:'Course sans fin', garage:'Garage', lb:'Classement', shop:'Boutique', settings:'Réglages', how:'Comment jouer',
+  restart:'Recommencer', privacy:'Confidentialité', terms:'Conditions',
+  finish:'Arrivée', timeUp:'Temps écoulé', next:'Piste suivante', retry:'Réessayer', tracksBtn:'Pistes', bestTime:'Meilleur temps', rank:'Rang',
+  locked:'Terminez la piste précédente', special:'SPÉCIAL', twCam:'Caméra en vrille', twRoll:'Tourne', twLevel:'À plat', starsWord:'étoiles',
+  noRun:'pas encore courue', bankShort:'Jetons à dépenser', earned:'Jetons gagnés', bankWord:'jetons à dépenser',
+  use:'Utiliser cette peinture', inUse:'Utilisée', unlockFor:'Débloquer pour {n} jetons', needMore:'Il manque {n} jetons', getShop:'Disponible dans la Boutique',
+  freePaint:'Peinture de départ', earnPaint:'Gagnée avec les jetons ramassés', shopPaint:'Supporter Garage (Boutique)', unlockedT:'Débloquée',
+  ok:'OK', close:'Fermer', back:'Retour', notNow:'Pas maintenant',
+  lbWeek:'Cette semaine', lbAll:'Général', lbLoading:'Chargement…', lbEmpty:'Aucun temps pour l\'instant. Soyez le premier.', lbErr:'Le classement n\'est pas accessible pour le moment.', lbYou:'Vous',
+  lbMe:(r, s) => 'Votre place : #' + r + ' · ' + s, lbNoScore:'Vous n\'avez pas encore de résultat dans ce classement.', lbRank:r => 'Classement : #' + r,
+  garageDesc:'Quatre peintures premium : Chrome, Gold Leaf, Candy et Neon Mint. Apparence uniquement.',
+  owned:'Acheté', buy:'Acheter', restore:'Restaurer les achats', thanks:'Merci', garageThanks:'Les quatre peintures premium sont dans votre Garage.', done:'Terminé', tryAgain:'Réessayer',
+  restored:n => n === 1 ? '1 article restauré.' : n + ' articles restaurés.', allRestored:'Tout est déjà restauré.', loading:'Chargement',
+  gpIntro:'Extras facultatifs qui ne changent que l\'apparence de votre voiture. Le paiement passe par Google Play.',
+  gpNote:'Les paiements utilisent votre compte Google Play (carte, PayPal et autres). Les achats sont liés à votre compte Google, pas à un wallet.',
+  gpOpening:'Ouverture de Google Play…', gpChecking:'Confirmation de votre achat…', gpCancelled:'Achat annulé. Rien n\'a été débité.',
+  gpInvalid:'Google n\'a pas confirmé l\'achat. Si vous avez été débité, vous serez remboursé automatiquement.',
+  gpUnavail:'Les achats ne sont pas disponibles pour le moment. Réessayez plus tard.', gpRestored:'Vos achats ont été vérifiés auprès de Google Play.'
+});
+T.tr = moreLang({
+  tag:'Kripto otoyollarında arcade yarış. On parkur, sonsuz sürüş ve doldurulacak bir garaj.',
+  r1:'Sol pedle yönlendir. Başparmağını okların arasında kaydır.', r2:'Araba kendiliğinden hızlanır. Yavaşlamak için FREN\'e basılı tut.',
+  r3:'Jeton topla. Bunlar oyun içi puandır, gerçek kripto değildir.', r4:'Nitro topla, sonra hız patlaması için NITRO\'ya dokun.',
+  r5:'Sonsuz sürüş: kontrol noktaları süre ekler. Trafik ve bariyerler hız kaybettirir. Her 2 km\'de yol burguya dönüşür ve baş aşağı sürersin.',
+  r6:'Yarışlar: burgulardan oluşan Corkscrew Run dahil on parkurun hepsi açık. Bitiş çizgisine ulaş; daha iyi süreler 3 yıldıza kadar kazandırır.',
+  r7:'Liquidation Chase: likidatörler seni sollar ve fren yapmak için önüne kırar. Onlardan kaç, uzaklaşmak için nitro kullan, onları trafiğe sür. Trafiğin ve likidatörlerin üzerinden yaklaşık 4,5 saniye, nitrodan daha hızlı uçmak için FLY\'a bas (bir tane ile başlarsın, yolda daha fazlasını toplarsın). Üç darbede likide olursun; her kontrol noktası bir teminat geri verir.',
+  throttle:'Gaz', manual:'Manuel', auto:'Otomatik', sound:'Ses', on:'Açık', off:'Kapalı', lang:'Dil', music:'Müzik',
+  start:'Başla', best:'Rekor', tokensTotal:'jeton toplandı', time:'Süre', over:'Süre doldu', toks:'Jeton', top:'Maks. km/s', cps:'Kontrol noktaları',
+  again:'Tekrar yarış', menu:'Menü', paused:'Duraklatıldı', resume:'Devam et', newBest:'Yeni rekor', gas:'GAZ', brake:'FREN', nitroGot:'Nitro +1', cp:'+{s} sn',
+  chaseSub:'Likidatörlerden kaç', newMode:'Yeni', flyGot:'+1 şarj', collateral:'Teminat', liqComing:'LİKİDATÖR GELİYOR', liqDown:'LİKİDATÖR DEVRİLDİ', liqEscaped:'KAÇTIN',
+  liquidated:'LİKİDE OLDUN', collHit:'TEMİNAT DARBE ALDI', collBack:'+1 teminat', liqShort:'LİK', liqKnocks:'Devrilen', liqEscapes:'Kaçış',
+  gfx:'Grafikler', gfxAuto:'Otomatik', gfxLow:'Düşük', gfxMid:'Orta', gfxHigh:'Yüksek', steering:'Direksiyon', btnSteer:'Düğmeler', dragSteer:'Sürükle', dragOk:'Sürükleyerek yönlendirme açık', dragHint:'Parmağını ekranın herhangi bir yerinde sola ve sağa kaydır. Araba onu takip eder.', tiltSteer:'Eğ', tiltOff:'Eğerek yönlendirme bu cihazda kullanılamıyor. Düğmeler kullanılıyor.', tiltHint:'Telefonu direksiyon gibi sola ve sağa eğ', tiltOk:'Eğerek yönlendirme açık',
+  daily:'Günlük parkur', dailyShort:'Günlük', bestToday:'Bugünün en iyisi', dailyBonus:'jeton · bugünün ilk bitirişi', dailyNew:'Her gün 00:00 UTC\'de yeni bir günlük parkur.', dailyLbNote:'bugünün tablosu',
+  races:'Yarışlar', endless:'Sonsuz sürüş', garage:'Garaj', lb:'Sıralama', shop:'Mağaza', settings:'Ayarlar', how:'Nasıl oynanır',
+  restart:'Yeniden başlat', privacy:'Gizlilik', terms:'Şartlar',
+  finish:'Bitiş', timeUp:'Süre bitti', next:'Sonraki parkur', retry:'Tekrar dene', tracksBtn:'Parkurlar', bestTime:'En iyi süre', rank:'Sıra',
+  locked:'Önceki parkuru bitir', special:'ÖZEL', twCam:'Burgu kamerası', twRoll:'Döner', twLevel:'Düz', starsWord:'yıldız',
+  noRun:'henüz yarışılmadı', bankShort:'Harcanacak jeton', earned:'Kazanılan jeton', bankWord:'harcanacak jeton',
+  use:'Bu boyayı kullan', inUse:'Kullanımda', unlockFor:'{n} jetona aç', needMore:'{n} jeton daha gerekli', getShop:'Mağazadan al',
+  freePaint:'Başlangıç boyası', earnPaint:'Topladığın jetonlarla kazanılır', shopPaint:'Supporter Garage (Mağaza)', unlockedT:'Açıldı',
+  ok:'Tamam', close:'Kapat', back:'Geri', notNow:'Şimdi değil',
+  lbWeek:'Bu hafta', lbAll:'Tüm zamanlar', lbLoading:'Yükleniyor…', lbEmpty:'Henüz süre yok. İlk sen ol.', lbErr:'Sıralamaya şu anda ulaşılamıyor.', lbYou:'Sen',
+  lbMe:(r, s) => 'Sıran: #' + r + ' · ' + s, lbNoScore:'Bu tabloda henüz sonucun yok.', lbRank:r => 'Sıralama: #' + r,
+  garageDesc:'Dört premium boya: Chrome, Gold Leaf, Candy ve Neon Mint. Yalnızca görünüm.',
+  owned:'Satın alındı', buy:'Satın al', restore:'Satın alımları geri yükle', thanks:'Teşekkürler', garageThanks:'Dört premium boya Garajında.', done:'Tamam', tryAgain:'Tekrar dene',
+  restored:n => n + ' öğe geri yüklendi.', allRestored:'Her şey zaten geri yüklendi.', loading:'Yükleniyor',
+  gpIntro:'Yalnızca arabanın görünümünü değiştiren isteğe bağlı ekstralar. Ödeme Google Play üzerinden yapılır.',
+  gpNote:'Ödemeler Google Play hesabını kullanır (kart, PayPal ve diğerleri). Satın alımlar bir cüzdana değil, Google hesabına aittir.',
+  gpOpening:'Google Play açılıyor…', gpChecking:'Satın alımın onaylanıyor…', gpCancelled:'Satın alma iptal edildi. Hiçbir ücret alınmadı.',
+  gpInvalid:'Google satın almayı onaylamadı. Senden ücret alındıysa otomatik olarak iade edilecek.',
+  gpUnavail:'Satın alımlar şu anda kullanılamıyor. Daha sonra tekrar dene.', gpRestored:'Satın alımların Google Play ile kontrol edildi.'
+});
+let lang = store.get('bullrun_lang');
+if (!LANGS.includes(lang)) { const nav = (navigator.language || 'en').toLowerCase().slice(0, 2); lang = LANGS.includes(nav) ? nav : 'en'; }
 let autoGas = true;   // the car always accelerates by itself; there is no manual throttle
 let muted = store.get('bullrun_mute') === '1';
 let best = +(store.get('bullrun_best') || 0) || 0;
@@ -853,7 +1026,7 @@ TEX.win.wrapS = TEX.win.wrapT = THREE.RepeatWrapping;
 const finishMats = {};
 function finishMat(){
   const key = TR.id + (TR.key || '') + lang;
-  if (!finishMats[key]) finishMats[key] = new THREE.MeshBasicMaterial({ map: bannerTex(lang === 'el' ? 'ΤΕΡΜΑΤΙΣΜΟΣ' : 'FINISH', trName(TR).toUpperCase(), '#ffc24a') });
+  if (!finishMats[key]) finishMats[key] = new THREE.MeshBasicMaterial({ map: bannerTex(lang === 'el' ? 'ΤΕΡΜΑΤΙΣΜΟΣ' : T[lang].finish.toLocaleUpperCase(LOCALE[lang]), trName(TR).toUpperCase(), '#ffc24a') });
   return finishMats[key];
 }
 function redrawTextTextures(){ [...TEX.boardDay, ...TEX.boardNight, ...TEX.gate, TEX.start, TEX.plate].forEach(t => t.userData.redraw()); }
@@ -2217,7 +2390,7 @@ function renderGarage(){
   for (const pt of PAINTS) {
     if (PLAY && (pt.how === 'seeker' || pt.how === 'nft') && !hasPaint(pt)) continue;   // need a wallet, not part of the Play edition
     const b = document.createElement('button'); b.type = 'button'; b.className = 'sw'; b.setAttribute('aria-pressed', String(pt.id === paintView));
-    b.setAttribute('aria-label', pt[lang]);
+    b.setAttribute('aria-label', pt[lang] || pt.en);
     b.style.background = pt.m >= .7 ? 'linear-gradient(140deg,#fff 0%,' + pt.hex + ' 38%,' + pt.hex + ' 62%,rgba(0,0,0,.55) 100%)' : pt.hex;
     if (pt.trim) b.style.boxShadow = 'inset 0 -6px 0 ' + pt.trim;
     if (!hasPaint(pt)) b.insertAdjacentHTML('beforeend', '<svg class="lk" aria-hidden="true"><use href="#i-lock"/></svg>');
@@ -2226,7 +2399,7 @@ function renderGarage(){
     box.appendChild(b);
   }
   const pt = paintById(paintView), own = hasPaint(pt), act = $('pAct');
-  $('pName').textContent = pt[lang];
+  $('pName').textContent = pt[lang] || pt.en;
   $('pNote').textContent = pt.how === 'seeker' ? T[lang].seekerPaint : pt.how === 'free' ? T[lang].freePaint : pt.how === 'tok' ? T[lang].earnPaint : pt.how === 'shop' ? T[lang].shopPaint : T[lang].nftPaint;
   act.disabled = false; act.onclick = null;
   if (own) {
@@ -2722,7 +2895,7 @@ const GP_API = store.get('bullrun_gp_api') || 'https://pay.stratoshivibes.com';
 let gp = null, gpItems = {}, gpStatus = 'not started';
 SH.gpTok = SH.gpTok || {};
 const gpPrice = id => { const d = gpItems[GP_SKU[id]]; if (!d) return '';
-  try { return new Intl.NumberFormat(lang === 'el' ? 'el-GR' : navigator.language || 'en', { style: 'currency', currency: d.price.currency }).format(+d.price.value); }
+  try { return new Intl.NumberFormat(LOCALE[lang], { style: 'currency', currency: d.price.currency }).format(+d.price.value); }
   catch (e) { return d.price.value + ' ' + d.price.currency; } };
 async function gpVerify(sku, token){        // true = valid, false = Google says invalid, null = could not check now
   try { const r = await fetch(GP_API + '/verify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ sku, token }) });

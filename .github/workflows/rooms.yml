@@ -1,0 +1,21 @@
+name: Deploy live race rooms
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: ['rooms/**']
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check secrets
+        env: { T: '${{ secrets.CLOUDFLARE_API_TOKEN }}', A: '${{ secrets.CLOUDFLARE_ACCOUNT_ID }}' }
+        run: |
+          if [ -z "$T" ] || [ -z "$A" ]; then echo "::error::Add CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID in Settings → Secrets and variables → Actions (see rooms/README.md)"; exit 1; fi
+      - uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: rooms
+          command: deploy

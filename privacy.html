@@ -41,6 +41,10 @@ p,li{color:var(--fg)} .muted{color:var(--muted)} a{color:var(--gold)}
 <h2>Ranking</h2>
 <p>The ranking is optional. To join, you sign one plain message with your wallet. It is not a transaction and cannot move funds; it only proves the address is yours. After that, the game sends your result at the end of each race (your time on that track, or your endless-run distance) to the StratoshiVibes ranking server, which runs on Cloudflare. The server stores your public wallet address, your best result per board (for the daily track: per day; for the other boards: for the current week and overall), and when you set it. The ranking shows a shortened form of your address to everyone. Tap "Leave the ranking" to stop sending results; to have your results removed, contact us.</p>
 
+<h2>Racing with friends</h2>
+<p>Ghost races and challenge links work without any server: your best run on each track is kept on your device, and a challenge link carries a compressed copy of that run (your car's path, your time, your car colour and the name you typed). Anyone you send the link to can see these.</p>
+<p>In a live race, the game connects to our small room server (rooms.stratoshivibes.com, a Cloudflare Worker). While you are in a room it passes the name you typed, your car colour, and your car's position on the track to the other players in the same room, and your finishing time at the end. Nothing is stored: each room and everything in it is deleted as soon as the players leave. No wallet address or account is sent.</p>
+
 <h2>Purchases</h2>
 <p>When you buy an extra, the payment is a public Solana transaction from your wallet to the StratoshiVibes wallet, with a note naming the item (for example "svbullrun:garage"). Like every blockchain transaction, it is permanently visible to anyone. To show prices, the game asks Jupiter for current SOL and SKR prices; this request does not include your address. "Restore purchases" reads your wallet's public transaction history through Helius.</p>
 

@@ -3485,6 +3485,7 @@ const NO_MIRROR = /[?&]nomirror\b/.test(location.search);
     $('segGhost').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; ghostOn = b.dataset.v === 'on'; store.set('bullrun_ghost', ghostOn ? '1' : '0'); applyLang(); });
     $('segMirror').addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; mirrorPref = b.dataset.v; store.set('bullrun_mirror', mirrorPref); applyLang(); });
   }
+  [$('goFriends'), gs && gs.parentNode].forEach(r => r && r.querySelectorAll('[data-t]').forEach(el => { const t = T[lang][el.dataset.t]; if (typeof t === 'string') el.textContent = t; }));
   const link = delay => {
     const h = location.hash, mg = h.match(/[#&]g=([A-Za-z0-9_-]+)/), mr = h.match(/[#&]r=([A-Z0-9]{5})/);
     if (mg || mr) { try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {} }

@@ -1,8 +1,8 @@
-/* Rollway live rooms: up to 3 players race together. One Durable Object per room code.
+/* Rollway live rooms: up to 4 players race together. One Durable Object per room code.
    The room only relays positions between players; it stores nothing about them after the room empties. */
 import { DurableObject } from 'cloudflare:workers';
 
-const MAX = 3, RACE_MAX_MS = 8 * 60 * 1000;
+const MAX = 4, RACE_MAX_MS = 8 * 60 * 1000;
 const ALLOWED = /^https:\/\/(bullrun\.stratoshivibes\.com|localhost(:\d+)?)$|^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/;
 const json = (o, s) => new Response(JSON.stringify(o), { status: s || 200, headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' } });
 

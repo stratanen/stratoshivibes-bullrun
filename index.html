@@ -392,6 +392,7 @@ html.play:not(.gpbill) #tShop{display:none!important}
 .rvtr{display:grid;gap:4px;margin:10px 0}.rvtr select{background:rgba(255,255,255,.07);color:var(--ink);border:1px solid var(--line);border-radius:12px;padding:10px;font:700 15px var(--fb)}
 .rvtr select option{background:#160f36}
 #rvRoom .row{margin-top:12px}
+.hud.mir .time{grid-column:3;grid-row:2;align-items:flex-end;text-align:right;margin-top:-2px}.hud.mir .col.r{grid-column:3;grid-row:1}.hud.mir .time .num{font-size:38px}
 .mirrorframe{position:fixed;z-index:2;pointer-events:none;border:2px solid rgba(255,255,255,.55);border-radius:10px;box-shadow:0 4px 14px rgba(0,0,0,.4),inset 0 0 0 1px rgba(0,0,0,.4)}
 </style>
 
@@ -3459,13 +3460,14 @@ function mirrorSetup(){
 function mirrorRender(){
   if (!RV_READY) return;
   const want = mirrorOn() && (state === 'race' || state === 'count' || state === 'ending') && !NO_MIRROR;
-  if (!want) { if (mirror && !mirror.fr.hidden) mirror.fr.hidden = true; return; }
+  if (!want) { if (mirror && !mirror.fr.hidden) { mirror.fr.hidden = true; $('hud').classList.remove('mir'); } return; }
   if (!mirror) mirrorSetup();
   /* size: about a third of the screen width, top centre, under the timer */
-  /* in landscape the middle of the screen is road, so the mirror moves to the top right corner, under the speed */
+  /* in landscape the mirror sits at the very top in the middle, like a real one, and the timer moves to the right under the speed */
   const land = W > H * 1.2;
-  const mw = Math.round(land ? clamp(W * .22, 140, 220) : clamp(W * .34, 150, 300)), mh = Math.round(mw * .33);
-  const mx = Math.round(land ? W - mw - 14 : (W - mw) / 2), my = Math.round(land ? 62 : clamp(H * .11, 58, 92));
+  const mw = Math.round(land ? clamp(W * .3, 200, 300) : clamp(W * .34, 150, 300)), mh = Math.round(mw * .33);
+  const mx = Math.round((W - mw) / 2), my = Math.round(land ? 10 : clamp(H * .11, 58, 92));
+  const hud = $('hud'); if (hud.classList.contains('mir') !== land) hud.classList.toggle('mir', land);
   const fr = mirror.fr; if (fr.hidden) fr.hidden = false;
   const key = mw + 'x' + mh + '@' + mx + ',' + my; if (fr.dataset.k !== key) { fr.dataset.k = key; Object.assign(fr.style, { left: mx + 'px', top: my + 'px', width: mw + 'px', height: mh + 'px' }); mirror.cam.aspect = mw / mh; mirror.cam.updateProjectionMatrix(); }
   if ((mirrorFrame++ & 1) === 0) {

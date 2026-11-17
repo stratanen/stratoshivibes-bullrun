@@ -2637,7 +2637,7 @@ function finish(){
   addShare();
   releaseAll(); setUI(); engineTick(false);
 }
-function pause(){ if (state !== 'race' && state !== 'count') return; if (RV_READY && NET.on) { toast(T[lang].noPause); return; } prevState = state; state = 'paused'; releaseAll(); setUI(); engineTick(false); }
+function pause(){ if (state !== 'race' && state !== 'count') return; if (RV_READY && NET.on) { livePauseDlg(); return; } prevState = state; state = 'paused'; releaseAll(); setUI(); engineTick(false); }
 function resume(){ if (state !== 'paused') return; state = prevState; if (state === 'count') countShown = ''; if (tiltMode) { tiltRecenter(); TILT.zeroN = 0; } setUI(); audioStart(); }
 function toMenu(scr){
   rvClear();
@@ -3152,43 +3152,43 @@ const RV_TXT = {
     myBest:'Το ρεκόρ σου', pos:'Θέση', results:'Κατάταξη', you:'Εσύ', dnf:'δεν τερμάτισε', ghostOpt:'Φάντασμα ρεκόρ', mirrorOpt:'Καθρέφτης',
     yourName:'Το όνομά σου', roomCreate:'Νέο δωμάτιο', roomJoin:'Μπες με κωδικό', roomCode:'Κωδικός δωματίου', roomWait:'Περιμένουμε παίκτες…', roomStart:'Ξεκίνα τον αγώνα', roomShare:'Στείλε πρόσκληση',
     roomFull:'Το δωμάτιο είναι γεμάτο.', roomGone:'Δεν βρέθηκε δωμάτιο με αυτόν τον κωδικό.', roomOff:'Ο ζωντανός αγώνας δεν είναι διαθέσιμος αυτή τη στιγμή. Δοκίμασε σε λίγο.', roomHost:'οικοδεσπότης', roomLeft:'αποχώρησε',
-    pickTrack:'Πίστα', waitHost:'Ο οικοδεσπότης θα ξεκινήσει τον αγώνα.', need2:'Χρειάζεται τουλάχιστον ένας ακόμα παίκτης.', invite:'Έλα να τρέξουμε μαζί στο Rollway! Κωδικός: {c}', challengeText:'Νίκησε τον χρόνο μου στο Rollway: {t} στην πίστα {tr}', leave:'Έξοδος', again:'Ξανά στο δωμάτιο', live:'LIVE', noPause:'Στον ζωντανό αγώνα δεν υπάρχει παύση.' },
+    pickTrack:'Πίστα', waitHost:'Ο οικοδεσπότης θα ξεκινήσει τον αγώνα.', need2:'Χρειάζεται τουλάχιστον ένας ακόμα παίκτης.', invite:'Έλα να τρέξουμε μαζί στο Rollway! Κωδικός: {c}', challengeText:'Νίκησε τον χρόνο μου στο Rollway: {t} στην πίστα {tr}', leave:'Έξοδος', again:'Ξανά στο δωμάτιο', live:'LIVE', noPause:'Στον ζωντανό αγώνα δεν υπάρχει παύση.', livePause:'Ο αγώνας είναι ζωντανός και δεν σταματά. Οι άλλοι συνεχίζουν να τρέχουν.', keepRacing:'Συνέχεια', quitRace:'Εγκατάλειψη' },
   en: { friends:'With friends', friendsSub:'Live race or challenge', liveTitle:'Live race', liveSub:'2–3 players start together, side by side', chTitle:'Ghost challenge', chSub:'Race a track and send your time to a friend',
     challenge:'Challenge a friend', challengeTitle:'Challenge!', challengeMsg:'{n} challenges you on {tr} with a time of {t}. You will race next to their ghost.', raceIt:'Race!', later:'Later', expired:'This challenge cannot be read.',
     myBest:'Your best', pos:'Pos', results:'Standings', you:'You', dnf:'did not finish', ghostOpt:'Best-run ghost', mirrorOpt:'Mirror',
     yourName:'Your name', roomCreate:'New room', roomJoin:'Join with a code', roomCode:'Room code', roomWait:'Waiting for players…', roomStart:'Start the race', roomShare:'Send invite',
     roomFull:'The room is full.', roomGone:'No room found with this code.', roomOff:'Live racing is not available right now. Try again shortly.', roomHost:'host', roomLeft:'left',
-    pickTrack:'Track', waitHost:'The host will start the race.', need2:'At least one more player is needed.', invite:'Come race with me on Rollway! Code: {c}', challengeText:'Beat my Rollway time: {t} on {tr}', leave:'Leave', again:'Back to the room', live:'LIVE', noPause:'There is no pause in a live race.' },
+    pickTrack:'Track', waitHost:'The host will start the race.', need2:'At least one more player is needed.', invite:'Come race with me on Rollway! Code: {c}', challengeText:'Beat my Rollway time: {t} on {tr}', leave:'Leave', again:'Back to the room', live:'LIVE', noPause:'There is no pause in a live race.', livePause:'The race is live and does not stop. The others keep racing.', keepRacing:'Keep racing', quitRace:'Quit race' },
   es: { friends:'Con amigos', friendsSub:'Carrera en vivo o reto', liveTitle:'Carrera en vivo', liveSub:'2–3 jugadores salen juntos, lado a lado', chTitle:'Reto con fantasma', chSub:'Corre una pista y envía tu tiempo a un amigo',
     challenge:'Retar a un amigo', challengeTitle:'¡Reto!', challengeMsg:'{n} te reta en {tr} con un tiempo de {t}. Correrás junto a su fantasma.', raceIt:'¡A correr!', later:'Más tarde', expired:'No se puede leer este reto.',
     myBest:'Tu récord', pos:'Pos', results:'Clasificación', you:'Tú', dnf:'no terminó', ghostOpt:'Fantasma del récord', mirrorOpt:'Retrovisor',
     yourName:'Tu nombre', roomCreate:'Nueva sala', roomJoin:'Entrar con código', roomCode:'Código de sala', roomWait:'Esperando jugadores…', roomStart:'Empezar la carrera', roomShare:'Enviar invitación',
     roomFull:'La sala está llena.', roomGone:'No hay ninguna sala con este código.', roomOff:'La carrera en vivo no está disponible ahora. Inténtalo en un rato.', roomHost:'anfitrión', roomLeft:'salió',
-    pickTrack:'Pista', waitHost:'El anfitrión empezará la carrera.', need2:'Hace falta al menos un jugador más.', invite:'¡Ven a correr conmigo en Rollway! Código: {c}', challengeText:'Supera mi tiempo en Rollway: {t} en {tr}', leave:'Salir', again:'Volver a la sala', live:'EN VIVO', noPause:'En una carrera en vivo no hay pausa.' },
+    pickTrack:'Pista', waitHost:'El anfitrión empezará la carrera.', need2:'Hace falta al menos un jugador más.', invite:'¡Ven a correr conmigo en Rollway! Código: {c}', challengeText:'Supera mi tiempo en Rollway: {t} en {tr}', leave:'Salir', again:'Volver a la sala', live:'EN VIVO', noPause:'En una carrera en vivo no hay pausa.', livePause:'La carrera es en vivo y no se detiene. Los demás siguen corriendo.', keepRacing:'Seguir', quitRace:'Abandonar' },
   pt: { friends:'Com amigos', friendsSub:'Corrida ao vivo ou desafio', liveTitle:'Corrida ao vivo', liveSub:'2–3 jogadores largam juntos, lado a lado', chTitle:'Desafio com fantasma', chSub:'Corra uma pista e envie seu tempo a um amigo',
     challenge:'Desafiar um amigo', challengeTitle:'Desafio!', challengeMsg:'{n} desafia você em {tr} com o tempo {t}. Você vai correr ao lado do fantasma dele.', raceIt:'Correr!', later:'Depois', expired:'Não foi possível ler este desafio.',
     myBest:'Seu recorde', pos:'Pos', results:'Classificação', you:'Você', dnf:'não terminou', ghostOpt:'Fantasma do recorde', mirrorOpt:'Retrovisor',
     yourName:'Seu nome', roomCreate:'Nova sala', roomJoin:'Entrar com código', roomCode:'Código da sala', roomWait:'Aguardando jogadores…', roomStart:'Começar a corrida', roomShare:'Enviar convite',
     roomFull:'A sala está cheia.', roomGone:'Nenhuma sala com este código.', roomOff:'A corrida ao vivo não está disponível agora. Tente daqui a pouco.', roomHost:'anfitrião', roomLeft:'saiu',
-    pickTrack:'Pista', waitHost:'O anfitrião vai começar a corrida.', need2:'Falta pelo menos mais um jogador.', invite:'Vem correr comigo no Rollway! Código: {c}', challengeText:'Bata meu tempo no Rollway: {t} em {tr}', leave:'Sair', again:'Voltar à sala', live:'AO VIVO', noPause:'Não há pausa numa corrida ao vivo.' },
+    pickTrack:'Pista', waitHost:'O anfitrião vai começar a corrida.', need2:'Falta pelo menos mais um jogador.', invite:'Vem correr comigo no Rollway! Código: {c}', challengeText:'Bata meu tempo no Rollway: {t} em {tr}', leave:'Sair', again:'Voltar à sala', live:'AO VIVO', noPause:'Não há pausa numa corrida ao vivo.', livePause:'A corrida é ao vivo e não para. Os outros continuam correndo.', keepRacing:'Continuar', quitRace:'Desistir' },
   de: { friends:'Mit Freunden', friendsSub:'Live-Rennen oder Herausforderung', liveTitle:'Live-Rennen', liveSub:'2–3 Spieler starten gemeinsam, Seite an Seite', chTitle:'Geister-Herausforderung', chSub:'Fahre eine Strecke und schick deine Zeit an Freunde',
     challenge:'Freund herausfordern', challengeTitle:'Herausforderung!', challengeMsg:'{n} fordert dich auf {tr} mit {t} heraus. Du fährst neben dem Geist.', raceIt:'Los!', later:'Später', expired:'Diese Herausforderung kann nicht gelesen werden.',
     myBest:'Deine Bestzeit', pos:'Pos', results:'Wertung', you:'Du', dnf:'nicht im Ziel', ghostOpt:'Bestzeit-Geist', mirrorOpt:'Rückspiegel',
     yourName:'Dein Name', roomCreate:'Neuer Raum', roomJoin:'Mit Code beitreten', roomCode:'Raumcode', roomWait:'Warte auf Spieler…', roomStart:'Rennen starten', roomShare:'Einladung senden',
     roomFull:'Der Raum ist voll.', roomGone:'Kein Raum mit diesem Code.', roomOff:'Live-Rennen sind gerade nicht verfügbar. Versuch es gleich noch mal.', roomHost:'Gastgeber', roomLeft:'hat verlassen',
-    pickTrack:'Strecke', waitHost:'Der Gastgeber startet das Rennen.', need2:'Es fehlt noch mindestens ein Spieler.', invite:'Fahr mit mir bei Rollway! Code: {c}', challengeText:'Schlag meine Rollway-Zeit: {t} auf {tr}', leave:'Verlassen', again:'Zurück in den Raum', live:'LIVE', noPause:'Im Live-Rennen gibt es keine Pause.' },
+    pickTrack:'Strecke', waitHost:'Der Gastgeber startet das Rennen.', need2:'Es fehlt noch mindestens ein Spieler.', invite:'Fahr mit mir bei Rollway! Code: {c}', challengeText:'Schlag meine Rollway-Zeit: {t} auf {tr}', leave:'Verlassen', again:'Zurück in den Raum', live:'LIVE', noPause:'Im Live-Rennen gibt es keine Pause.', livePause:'Das Rennen läuft live und hält nicht an. Die anderen fahren weiter.', keepRacing:'Weiterfahren', quitRace:'Aufgeben' },
   fr: { friends:'Entre amis', friendsSub:'Course en direct ou défi', liveTitle:'Course en direct', liveSub:'2–3 joueurs partent ensemble, côte à côte', chTitle:'Défi fantôme', chSub:'Faites une piste et envoyez votre temps à un ami',
     challenge:'Défier un ami', challengeTitle:'Défi !', challengeMsg:'{n} vous défie sur {tr} avec un temps de {t}. Vous courrez à côté de son fantôme.', raceIt:'En course !', later:'Plus tard', expired:'Ce défi est illisible.',
     myBest:'Votre record', pos:'Pos', results:'Classement', you:'Vous', dnf:'non classé', ghostOpt:'Fantôme du record', mirrorOpt:'Rétroviseur',
     yourName:'Votre nom', roomCreate:'Nouvelle salle', roomJoin:'Rejoindre avec un code', roomCode:'Code de la salle', roomWait:'En attente de joueurs…', roomStart:'Lancer la course', roomShare:'Envoyer l’invitation',
     roomFull:'La salle est pleine.', roomGone:'Aucune salle avec ce code.', roomOff:'La course en direct n’est pas disponible pour le moment. Réessayez bientôt.', roomHost:'hôte', roomLeft:'est parti',
-    pickTrack:'Piste', waitHost:'L’hôte lancera la course.', need2:'Il faut au moins un autre joueur.', invite:'Viens faire la course avec moi sur Rollway ! Code : {c}', challengeText:'Bats mon temps sur Rollway : {t} sur {tr}', leave:'Quitter', again:'Retour à la salle', live:'DIRECT', noPause:'Pas de pause en course en direct.' },
+    pickTrack:'Piste', waitHost:'L’hôte lancera la course.', need2:'Il faut au moins un autre joueur.', invite:'Viens faire la course avec moi sur Rollway ! Code : {c}', challengeText:'Bats mon temps sur Rollway : {t} sur {tr}', leave:'Quitter', again:'Retour à la salle', live:'DIRECT', noPause:'Pas de pause en course en direct.', livePause:'La course est en direct et ne s’arrête pas. Les autres continuent.', keepRacing:'Continuer', quitRace:'Abandonner' },
   tr: { friends:'Arkadaşlarla', friendsSub:'Canlı yarış veya meydan okuma', liveTitle:'Canlı yarış', liveSub:'2–3 oyuncu yan yana birlikte başlar', chTitle:'Hayalet meydan okuması', chSub:'Bir parkur koş ve süreni arkadaşına gönder',
     challenge:'Arkadaşına meydan oku', challengeTitle:'Meydan okuma!', challengeMsg:'{n}, {tr} parkurunda {t} süresiyle sana meydan okuyor. Hayaletinin yanında yarışacaksın.', raceIt:'Yarış!', later:'Sonra', expired:'Bu meydan okuma okunamıyor.',
     myBest:'Rekorun', pos:'Sıra', results:'Sıralama', you:'Sen', dnf:'bitiremedi', ghostOpt:'Rekor hayaleti', mirrorOpt:'Ayna',
     yourName:'Adın', roomCreate:'Yeni oda', roomJoin:'Kodla katıl', roomCode:'Oda kodu', roomWait:'Oyuncular bekleniyor…', roomStart:'Yarışı başlat', roomShare:'Davet gönder',
     roomFull:'Oda dolu.', roomGone:'Bu kodla oda bulunamadı.', roomOff:'Canlı yarış şu an kullanılamıyor. Biraz sonra tekrar dene.', roomHost:'ev sahibi', roomLeft:'ayrıldı',
-    pickTrack:'Parkur', waitHost:'Yarışı ev sahibi başlatacak.', need2:'En az bir oyuncu daha gerekli.', invite:'Rollway’de benimle yarış! Kod: {c}', challengeText:'Rollway süremi geç: {tr} parkurunda {t}', leave:'Çık', again:'Odaya dön', live:'CANLI', noPause:'Canlı yarışta duraklatma yok.' }
+    pickTrack:'Parkur', waitHost:'Yarışı ev sahibi başlatacak.', need2:'En az bir oyuncu daha gerekli.', invite:'Rollway’de benimle yarış! Kod: {c}', challengeText:'Rollway süremi geç: {tr} parkurunda {t}', leave:'Çık', again:'Odaya dön', live:'CANLI', noPause:'Canlı yarışta duraklatma yok.', livePause:'Yarış canlı ve durmuyor. Diğerleri yarışmaya devam ediyor.', keepRacing:'Devam et', quitRace:'Yarıştan çık' }
 };
 for (const l of LANGS) Object.assign(T[l], RV_TXT[l] || {});
 const RT_ = () => T[lang];
@@ -3209,6 +3209,14 @@ const rvPool = [];
 function rvMesh(hex, solid){ let m = rvPool.find(x => !x.visible); if (!m) { m = new THREE.Mesh(CAR_GEO.sport, carMats(hex)); scene.add(m); rvPool.push(m); } m.material = solid ? carMats(hex) : ghostMat(hex); m.castShadow = !!solid; m.visible = true; return m; }
 function rvTag(r){ const el = document.createElement('div'); el.className = 'rvtag'; el.textContent = r.name; el.style.setProperty('--c', r.hex); document.body.appendChild(el); return el; }
 function rvClear(){ if (!RV_READY) return; for (const r of rivals) { if (r.mesh) r.mesh.visible = false; if (r.tag) r.tag.remove(); } rivals = []; const p = $('hPos'); if (p) p.hidden = true; }
+function livePauseDlg(){
+  const L = T[lang];
+  dlg('<h2>' + esc(L.liveTitle) + '</h2><p>' + esc(L.livePause) + '</p><div class="row"><button class="go" id="lpGo" type="button">' + esc(L.keepRacing) + '</button><button class="go alt" id="lpQuit" type="button">' + esc(L.quitRace) + '</button></div>');
+  $('lpGo').onclick = closeDlg;
+  $('lpQuit').onclick = () => { netSend({ t: 'fin', time: null, s: sP }); netLeave(); closeDlg(); toMenu(); };
+}
+/* in a live race no two cars share a colour: a rival whose paint is already taken gets the next free one */
+function rvColour(hex, used){ if (!used.has(hex)) { used.add(hex); return hex; } const c = RIVAL_COLS.find(x => !used.has(x)) || hex; used.add(c); return c; }
 function rvAdd(o){ const r = { s: 60, d: 0, h: 0, fin: null, ...o }; r.mesh = rvMesh(r.hex, r.kind === 'net'); r.tag = rvTag(r); rivals.push(r); return r; }
 
 /* where a recorded rival is at race time t (samples every 0.1 s) */
@@ -3270,7 +3278,7 @@ function rvStart(opt){
   const idx = TRACKS.indexOf(TR);
   if (opt.ghost && opt.ghost.track === idx) rvAdd({ kind: 'ghost', name: opt.ghost.name, hex: opt.ghost.hex === paintById(paintSel).hex ? RIVAL_COLS[1] : opt.ghost.hex, g: opt.ghost, t: opt.ghost.t });
   if (ghostOn && !NET.on && !isDaily()) { const c = store.get(ghKey(TR.id)); if (c) ghDecode(c).then(g => { if (g.track === idx && state !== 'menu' && TR === TRACKS[idx]) rvAdd({ kind: 'ghost', own: true, name: RT_().myBest, hex: '#e8e4ff', g, t: g.t }); }).catch(() => {}); }
-  if (NET.on) for (const p of NET.players) if (p.id !== NET.me) rvAdd({ kind: 'net', id: p.id, name: p.name, hex: p.hex, buf: [], s: 60, d: slotD(p.slot) });
+  if (NET.on) { const used = new Set([paintById(paintSel).hex]); for (const p of NET.players) if (p.id !== NET.me) rvAdd({ kind: 'net', id: p.id, name: p.name, hex: rvColour(p.hex, used), buf: [], s: 60, d: slotD(p.slot) }); }
 }
 const slotD = i => [-1.7, 1.7, -5.1][i] ?? 0;
 function rvEnd(won, t){

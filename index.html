@@ -3462,7 +3462,10 @@ function mirrorRender(){
   if (!want) { if (mirror && !mirror.fr.hidden) mirror.fr.hidden = true; return; }
   if (!mirror) mirrorSetup();
   /* size: about a third of the screen width, top centre, under the timer */
-  const mw = Math.round(clamp(W * .34, 150, 300)), mh = Math.round(mw * .33), mx = Math.round((W - mw) / 2), my = Math.round(clamp(H * .11, 58, 92));
+  /* in landscape the middle of the screen is road, so the mirror moves to the top right corner, under the speed */
+  const land = W > H * 1.2;
+  const mw = Math.round(land ? clamp(W * .22, 140, 220) : clamp(W * .34, 150, 300)), mh = Math.round(mw * .33);
+  const mx = Math.round(land ? W - mw - 14 : (W - mw) / 2), my = Math.round(land ? 62 : clamp(H * .11, 58, 92));
   const fr = mirror.fr; if (fr.hidden) fr.hidden = false;
   const key = mw + 'x' + mh + '@' + mx + ',' + my; if (fr.dataset.k !== key) { fr.dataset.k = key; Object.assign(fr.style, { left: mx + 'px', top: my + 'px', width: mw + 'px', height: mh + 'px' }); mirror.cam.aspect = mw / mh; mirror.cam.updateProjectionMatrix(); }
   if ((mirrorFrame++ & 1) === 0) {

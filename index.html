@@ -2507,10 +2507,13 @@ function setUI(){
   $('over').hidden = state !== 'over'; $('paused').hidden = state !== 'paused';
 }
 function go(scr){ screen = scr; if (scr === 'tracks') renderTracks(); if (scr === 'home') renderHome(); setUI(); }
+const NET_RACE_S = 125;
 function startRace(opt){
   opt = opt || {};
   audioStart(); releaseAll(); closeDlg();
   if (opt.daily) { mode = 'track'; TR = dailyTrack(); } else if (opt.track != null) { mode = 'track'; TR = TRACKS[opt.track]; } else if (opt.endless) { mode = 'endless'; TR = null; } else if (opt.chase) { mode = 'chase'; TR = null; }
+  /* a live race runs the chosen track's road for about two minutes (a clean drive without nitro), not its usual 40-75 seconds; its times are not track records */
+  if (opt.net && TR) { const L = Math.round(NET_RACE_S * TR.len / TR.par / 100) * 100; TR = Object.assign({}, TR, { id: 'net-' + TR.id, len: L, par: TR.par * L / TR.len, net: true }); }
   reset(mode === 'track' ? TR.seed : (typeof opt.seed === 'number' ? opt.seed : (Date.now() ^ (Math.random() * 1e9)) >>> 0));
   rvStart(opt);
   equipValid();
@@ -2589,7 +2592,7 @@ function finish(){
   } else if (mode === 'track') {
     const idx = TRACKS.indexOf(TR), st = starTimes(TR), prev = PROG[TR.id] || { s: 0, b: null };
     let stars = 0, isBest = false;
-    if (result.won) {
+    if (result.won && !TR.net) {
       stars = result.t <= st[2] ? 3 : result.t <= st[1] ? 2 : result.t <= st[0] ? 1 : 0;
       isBest = prev.b == null || result.t < prev.b;
       lastStars = stars; if (stars >= 2) store.set('bullrun_good', '1');
@@ -3286,7 +3289,7 @@ function rvEnd(won, t){
   if (!RV_READY) return;
   if (mode !== 'track') return;
   if (NET.on) netSend({ t: 'fin', time: won ? +t.toFixed(3) : null, s: +sP.toFixed(1) });
-  if (won && ghRec && ghRec.S.length > 20 && !isDaily()) {
+  if (won && ghRec && ghRec.S.length > 20 && !isDaily() && !TR.net) {
     const prev = PROG[TR.id] && PROG[TR.id].b;
     const g = { track: TRACKS.indexOf(TR), t, paint: paintSel, name: myName || 'Rollway', S: ghRec.S, D: ghRec.D, H: ghRec.H };
     rvLast = g;

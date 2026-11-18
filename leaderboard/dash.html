@@ -87,7 +87,7 @@ a{color:var(--accent)}
 
   <div class="card">
     <h2>Πού φτάνουν οι παίκτες</h2>
-    <div class="sub">Τελευταίες 30 ημέρες. Πόσοι παίκτες έπαιξαν σε κάθε εικόνα (Blockspace) ή πίστα (Rollway). Εκεί που ο αριθμός πέφτει απότομα, τα παρατάνε.</div>
+    <div class="sub">Τελευταίες 30 ημέρες. Πόσοι παίκτες έπαιξαν σε κάθε εικόνα (Blockspace) ή πίστα (Rollway). Εκεί που ο αριθμός πέφτει απότομα, τα παρατάνε. Στο Blockspace φαίνεται και πόσοι είδαν την οθόνη «Τέλος» σε κάθε εικόνα και πόσοι την ολοκλήρωσαν (μετράει από 18/11).</div>
     <div class="tabs" id="pt"></div>
     <div id="ptab" style="overflow:auto"></div>
   </div>
@@ -105,7 +105,7 @@ a{color:var(--accent)}
 (function(){
 const G=[['bullrun','Rollway','--s1'],['blockspace','Blockspace','--s2'],['arcade','Arcade','--s3']];
 const MODE={menu:'Μενού',garage:'Γκαράζ',track:'Πίστες',endless:'Ατελείωτη διαδρομή',chase:'Liquidation Chase',daily:'Καθημερινή πίστα',play:'Παιχνίδι',
- 'blockspace:daily':'Ημερήσια πρόκληση','blockspace:play':'Κανονικό παιχνίδι',lobby:'Αρχική',mahjong:'Mahjong','mahjong-daily':'Mahjong ημερήσιο',battlegrounds:'Battlegrounds',poker:'Rugpull Poker',rug:'Escape the Rug','rug-daily':'Escape ημερήσιο'};
+ 'blockspace:daily':'Ημερήσια πρόκληση','blockspace:play':'Κανονικό παιχνίδι','blockspace:over':'Οθόνη «Τέλος παρτίδας»','blockspace:done':'Οθόνη «Η εικόνα ολοκληρώθηκε»',lobby:'Αρχική',mahjong:'Mahjong','mahjong-daily':'Mahjong ημερήσιο',battlegrounds:'Battlegrounds',poker:'Rugpull Poker',rug:'Escape the Rug','rug-daily':'Escape ημερήσιο'};
 const SRC={app:'Εφαρμογή (Seeker / Android)','app-seeker':'Εφαρμογή στο Seeker',android:'Browser σε Android','android-seeker':'Browser στο Seeker',ios:'Browser σε iPhone',desktop:'Υπολογιστής',other:'Άλλο'};
 const $=id=>document.getElementById(id);
 const nf=new Intl.NumberFormat('el-GR');
@@ -143,7 +143,9 @@ function steps(){
   const c=G.find(x=>x[0]===pg)[2],want=pg==='blockspace'?'play:p':'track:t';
   const rows=by(D.steps||[],pg).filter(r=>r.mode.startsWith(want)&&/^\d+$/.test(r.mode.slice(want.length))).map(r=>({n:+r.mode.slice(want.length),players:r.players,secs:r.secs})).sort((a,b)=>a.n-b.n);
   const first=rows.length?rows[0].players:0,mx=Math.max(1,...rows.map(r=>r.players));
-  $('ptab').innerHTML=rows.length?`<table><thead><tr><th>${pg==='blockspace'?'Εικόνα':'Πίστα'}</th><th>Παίκτες</th><th>Σε σχέση με την πρώτη</th><th>Χρόνος ανά παίκτη</th><th class="barc" style="width:30%"></th></tr></thead><tbody>${rows.map(r=>`<tr><td>${pg==='blockspace'?r.n+'η εικόνα':r.n+'. '+esc(TRACK[r.n]||'')}</td><td>${nf.format(r.players)}</td><td>${first?Math.round(100*r.players/first)+'%':'–'}</td><td>${mins(Math.round(r.secs/r.players))}</td><td class="barc"><div class="bar"><i style="width:${Math.max(2,100*r.players/mx)}%;background:var(${c})"></i></div></td></tr>`).join('')}</tbody></table>`:'<p class="sub">Δεν υπάρχουν ακόμα στοιχεία. Γεμίζει όσο οι παίκτες ανοίγουν τη νέα έκδοση των παιχνιδιών.</p>';
+  // Blockspace also reports the game-over screen (over:pN) and the picture-complete screen (done:pN) of each picture
+  const bs=pg==='blockspace',cnt=(k,n)=>{const r=by(D.steps||[],pg).find(x=>x.mode===k+':p'+n);return r?nf.format(r.players):'–'};
+  $('ptab').innerHTML=rows.length?`<table><thead><tr><th>${bs?'Εικόνα':'Πίστα'}</th><th>Παίκτες</th>${bs?'<th>Είδαν «Τέλος»</th><th>Την ολοκλήρωσαν</th>':''}<th>Σε σχέση με την πρώτη</th><th>Χρόνος ανά παίκτη</th><th class="barc" style="width:30%"></th></tr></thead><tbody>${rows.map(r=>`<tr><td>${pg==='blockspace'?r.n+'η εικόνα':r.n+'. '+esc(TRACK[r.n]||'')}</td><td>${nf.format(r.players)}</td>${bs?`<td>${cnt('over',r.n)}</td><td>${cnt('done',r.n)}</td>`:''}<td>${first?Math.round(100*r.players/first)+'%':'–'}</td><td>${mins(Math.round(r.secs/r.players))}</td><td class="barc"><div class="bar"><i style="width:${Math.max(2,100*r.players/mx)}%;background:var(${c})"></i></div></td></tr>`).join('')}</tbody></table>`:'<p class="sub">Δεν υπάρχουν ακόμα στοιχεία. Γεμίζει όσο οι παίκτες ανοίγουν τη νέα έκδοση των παιχνιδιών.</p>';
 }
 function render(){
   $('upd').textContent='Ενημέρωση: '+new Date().toLocaleTimeString('el-GR',{hour:'2-digit',minute:'2-digit'});

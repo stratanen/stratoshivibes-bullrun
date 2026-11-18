@@ -2620,7 +2620,7 @@ function finish(){
       (isBest && dist >= .05 ? '<span class="chip">' + L.newBest + '</span>' : '') + '</div>' +
       '<div class="or"><div class="stats"><div><span class="lab">' + L.earned + '</span><b>' + tokens + '</b></div><div><span class="lab">' + L.liqKnocks + '</span><b>' + knocks + '</b></div>' +
       '<div><span class="lab">' + L.liqEscapes + '</span><b>' + escapes + '</b></div><div><span class="lab">' + L.best + '</span><b>' + chaseBest.toFixed(2) + '</b></div></div>' +
-      '<p class="meta" id="oRankP"></p>' +
+      '<p class="meta" id="oRankP">' + (ONLINE && lbOn && lbSignedIn() && dist > 0 ? L.rank + ' …' : '') + '</p>' +
       '<div class="row"><button class="go" id="oAgain" type="button">' + L.again + '</button><button class="go alt" id="oMenu" type="button">' + L.menu + '</button></div></div>';
     $('oAgain').onclick = () => startRace({ chase: true });
     $('oMenu').onclick = () => toMenu();
@@ -2632,7 +2632,7 @@ function finish(){
       (isBest && dist >= .05 ? '<span class="chip">' + L.newBest + '</span>' : '') + '</div>' +
       '<div class="or"><div class="stats"><div><span class="lab">' + L.earned + '</span><b>' + tokens + '</b></div><div><span class="lab">' + L.top + '</span><b>' + topKmh + '</b></div>' +
       '<div><span class="lab">' + L.cps + '</span><b>' + cps + '</b></div><div><span class="lab">' + L.best + '</span><b>' + best.toFixed(2) + '</b></div></div>' +
-      '<p class="meta" id="oRankP"></p>' +
+      '<p class="meta" id="oRankP">' + (ONLINE && lbOn && lbSignedIn() && dist > 0 ? L.rank + ' …' : '') + '</p>' +
       '<div class="row"><button class="go" id="oAgain" type="button">' + L.again + '</button><button class="go alt" id="oMenu" type="button">' + L.menu + '</button></div></div>';
     $('oAgain').onclick = () => startRace({ endless: true });
     $('oMenu').onclick = () => toMenu();
@@ -2834,11 +2834,15 @@ const lbSignedIn = () => !!(LBS.token && WAL.addr && LBS.addr === WAL.addr);
 const lbFetch = (path, opt) => { const c = new AbortController(), to = setTimeout(() => c.abort(), 8000); return fetch(LB_API + path, { ...(opt || {}), signal: c.signal }).then(r => r.json().then(b => ({ s: r.status, b }))).finally(() => clearTimeout(to)); };
 if (ONLINE) lbFetch('/health').then(r => { if (r.b && r.b.ok) lbOn = true; }).catch(() => {});
 const lbFmt = (board, val) => board === 'endless' || board === 'chase' ? (val / 1000).toFixed(2) + ' km' : fmtTime(val / 1000);
-function lbSubmit(board, val){
+function lbSubmit(board, val, retry){
   if (!ONLINE || !lbOn || !lbSignedIn() || !(val > 0)) return;
+  const rankEl = () => state === 'over' ? ($('oRank') || $('oRankP')) : null;
   lbFetch('/score', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ token: LBS.token, game: 'bullrun', board, value: val }) })
     .then(r => {
       if (r.s === 401) { LBS = {}; store.set('bullrun_lb', '{}'); return; }
+      /* the server takes one result every 15 s: a run that ends sooner after the last one is sent again when the wait is over */
+      if (r.s === 429 && !retry) { setTimeout(() => lbSubmit(board, val, true), 16000); return; }
+      if (!(r.b && r.b.me)) { const e = rankEl(); if (e && e.textContent.includes('…')) e.textContent = e.id === 'oRank' ? '--' : ''; return; }
       if (r.b && r.b.me && state === 'over') { const e = $('oRank') || $('oRankP'); if (e) e.textContent = e.id === 'oRank' ? '#' + r.b.me.rank : T[lang].lbRank(r.b.me.rank); }
     }).catch(() => {});
 }
@@ -2884,6 +2888,7 @@ async function lbJoin(){
     if (r.b.seeker && !WAL.seeker) { WAL.seeker = true; WAL.seekerChecked = true; saveW(); renderPerkCard(); }
     // send this phone's existing bests once
     if (best > 0) lbQueue.push(['endless', Math.round(best * 1000)]);
+    if (chaseBest > 0) lbQueue.push(['chase', Math.round(chaseBest * 1000)]);
     for (const t of TRACKS) if (PROG[t.id] && PROG[t.id].b) lbQueue.push(['t2:' + t.id, Math.round(PROG[t.id].b * 1000)]);
     lbDrain(); openLb();
   } catch (e) { console.warn(e); btn.disabled = false; btn.textContent = L.lbJoin; err.textContent = e && e.user ? e.message : L.lbSignFail; err.hidden = false; }

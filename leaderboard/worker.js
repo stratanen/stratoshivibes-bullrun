@@ -234,7 +234,7 @@ export default {
 
       if (url.pathname === '/top' && req.method === 'GET' && url.searchParams.get('game') === 'bullrun') {
         const board = url.searchParams.get('board') || 'endless';
-        if (bullrunCheck(board, board === 'endless' ? 1 : 10 * 60e3) === null) return json({ error: 'unknown board' }, 400);
+        if (bullrunCheck(board, board === 'endless' || board === 'chase' ? 1 : 10 * 60e3) === null) return json({ error: 'unknown board' }, 400);
         const period = brPeriod(board, board.startsWith('d:') || url.searchParams.get('scope') === 'all' ? 'all' : isoWeek(Date.now()));
         await ensureSeekerTable(env);
         const top = await env.DB.prepare('SELECT s.addr, s.best, k.addr AS sk FROM scores s LEFT JOIN seekers k ON k.addr = s.addr WHERE s.period = ? ORDER BY s.best DESC, s.at ASC LIMIT 20').bind(period).all();

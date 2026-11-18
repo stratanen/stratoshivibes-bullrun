@@ -2507,12 +2507,12 @@ function setUI(){
   $('over').hidden = state !== 'over'; $('paused').hidden = state !== 'paused';
 }
 function go(scr){ screen = scr; if (scr === 'tracks') renderTracks(); if (scr === 'home') renderHome(); setUI(); }
-const NET_RACE_S = 125;
+const NET_RACE_S = 180;
 function startRace(opt){
   opt = opt || {};
   audioStart(); releaseAll(); closeDlg();
   if (opt.daily) { mode = 'track'; TR = dailyTrack(); } else if (opt.track != null) { mode = 'track'; TR = TRACKS[opt.track]; } else if (opt.endless) { mode = 'endless'; TR = null; } else if (opt.chase) { mode = 'chase'; TR = null; }
-  /* a live race runs the chosen track's road for about two minutes (a clean drive without nitro), not its usual 40-75 seconds; its times are not track records */
+  /* a live race runs the chosen track's road for about three minutes (a clean drive without nitro), not its usual 40-75 seconds; its times are not track records */
   if (opt.net && TR) { const L = Math.round(NET_RACE_S * TR.len / TR.par / 100) * 100; TR = Object.assign({}, TR, { id: 'net-' + TR.id, len: L, par: TR.par * L / TR.len, net: true }); }
   reset(mode === 'track' ? TR.seed : (typeof opt.seed === 'number' ? opt.seed : (Date.now() ^ (Math.random() * 1e9)) >>> 0));
   rvStart(opt);

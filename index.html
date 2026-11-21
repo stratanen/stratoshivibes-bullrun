@@ -3205,8 +3205,8 @@ const fill = (s, o) => String(s).replace(/\{(\w+)\}/g, (_, k) => o[k] != null ? 
 
 /* ---------- settings ---------- */
 let ghostOn = store.get('bullrun_ghost') !== '0';
-let mirrorPref = store.get('bullrun_mirror');   // 'on' | 'off' | null = by graphics level
-const mirrorOn = () => mirrorPref === 'on' || (mirrorPref !== 'off' && gfxLevel >= 2);
+let mirrorPref = store.get('bullrun_mirror');   // 'on' | 'off' | null = on unless graphics is at the lightest level
+const mirrorOn = () => mirrorPref === 'on' || (mirrorPref !== 'off' && gfxLevel >= 1);
 let myName = (store.get('bullrun_name') || '').slice(0, 14);
 
 /* ---------- rival cars ---------- */
